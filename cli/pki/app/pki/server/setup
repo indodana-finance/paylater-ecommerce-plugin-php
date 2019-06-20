@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -e
+trap "exit" INT
+
+echo -e "${GREEN}[PKICTL]${NC} Ensuring curl has been installed"
+sudo apt-get -y install curl
+
+CURRENT_DIRECTORY=$(pwd)
+SERVER_DIR=${CURRENT_DIRECTORY}/pki/server
+export NVM_VERSION="0.34.0"
+export NODE_VERSION="10.15.1"
+export NVM_DIR=${CURRENT_DIRECTORY}/.bin.pki/.nvm
+NPM_BIN=${NVM_DIR}/versions/node/v${NODE_VERSION}/bin/npm
+
+echo -e ""
+echo -e "${GREEN}[PKICTL]${NC} Ensuring nvm and node has been installed"
+mkdir -p $NVM_DIR
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash
+
+echo -e ""
+echo -e "${GREEN}[PKICTL]${NC} Installing node_modules"
+pushd ${SERVER_DIR} > /dev/null
+    $NPM_BIN install
+popd > /dev/null
+
+echo -e ""
+echo -e "${GREEN}[PKICTL]${NC} Generating .env file"
+$ANSIBLE_PLAYBOOK pki/playbook/pki-server-env-setup.yml \
+    -e "env_directory=${SERVER_DIR}" \
+    --vault-password-file "${CURRENT_DIRECTORY}/vault_password.txt"

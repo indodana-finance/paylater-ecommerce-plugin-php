@@ -1,0 +1,84 @@
+#!/bin/bash
+function meta-execute {
+    if [ ! -f "db/blueprint/dbctl.meta.vars" ]; then
+        echo -e "${RED}ERROR:${NC}No ${YELLOW}db/blueprint/dbctl.meta.vars found${NC}."
+    else
+        source db/blueprint/dbctl.meta.vars
+        if [ ! -n "${DYNAMODB_DATA_DOWNLOAD_PATH}" ]; then
+            DYNAMODB_DATA_DOWNLOAD_PATH="${RED}Has not been set yet. Please set this by creating dbctl.meta.vars in db/blueprint folder.${NC}"
+        fi
+        if [ ! -n "${DYNAMODB_SCHEMA_DOWNLOAD_PATH}" ]; then
+            DYNAMODB_SCHEMA_DOWNLOAD_PATH="${RED}Has not been set yet. Please set this by creating dbctl.meta.vars in db/blueprint folder.${NC}"
+        fi
+        if [ ! -n "${DYNAMODB_DATA_BACKUP_PATH}" ]; then
+            DYNAMODB_DATA_BACKUP_PATH="${RED}Has not been set yet. Please set this by creating dbctl.meta.vars in db/blueprint folder.${NC}"
+        fi
+        if [ ! -n "${DYNAMODB_SCHEMA_BACKUP_PATH}" ]; then
+            DYNAMODB_SCHEMA_BACKUP_PATH="${RED}Has not been set yet. Please set this by creating dbctl.meta.vars in db/blueprint folder.${NC}"
+        fi
+
+        if [[ "$SILENT_OPT" != "--silent" ]]; then
+            echo -e "${YELLOW}DYNAMODB_DATA_DOWNLOAD_PATH${NC}=${DYNAMODB_DATA_DOWNLOAD_PATH}"
+            echo -e "${YELLOW}DYNAMODB_SCHEMA_DOWNLOAD_PATH${NC}=${DYNAMODB_SCHEMA_DOWNLOAD_PATH}"
+            echo -e "${YELLOW}DYNAMODB_DATA_BACKUP_PATH${NC}=${DYNAMODB_DATA_BACKUP_PATH}"
+            echo -e "${YELLOW}DYNAMODB_SCHEMA_BACKUP_PATH${NC}=${DYNAMODB_SCHEMA_BACKUP_PATH}"
+        fi
+
+        mkdir -p ${DYNAMODB_DATA_DOWNLOAD_PATH}
+        mkdir -p ${DYNAMODB_SCHEMA_DOWNLOAD_PATH}
+        mkdir -p ${DYNAMODB_DATA_BACKUP_PATH}
+        mkdir -p ${DYNAMODB_SCHEMA_BACKUP_PATH}
+
+        if [ ! -n "${MYSQL_DATA_DOWNLOAD_PATH}" ]; then
+            MYSQL_DATA_DOWNLOAD_PATH="${RED}Has not been set yet. Please set this by creating dbctl.meta.vars in db/blueprint folder.${NC}"
+        fi
+        if [ ! -n "${MYSQL_SCHEMA_DOWNLOAD_PATH}" ]; then
+            MYSQL_SCHEMA_DOWNLOAD_PATH="${RED}Has not been set yet. Please set this by creating dbctl.meta.vars in db/blueprint folder.${NC}"
+        fi
+        if [ ! -n "${MYSQL_DATA_BACKUP_PATH}" ]; then
+            MYSQL_DATA_BACKUP_PATH="${RED}Has not been set yet. Please set this by creating dbctl.meta.vars in db/blueprint folder.${NC}"
+        fi
+        if [ ! -n "${MYSQL_SCHEMA_BACKUP_PATH}" ]; then
+            MYSQL_SCHEMA_BACKUP_PATH="${RED}Has not been set yet. Please set this by creating dbctl.meta.vars in db/blueprint/ folder.${NC}"
+        fi
+        
+        if [[ "$SILENT_OPT" != "--silent" ]]; then
+            echo -e "${YELLOW}MYSQL_DATA_DOWNLOAD_PATH${NC}=${MYSQL_DATA_DOWNLOAD_PATH}"
+            echo -e "${YELLOW}MYSQL_SCHEMA_DOWNLOAD_PATH${NC}=${MYSQL_SCHEMA_DOWNLOAD_PATH}"
+            echo -e "${YELLOW}MYSQL_DATA_BACKUP_PATH${NC}=${MYSQL_DATA_BACKUP_PATH}"
+            echo -e "${YELLOW}MYSQL_SCHEMA_BACKUP_PATH${NC}=${MYSQL_SCHEMA_BACKUP_PATH}"
+        fi
+
+        mkdir -p ${MYSQL_DATA_DOWNLOAD_PATH}
+        mkdir -p ${MYSQL_SCHEMA_DOWNLOAD_PATH}
+        mkdir -p ${MYSQL_DATA_BACKUP_PATH}
+        mkdir -p ${MYSQL_SCHEMA_BACKUP_PATH}
+
+        if [ ! -n "${POSTGRES_DATA_DOWNLOAD_PATH}" ]; then
+            POSTGRES_DATA_DOWNLOAD_PATH="${RED}Has not been set yet. Please set this by creating dbctl.meta.vars in db/blueprint folder.${NC}"
+        fi
+        if [ ! -n "${POSTGRES_SCHEMA_DOWNLOAD_PATH}" ]; then
+            POSTGRES_SCHEMA_DOWNLOAD_PATH="${RED}Has not been set yet. Please set this by creating dbctl.meta.vars in db/blueprint folder.${NC}"
+        fi
+        if [ ! -n "${POSTGRES_DATA_BACKUP_PATH}" ]; then
+            POSTGRES_DATA_BACKUP_PATH="${RED}Has not been set yet. Please set this by creating dbctl.meta.vars in db/blueprint folder.${NC}"
+        fi
+        if [ ! -n "${POSTGRES_SCHEMA_BACKUP_PATH}" ]; then
+            POSTGRES_SCHEMA_BACKUP_PATH="${RED}Has not been set yet. Please set this by creating dbctl.meta.vars in db/blueprint folder.${NC}"
+        fi
+        
+        if [[ "$SILENT_OPT" != "--silent" ]]; then
+            echo -e "${YELLOW}POSTGRES_DATA_DOWNLOAD_PATH${NC}=${POSTGRES_DATA_DOWNLOAD_PATH}"
+            echo -e "${YELLOW}POSTGRES_SCHEMA_DOWNLOAD_PATH${NC}=${POSTGRES_SCHEMA_DOWNLOAD_PATH}"
+            echo -e "${YELLOW}POSTGRES_DATA_BACKUP_PATH${NC}=${POSTGRES_DATA_BACKUP_PATH}"
+            echo -e "${YELLOW}POSTGRES_SCHEMA_BACKUP_PATH${NC}=${POSTGRES_SCHEMA_BACKUP_PATH}"
+        fi
+        
+        mkdir -p ${POSTGRES_DATA_DOWNLOAD_PATH}
+        mkdir -p ${POSTGRES_SCHEMA_DOWNLOAD_PATH}
+        mkdir -p ${POSTGRES_DATA_BACKUP_PATH}
+        mkdir -p ${POSTGRES_SCHEMA_BACKUP_PATH}
+    fi
+}
+
+meta-execute 

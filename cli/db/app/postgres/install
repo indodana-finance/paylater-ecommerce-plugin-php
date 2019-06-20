@@ -1,0 +1,5 @@
+#!/bin/bash
+sudo apt-get install postgresql-9.3 postgresql-contrib-9.3
+sudo apt-get install postgresql-9.4 postgresql-contrib-9.4
+sudo apt-get install postgresql-9.5 postgresql-contrib-9.5
+sudo apt-get install postgresql-9.6 postgresql-contrib-9.6

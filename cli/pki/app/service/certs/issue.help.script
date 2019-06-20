@@ -1,0 +1,14 @@
+#!/bin/bash
+function service-certs-issue-help {
+    echo -e ""
+    echo -e "Issue certificate for a service"
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} service certs issue {CLUSTER_INVENTORY} {SERVICE_CERTS_BLUEPRINT} {TARGET_CA}"
+    echo -e "${YELLOW}Example:${NC} ${GREEN}./pkictl${NC} service certs issue prod vault-01 intermediate-ca"
+    echo -e "         ${GREEN}./pkictl${NC} service certs issue prod vault-01 intermediate-ca"
+    echo -e "${YELLOW}Local-Example:${NC} ${GREEN}./pkictl${NC} service certs issue local vault-01-dev intermediate-ca"
+    echo -e "${YELLOW}Help${NC}: ${YELLOW}{CLUSTER_INVENTORY}${NC} is the inventory file located in ${YELLOW}~/.inventory/inventory.d${NC} (following Ansible format)."
+    echo -e "      ${YELLOW}{SERVICE_CERTS_BLUEPRINT}${NC} blueprint name of the service certificate."
+    echo -e "      ${YELLOW}{TARGET_CA}${NC} name of the target CA (e.g. intermediate-ca)."     
+}
+
+service-certs-issue-help

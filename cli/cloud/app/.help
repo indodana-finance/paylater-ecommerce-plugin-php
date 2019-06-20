@@ -1,0 +1,30 @@
+      _                 _      _   _ 
+  ___| | ___  _   _  __| | ___| |_| |
+ / __| |/ _ \| | | |/ _` |/ __| __| |
+| (__| | (_) | |_| | (_| | (__| |_| |
+ \___|_|\___/ \__,_|\__,_|\___|\__|_|
+
+cloudctl is a DevOps Toolkit for provisioning various cloud provider configuration
+
+First time setup:
+1. Create namespace file in the root cli directory.
+File content example:
+ORGANIZATION=cermati
+TEAM=indodana
+PRODUCT=midas
+PROJECT_DIRECTORY=$(pwd)
+
+2. Request cloudctl-{environment} certificate bundle (Need pkictl to be installed)
+./pkictl member certs get
+
+3. Setup cloudctl
+./cloudctl setup
+
+I. Configure AWS Dynamic credentials to Vault
+1. Export the necessary variables
+export GITHUB_USERNAME="YOUR_GITHUB_USERNAME"
+export AWS_VAULT_ACCESS_KEY="TO_BE_FILLED"
+export AWS_VAULT_ACCESS_SECRET_KEY="TO_BE_FILLED"
+
+2. Configure the Role to Vault
+./cloudctl aws role configure <service> <environment> <role>

@@ -1,0 +1,47 @@
+cert_auth_config:
+  path: cert/
+  roles:
+    - name: cermati-team-product-dev
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-team-product-dev
+      allowed_common_names:
+        - '*@cermati.com'
+        - '*@indodana.com'
+
+    - name: cermati-indodana-athena-dev
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-indodana-athena-dev
+      allowed_common_names:
+        - '*@cermati.com'
+        - '*@indodana.com'
+
+    - name: cermati-indodana-artemis-dev
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-indodana-artemis-dev
+      allowed_common_names:
+        - '*@cermati.com'
+        - '*@indodana.com'
+
+    - name: cermati-indodana-midas-dev
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-indodana-midas-dev
+      allowed_common_names:
+        - '*@cermati.com'
+        - '*@indodana.com'
+
+    - name: cermati-indodana-testenv-dev
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-indodana-testenv-dev
+      allowed_common_names:
+        - '*@cermati.com'
+        - '*@indodana.com'

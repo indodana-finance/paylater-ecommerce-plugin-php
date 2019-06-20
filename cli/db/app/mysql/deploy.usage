@@ -1,0 +1,3 @@
+DB_NAME ENV
+    DB_NAME:    Name of the database that exist in blueprints
+    ENV:        Environment, refers to env.yml file in blueprints

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+if [[ ! -d ".env.cloud" ]]; then
+    sudo apt-get -y install virtualenv
+    virtualenv .env.cloud
+    source .env.cloud/bin/activate
+    pip install ansible==2.7.7.0
+fi
+source .env.cloud/bin/activate
+
+export ANSIBLE_PLAYBOOK=./.env.cloud/bin/ansible-playbook
+
+export SILENT_OPT="--silent"
+
+source cloud/framework/cli
+source cloud/framework/complete
+source cloud/framework/help
+source cloud/framework/utils
+cli "$@"

@@ -1,0 +1,19 @@
+- name: Setting Variables
+  set_fact:
+    db_identifier: "db-{{ organization }}-{{ team }}-{{ db_deployment_type }}-{{ db_engine }}-{{ product }}-{{ db_name }}-{{ db_environment }}" 
+    v11alt_db_identifier_path: "v1.1.alt/db/{{ db_deployment_type }}/{{ db_engine }}/{{ organization }}/{{ team }}/{{ product }}/{{ db_name }}/{{ db_environment }}" 
+    v11_db_identifier_path: "v1.1/{{ organization }}/{{ team }}/db/{{ db_deployment_type }}/{{ db_engine }}/{{ product }}/{{ db_name }}/{{ db_environment }}"
+    v10_db_identifier_path_namespace: "v10/{{ organization }}/{{ team }}/db/{{ db_deployment_type }}/{{ db_engine }}"
+    v10_db_identifier_path_key: "{{ db_environment }}/{{ product }}/{{ db_name }}"
+
+- name: Setting db_identifier_path
+  set_fact:
+    db_identifier_path: "{{ v11_db_identifier_path }}"
+
+- name: DB Identifier - Debug
+  debug:
+    var: db_identifier
+
+- name: DB Identifier Path - Debug
+  debug:
+    var: db_identifier_path

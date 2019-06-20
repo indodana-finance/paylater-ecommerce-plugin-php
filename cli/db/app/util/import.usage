@@ -1,0 +1,1 @@
+{DB_ENGINE-postgres} {DB_TYPE-local|rds} {DB_NAME} {ENVIRONMENT}

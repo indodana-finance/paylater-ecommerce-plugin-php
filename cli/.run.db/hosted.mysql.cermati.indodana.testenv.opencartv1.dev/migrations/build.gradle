@@ -1,0 +1,23 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath group: 'mysql', name: 'mysql-connector-java', version: '8.0.16'
+  }
+}
+
+plugins {
+    id "org.flywaydb.flyway" version "5.2.4"
+}
+
+flyway.sqlMigrationPrefix = ''
+flyway.locations = ['filesystem:public']
+
+// TODO: manually advance this.
+flyway.target = '2030.12.31.9999'    //Fix flyway target to given schema version. Change this to migrate further.
+flyway.baselineOnMigrate = true
+flyway.user = 'opencartv1_migrations'
+flyway.url = 'jdbc:mysql://localhost/opencartv1?serverTimezone=UTC'
+flyway.password = 'A1a-Iiexj5iq77zr7Hpv'

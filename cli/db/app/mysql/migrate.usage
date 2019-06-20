@@ -1,0 +1,4 @@
+DB_NAME ENV SCHEMA
+    DB_NAME:    Name of the database that exist in blueprints
+    ENV:        Environment, refers to env.yml file in blueprints
+    SCHEMA:     Migration schema specified in blurpint directory

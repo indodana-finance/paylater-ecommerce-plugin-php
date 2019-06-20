@@ -1,0 +1,84 @@
+- name: Welcome to Vault cluster provisioning
+  debug:
+    msg: 'Provision blueprint: {{ cluster }} - {{ blueprint }}'
+
+- name: Vault Cluster specifications
+  debug:
+    var: "vault_cluster"
+
+- name: Setting prefix
+  set_fact:
+    prefix: ""
+
+- name: Setting prefix
+  set_fact:
+    prefix: "{{ vault_cluster.options.prefix + '-' }}"
+  when: "vault_cluster.options.prefix != ''"
+
+- name: Populate target
+  set_fact:
+    target: "{{ inventory_hostname | replace(prefix,'') | replace(vault_cluster.domain, '') }}"
+
+- name: Reading member cluster specification
+  set_fact:
+    member: "{{ vault_cluster.members[target] }}"
+
+- name: Member Specification
+  debug:
+    var: member
+
+- name: Machine IP
+  set_fact:
+    machine_ip: "{{ ansible_default_ipv4.address }}"
+  when: "vault_cluster.environment != 'development'"
+
+- set_fact:
+    machine_ip: "127.0.0.1"
+  when: "vault_cluster.environment == 'development'"
+
+- name: Machine IP
+  debug:
+    var: machine_ip
+
+- name: Set Variables
+  set_fact:
+    vault_base_directory: "/opt/vault"
+    vault_binary_directory: "/opt/vault/bin"
+    vault_install_directory: "/opt/vault/.install/{{ target }}"
+    vault_config_directory: "/etc/vault/conf.d"
+    vault_log_directory: "/var/log/vault"
+    vault_run_directory: "/var/run/vault"
+    vault_tls_directory: "/etc/vault/tls"
+    vault_scripts_directory: "/opt/vault/.scripts/{{ target }}"
+    
+- block:
+    - name: "Add Vault group"
+      group:
+        name: "{{ vault_group }}"
+        state: present
+        system: yes
+
+    - name: "Add Vault user"
+      user:
+        name: "{{ vault_user }}"
+        group: "{{ vault_group }}"
+        system: yes
+      
+    - name: Ensure directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0755
+        owner: "{{ vault_user }}"
+        group: "{{ vault_group }}"
+      with_items:
+        - "{{ vault_base_directory }}"
+        - "{{ vault_binary_directory }}"
+        - "{{ vault_install_directory }}"
+        - "{{ vault_install_directory }}/vault"
+        - "{{ vault_config_directory }}"
+        - "{{ vault_log_directory }}"
+        - "{{ vault_run_directory }}"
+        - "{{ vault_tls_directory }}"
+        - "{{ vault_scripts_directory }}"
+  become: true

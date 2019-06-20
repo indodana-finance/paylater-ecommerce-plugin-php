@@ -1,0 +1,6 @@
+csr:
+  SAN:
+    - IP:10.100.1.8
+    - IP:52.220.51.95
+    - DNS:vault-01.infra-management
+    - DNS:vault.cermati.com

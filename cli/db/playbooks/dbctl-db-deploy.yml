@@ -1,0 +1,7 @@
+- hosts: "localhost"
+  roles:
+  - role: "database/common"
+  - role: "database/deploy/postgres"
+    when: "db_engine == 'postgres'"
+  - role: "database/deploy/mysql"
+    when: "db_engine == 'mysql'"

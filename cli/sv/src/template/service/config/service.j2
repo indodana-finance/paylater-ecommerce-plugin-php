@@ -1,0 +1,132 @@
+#!/bin/bash
+
+set -e
+
+#-------------------------------------------------------------------------------
+# INTRODUCTION
+#
+# This file contains shell scripts to build and run services located in this
+# repository. This file will be source-ed by the run, build, and containerize
+# script located in the root project directory.
+#
+# For each service, some functions need to be defined:
+#   - build: Script to build the service into portable artifacts (e.g. static JS
+#       files, JAR files, or in NodeJS case: the whole project directory).
+#       Accepts three arguments: SERVICE_NAME, ENVIRONMENT, and BUILD_DIRECTORY.
+#       This function will be executed in the build image container. This
+#       function will be executed in the root project directory. The build
+#       artifact should be stored into BUILD_DIRECTORY directory.
+#
+#   - run: Script to run the service from the built artifacts. Accepts at least
+#       three arguments: SERVICE_NAME, ENVIRONMENT, and BUILD_DIRECTORY.
+#       Additional arguments for the function can be passed by passing `--`
+#       followed by the list of additional arguments. For example:
+#         ./svctl run a_service an_env -- pos_arg1 "pos arg2" --key1 value1
+#       The `run()` function will receive arguments like this:
+#         $1 = a_service
+#         $2 = an_env
+#         $3 = <build directory>
+#         $4 = pos_arg1
+#         $5 = pos arg2
+#         $6 = --key1
+#         $7 = value1
+#       This function will be executed in the BUILD_DIRECTORY.
+#
+# There is also several optional functions that a service can implement but not
+# required to:
+#   - postbuild: Script to install dependencies that are not portable but are
+#       not installed system-wide (e.g. Python virtualenv directory, NodeJS
+#       node_modules). Accepts three arguments: SERVICE_NAME, ENVIRONMENT, and
+#       BUILD_DIRECTORY. This function will be executed in the base image
+#       container, not in the build image container. This function will be
+#       executed in the BUILD_DIRECTORY. All files installed by this
+#       script should be contained within the BUILD_DIRECTORY directory.
+#       Additionally, a `.postbuild` file should be created in that directory
+#       containing the list of files/directories created by the dependency
+#       installation process. The format of this file follows the format of
+#       dockerignore file
+#       (https://docs.docker.com/engine/reference/builder/#dockerignore-file).
+#
+#   - host_prebuild: Script to prepare the project directory with build-time
+#       dependencies that are temporary. This script will run in the
+#       **host machine**, before the Docker build procedure is invoked. Some
+#       uses for this function are:
+#         - Copy files to Docker containerize mount directory (see 
+#           `docker.containerize.mount_directory` in the config.yml file)
+#         - Run some build steps that depend on environments that aren't present
+#           in the Docker build container
+#       This function accepts three arguments: SERVICE_NAME, ENVIRONMENT, and
+#       BUILD_DIRECTORY.
+#
+#   - host_postbuild: Script that will run in the **host machine**, after the
+#       Docker build procedure has finished. This function might be useful to
+#       clean up additional build artifacts created by host_prebuild(). This
+#       function accepts three arguments: SERVICE_NAME, ENVIRONMENT, and
+#       BUILD_DIRECTORY.
+#
+# Explanation of function arguments:
+#   - SERVICE_NAME: The name of the service that will be build, postbuild, or
+#       run.
+#
+#   - ENVIRONMENT: The environment of the service.
+#
+#   - BUILD_DIRECTORY: The directory that should contain the resulting build
+#       artifacts. Is equal to `.build/$SERVICE_NAME/$ENVIRONMENT`.
+#-------------------------------------------------------------------------------
+
+# Replace functions defined in this section with functions tailored for your
+# service. These functions are an example of build/postbuild/run scripts for
+# a simple NodeJS service.
+build() {
+  local SERVICE_NAME=$1
+  local ENVIRONMENT=$2
+  local BUILD_DIRECTORY=$3
+
+  local O_IFS="$IFS"
+
+  IFS=$'\n'
+  local files=(`git ls-files`)
+  local untracked_files=(`git ls-files --others --exclude-standard`)
+
+  echo "Copying non-gitignored files..."
+  for file in "${files[@]}"; do
+    cp --parents "$file" "$BUILD_DIRECTORY"
+  done
+
+  echo "Copying untracked files..."
+  for file in "${untracked_files[@]}"; do
+    cp --parents "$file" "$BUILD_DIRECTORY"
+  done
+
+  IFS="$O_IFS"
+
+  pushd "$BUILD_DIRECTORY"
+
+  echo "Creating empty .env file..."
+  touch .env
+
+  popd
+}
+
+postbuild() {
+  local SERVICE_NAME=$1
+  local ENVIRONMENT=$2
+  local BUILD_DIRECTORY=$3
+
+  echo "Running npm install..."
+  npm install --production
+
+  echo "Generating .postbuild..."
+  echo "node_modules" >> ".postbuild"
+}
+
+run() {
+  local SERVICE_NAME=$1
+  local ENVIRONMENT=$2
+  local BUILD_DIRECTORY=$3
+
+  local ALL_ARGS=( "$@" )
+  local SERVICE_ARGS=("${ALL_ARGS[@]:3}")
+
+  exec npm run start -- "${SERVICE_ARGS[@]}"
+}

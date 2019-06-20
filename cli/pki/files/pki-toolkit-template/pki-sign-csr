@@ -1,0 +1,48 @@
+#!/bin/bash
+export TYPE=$1
+export NAME=$2
+export CA=$3
+export DEFAULT_STORE_PASS=$4
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+set -e
+
+CURRENT_DIRECTORY=$(pwd)
+CSR_DIRECTORY=$CURRENT_DIRECTORY/certs/$TYPE/$NAME
+CA_DIRECTORY=$CURRENT_DIRECTORY/pki/$CA
+
+if [[ ! -d "$CSR_DIRECTORY" ]]; then
+    echo -e "${RED}[ERROR]${NC} CSR directory not found : ${YELLOW}$CSR_DIRECTORY${NC}"
+    exit 1;
+fi
+
+if [[ ! -d "$CA_DIRECTORY" ]]; then
+    echo -e "${RED}[ERROR]${NC} CA directory not found : ${YELLOW}$CA_DIRECTORY${NC}"
+    exit 1
+fi
+
+echo -e "-e ${GREEN}[PKI-SIGN-CSR]${NC} Copying ${YELLOW}$CA_DIRECTORY/$NAME.csr${NC} to ${YELLOW}$CA_DIRECTORY/csr/$NAME.csr${NC}"
+cp $CSR_DIRECTORY/$NAME.csr $CA_DIRECTORY/csr/$NAME.csr
+
+pushd $CA_DIRECTORY
+./sign $NAME
+cp $CA_DIRECTORY/certs/$NAME.crt $CSR_DIRECTORY/$NAME.crt
+cat $CSR_DIRECTORY/$NAME.crt \
+    $CA_DIRECTORY/ca-chain.crt > $CSR_DIRECTORY/$NAME-ca-chain.crt
+
+if [[ ${CA} == 'root-ca' ]]; then
+    cp $CA_DIRECTORY/ca.crt $CSR_DIRECTORY/$NAME.ca.crt
+else
+    cp $CA_DIRECTORY/ca-chain.crt $CSR_DIRECTORY/$NAME.ca.crt
+fi
+popd
+
+if [[ $TYPE == "service" ]]; then
+pushd $CSR_DIRECTORY
+    sudo tar -czf $NAME.tar.gz $NAME-ca-chain.crt $NAME.crt $NAME.ca.crt  
+popd
+fi

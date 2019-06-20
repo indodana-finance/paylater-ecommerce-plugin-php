@@ -1,0 +1,1 @@
+ALTER USER woocommerce_migrations IDENTIFIED BY '{{password}}'

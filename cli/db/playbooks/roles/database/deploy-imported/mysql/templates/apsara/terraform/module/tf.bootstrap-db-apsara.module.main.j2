@@ -1,0 +1,15 @@
+resource "alicloud_db_backup_policy" "apsara_db_backup_policy" {
+  instance_id = "${var.apsara_db_instance_id}"
+  backup_period = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+  backup_time = "16:00Z-17:00Z"
+  retention_period = 7
+  log_backup = true
+  log_retention_period = 7
+}
+
+resource "alicloud_db_account" "apsara_db_account" {
+  instance_id = "${var.apsara_db_instance_id}"
+  name = "${var.apsara_db_instance_username}"
+  password = "${var.apsara_db_instance_password}"
+  type = "Super"
+}

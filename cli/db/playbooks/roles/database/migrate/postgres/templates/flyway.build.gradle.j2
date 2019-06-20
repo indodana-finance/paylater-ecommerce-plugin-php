@@ -1,0 +1,24 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath group: 'postgresql', name: 'postgresql', version: '9.4.1208-jdbc42-atlassian-hosted'
+  }
+}
+
+plugins {
+    id "org.flywaydb.flyway" version "5.2.4"
+}
+
+flyway.sqlMigrationPrefix = ''
+flyway.locations = ['filesystem:{{ db_schema }}']
+flyway.schemas = ['{{ db_schema }}']
+
+// TODO: manually advance this.
+flyway.target = '2030.12.31.9999'    //Fix flyway target to given schema version. Change this to migrate further.
+flyway.baselineOnMigrate = true
+flyway.user = '{{ db_migration_username }}'
+flyway.url = 'jdbc:postgresql://{{ db_host }}/{{ db_name }}'
+flyway.password = '{{ db_migration_password }}'

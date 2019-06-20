@@ -1,0 +1,12 @@
+- name: Setting Variables
+  set_fact:
+    aws_identifier: "aws-{{ organization }}-{{ team }}-{{ product }}-{{ service_name }}-{{ service_environment }}" 
+    aws_identifier_path: "v1.1/{{ organization }}/{{ team }}/aws/{{ product }}/{{ service_name }}/{{ service_environment }}/"
+    
+- name: AWS Identifier - Debug
+  debug:
+    var: aws_identifier
+
+- name: AWS Identifier Path - Debug
+  debug:
+    var: aws_identifier_path

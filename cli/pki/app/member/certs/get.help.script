@@ -1,0 +1,9 @@
+#!/bin/bash
+function certs-member-request-help {
+    echo -e ""
+    echo -e "Get a signed certificate for member"
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} member certs get"
+    echo -e "${YELLOW}Example:${NC} ${GREEN}./pkictl${NC} member certs get"
+}
+
+certs-member-request-help

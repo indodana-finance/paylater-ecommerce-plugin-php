@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+echo -e ""
+echo -e "${RED}BEWARE THIS COMMAND WILL CLEAN-UP AND RE-INITIALIZE THE WHOLE LOCAL PKI, VAULT, AND ETCD SETUP${NC}"
+echo -e "${RED}PLEASE TAKE CAUTION WHEN INVOKING THIS COMMAND.${NC}"
+read -p "Are you sure (Y/y) for continuing? " -r
+echo -e ""
+if ! [[ $REPLY =~ ^[Yy]$ ]]; then
+    exit 1;
+fi
+
+CURRENT_USER=$(whoami)
+if [[ "${CURRENT_USER}" == "root" ]]; then
+  echo -e "${RED}You are currently logged-in as ROOT. Please run this script as non-ROOT user to properly clean the setup.${NC}"
+  exit 1
+fi
+
+echo -ne "${GREEN}[PKICTL]${NC} "
+$ANSIBLE_PLAYBOOK pki/playbook/pki-cleanup.yml \
+    -e "current_user=${CURRENT_USER}" \
+    --ask-become-pass

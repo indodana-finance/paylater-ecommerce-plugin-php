@@ -1,0 +1,85 @@
+#!/bin/bash
+DB_HOST="localhost"
+DB_PORT="3306"
+CONNECTION_STRING="testenv_root:ANf9p6hudSKbixaAbzBRdFwKb8fxp5w3@tcp(${DB_HOST}:${DB_PORT})/testenv"
+
+VAULT_EXEC=./.bin.db/vault
+YQ_EXEC=./.bin.db/yq
+
+export VAULT_ADDR="https://localhost:8200"
+export VAULT_CACERT=/usr/share/pki/certs/member/gerywahyu@03827496b46046e58700703488dd81aa@dbctl-dev/gerywahyu@03827496b46046e58700703488dd81aa@dbctl-dev.ca.crt
+export VAULT_CLIENT_CERT=/usr/share/pki/certs/member/gerywahyu@03827496b46046e58700703488dd81aa@dbctl-dev/gerywahyu@03827496b46046e58700703488dd81aa@dbctl-dev.crt
+export VAULT_CLIENT_KEY=/usr/share/pki/certs/member/gerywahyu@03827496b46046e58700703488dd81aa@dbctl-dev/.private/gerywahyu@03827496b46046e58700703488dd81aa@dbctl-dev.key
+export VAULT_TOKEN=s.wxd3aBzKNOhVWCFfMyRI9fRU
+
+$VAULT_EXEC secrets list -format=yaml > vault.secrets.list.yaml
+
+# DB_SECRET_ENGINE=$($YQ_EXEC r vault.secrets.list.yaml "[v1.1/cermati/indodana/db/hosted/mysql/testenv/testenv/dev/]")
+# if [[ $DB_SECRET_ENGINE == "null" ]]; then
+#     echo "[DBCTL] Enabling secrets - v0"
+#     $VAULT_EXEC secrets enable -path=v1.1/cermati/indodana/db/hosted/mysql/testenv/testenv/dev database
+# fi
+
+# DB_SECRET_ENGINE_v10=$($YQ_EXEC r vault.secrets.list.yaml "[v10/cermati/indodana/db/hosted/mysql/]")
+# if [[ $DB_SECRET_ENGINE_v10 == "null" ]]; then
+#     echo "[DBCTL] Enabling secrets - v1.0"
+#     $VAULT_EXEC secrets enable -path=v10/cermati/indodana/db/hosted/mysql database
+# fi
+
+DB_SECRET_ENGINE_v11=$($YQ_EXEC r vault.secrets.list.yaml "[v1.1/cermati/indodana/db/hosted/mysql/testenv/testenv/dev/]")
+if [[ $DB_SECRET_ENGINE_v11 == "null" ]]; then
+    echo "[DBCTL] Enabling secrets - v1.1"
+    $VAULT_EXEC secrets enable -path=v1.1/cermati/indodana/db/hosted/mysql/testenv/testenv/dev database
+fi
+
+# echo "[DBCTL] Configuring secrets v11-alt - path: v1.1/cermati/indodana/db/hosted/mysql/testenv/testenv/dev/config/root"
+# $VAULT_EXEC write v1.1/cermati/indodana/db/hosted/mysql/testenv/testenv/dev/config/root \
+#   plugin_name=mysql-database-plugin \
+#   allowed_roles="*" \
+#   connection_url="${CONNECTION_STRING}" \
+#   verify_connection=false
+
+echo "[DBCTL] Configuring secrets v11 - path: v1.1/cermati/indodana/db/hosted/mysql/testenv/testenv/dev/config/root"
+$VAULT_EXEC write v1.1/cermati/indodana/db/hosted/mysql/testenv/testenv/dev/config/root \
+  plugin_name=mysql-database-plugin \
+  allowed_roles="*" \
+  connection_url="${CONNECTION_STRING}" \
+  verify_connection=false
+
+# echo "[DBCTL] Configuring secrets v10 - path: v10/cermati/indodana/db/hosted/mysql/config/dev/testenv/testenv"
+# $VAULT_EXEC write v10/cermati/indodana/db/hosted/mysql/config/dev/testenv/testenv \
+#   plugin_name=mysql-database-plugin \
+#   allowed_roles="*" \
+#   connection_url="${CONNECTION_STRING}" \
+#   verify_connection=false
+
+if [ $? -eq 0 ]; then
+    # echo "[DBCTL] v11-alt - Generating role configuration script for migrations using DB v1.1/cermati/indodana/db/hosted/mysql/testenv/testenv/dev/config/root"
+    # $VAULT_EXEC write v1.1/cermati/indodana/db/hosted/mysql/testenv/testenv/dev/roles/migrations \
+    #     db_name=root \
+    #     creation_statements=@"/home/gwahyu/Developments/test-env/cli/.run.db/hosted.mysql.cermati.indodana.testenv.testenv.dev/sql/__roles__/migrations/creation.sql" \
+    #         default_ttl="1h" \
+    #         max_ttl="24h"
+
+    echo "[DBCTL] v11 - Generating role configuration script for migrations using DB v1.1/cermati/indodana/db/hosted/mysql/testenv/testenv/dev/config/root"
+    $VAULT_EXEC write v1.1/cermati/indodana/db/hosted/mysql/testenv/testenv/dev/roles/migrations \
+        db_name=root \
+        creation_statements=@"/home/gwahyu/Developments/test-env/cli/.run.db/hosted.mysql.cermati.indodana.testenv.testenv.dev/sql/__roles__/migrations/creation.sql" \
+            default_ttl="1h" \
+            max_ttl="24h"
+
+    # echo "[DBCTL] v10 - Generating role configuration script for migrations using DB v10/cermati/indodana/db/hosted/mysql/config/dev/testenv/testenv"
+    # $VAULT_EXEC write v10/cermati/indodana/db/hosted/mysql/roles/dev/testenv/testenv-migrations \
+    #     db_name=dev/testenv/testenv \
+    #     creation_statements=@"/home/gwahyu/Developments/test-env/cli/.run.db/hosted.mysql.cermati.indodana.testenv.testenv.dev/sql/__roles__/migrations/creation.sql" \
+    #         default_ttl="1h" \
+    #         max_ttl="24h"
+    
+    if [ $? -eq 0 ]; then
+        echo "SUCCESS" > VAULTUPLOADOUTPUT
+    else
+        echo "FAILED" > VAULTUPLOADOUTPUT
+    fi
+else
+    echo "FAILED" > VAULTUPLOADOUTPUT
+fi

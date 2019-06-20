@@ -1,0 +1,29 @@
+#!/bin/bash
+function namespace-execute {
+    if [ ! -f "./NAMESPACE" ]; then
+        echo -e "${RED}ERROR:${NC}No ${YELLOW}./NAMESPACE${NC} file found. Please create this file describing ORGANIZATION, TEAM, and PRODUCT"
+        exit 1
+    else
+        source ./NAMESPACE
+        if [ ! -n "${ORGANIZATION}" ]; then
+            ORGANIZATION="${RED}Has not been set yet. Please set this by creating NAMESPACE file in CLI folder.${NC}"
+        fi
+        if [ ! -n "${TEAM}" ]; then
+            TEAM="${RED}Has not been set yet. Please set this by creating NAMESPACE file in CLI folder.${NC}"
+        fi
+        if [ ! -n "${PRODUCT}" ]; then
+            PRODUCT="${RED}Has not been set yet. Please set this by creating NAMESPACE file in CLI folder.${NC}"
+        fi
+        if [[ "$SILENT_OPT" != "--silent" ]]; then
+            echo -e "${YELLOW}ORGANIZATION${NC}=${ORGANIZATION}"
+            echo -e "${YELLOW}TEAM${NC}=${TEAM}"
+            echo -e "${YELLOW}PRODUCT${NC}=${PRODUCT}"
+        fi
+    fi
+}
+
+if [[ " ${1} " == *"help"* ]] || [[ " ${1} " == *"--help"* ]];then
+    exit 3
+else
+    namespace-execute
+fi

@@ -1,0 +1,13 @@
+CREATE DATABASE {{ db_name }};
+USE {{ db_name }}
+CREATE USER {{ db_generated_user }};
+ALTER USER {{ db_generated_user }} IDENTIFIED BY '{{ db_generated_password }}';
+GRANT ALL ON {{ db_name }}.* TO {{ db_generated_user }};
+GRANT ALL PRIVILEGES ON {{ db_name }}.* TO {{ db_generated_user }};
+GRANT INSERT, UPDATE ON mysql.* TO {{ db_generated_user }};
+GRANT GRANT OPTION ON {{ db_name }}.* TO {{ db_generated_user }};
+
+-- Provision Migration User
+CREATE USER {{ db_generated_migration_user }};
+GRANT ALL ON {{ db_name }}.* TO {{ db_generated_migration_user }};
+GRANT ALL PRIVILEGES ON {{ db_name }}.* TO {{ db_generated_migration_user }};

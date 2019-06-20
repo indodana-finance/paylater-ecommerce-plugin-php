@@ -1,0 +1,12 @@
+- name: Configure Roles and certificates
+  shell:
+    cmd: |
+      vault write auth/{{ cert_auth_config.path }}/certs/{{ item.name }} \
+      display_name={{ item.name }} \
+      policies={{ item.policies | join(",") }} \
+      certificate=@{{ item.ca_cert }} \
+      ttl={{ item.ttl }} \
+      allowed_common_names={{ item.allowed_common_names | join(",") }}
+  with_items:
+  - "{{ cert_auth_config.roles }}"
+  run_once: true

@@ -1,0 +1,8 @@
+cermati-indodana-athena-prod:
+  host: "https://vault.cermati.com:8443"
+  tls:
+    enabled: true
+    certs_bundle: pkictl-prod
+  auth:
+    method: tls
+    role_name: cermati-indodana-athena-prod

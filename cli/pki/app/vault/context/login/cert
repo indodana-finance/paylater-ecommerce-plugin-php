@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+
+YQ=./.bin.pki/yq
+JQ=./.bin.pki/jq
+
+function vault-context-login-cert-validate {
+    local PKICTL_CONTEXT=$1
+    local CONTEXT_DIRECTORY=$HOME/.pkictl
+    local CONTEXT_FILE=${CONTEXT_DIRECTORY}/context.yml
+    local PKICTL_CONTEXT_HOST=$(${YQ} r ${CONTEXT_FILE} "contexts.${PKICTL_CONTEXT}.host")
+    local PKICTL_CONTEXT_AUTH_METHOD=$(${YQ} r ${CONTEXT_FILE} "contexts.${PKICTL_CONTEXT}.auth.method")
+    local CURRENT_DIRECTORY=$(pwd)
+    local BLUEPRINT_DIRECTORY=${CURRENT_DIRECTORY}/pki/blueprint/certs-bundle
+    local PKICTL_CONTEXT_AUTH_CERTS_BUNDLE=$(${YQ} r ${CONTEXT_FILE} "contexts.${PKICTL_CONTEXT}.tls.certs_bundle")
+    
+    if [[ -z "${GITHUB_USERNAME}" ]]; then
+        echo -e "${RED}[ERROR]${NC} No ${YELLOW}GITHUB_USERNAME${NC} environment variable found. Please set it using command ${YELLOW}export GITHUB_USERNAME=<your-github-username>${NC}"
+        exit 1
+    fi
+
+    if [[ ! -f "${CONTEXT_FILE}" ]]; then
+        echo -e "${RED}[ERROR] ${NC} No context.yml found in ${YELLOW}~/.pkictl${NC} directory. Please run ${YELLOW}./pkictl vault context configure${NC} first"
+        exit 1
+    fi
+
+    if [[ "${PKICTL_CONTEXT_HOST}" == "null" ]]; then
+        echo -e "${RED}[ERROR] ${NC} Context Host is not properly configured. Please specify the correct host for the context."
+        exit 1
+    fi
+
+    if [[ "${PKICTL_CONTEXT_AUTH_METHOD}" == "null" || "${PKICTL_CONTEXT_AUTH_METHOD}" != "tls" ]]; then
+        echo -e "${RED}[ERROR] ${NC} Auth method is not configured to use certificate. Please specify tls as the auth method."
+        exit 1
+    fi
+
+    if [[ ! -f "${BLUEPRINT_DIRECTORY}/${PKICTL_CONTEXT_AUTH_CERTS_BUNDLE}.yml" ]]; then
+        echo -e "${RED}[ERROR] ${NC} Certs bundle blueprint ${YELLOW}${BLUEPRINT_DIRECTORY}/${PKICTL_CONTEXT_AUTH_CERTS_BUNDLE}.yml${NC} not found."
+        exit 1
+    fi
+}
+
+function vault-context-login-cert-execute {
+    local PKICTL_CONTEXT=$1
+    
+    local CONTEXT_DIRECTORY=$HOME/.pkictl
+    local CONTEXT_FILE=${CONTEXT_DIRECTORY}/context.yml
+    local PKICTL_CONTEXT_ROLE_NAME=$(${YQ} r ${CONTEXT_FILE} "contexts.${PKICTL_CONTEXT}.auth.role_name")
+    local PKICTL_CONTEXT_HOST=$(${YQ} r ${CONTEXT_FILE} "contexts.${PKICTL_CONTEXT}.host")
+    local PKICTL_CONTEXT_TLS_ENABLED=$(${YQ} r ${CONTEXT_FILE} "contexts.${PKICTL_CONTEXT}.tls.enabled")
+    local CERTS_BUNDLE=$($YQ r ${CONTEXT_FILE} "contexts.${PKICTL_CONTEXT}.tls.certs_bundle")
+    local PAYLOAD=""
+
+    if [[ "${PKICTL_CONTEXT_ROLE_NAME}" != "null" ]]; then
+        PAYLOAD=$(${JQ} -n \
+                    --arg name "$PKICTL_CONTEXT_ROLE_NAME" \
+                    '{name: $name}')
+    fi
+
+    if [[  "$SILENT_OPT" != "--silent" ]]; then 
+        echo -e "${GREEN}[PKICTL]${NC} Importing PKI Certificate : [[member]]:${YELLOW}${GITHUB_USERNAME}${NC}@[[certs_bundle]]:${YELLOW}${CERTS_BUNDLE}${NC}"
+    fi
+    $(./pkictl member certs use ${CERTS_BUNDLE})
+    if [[ "$SILENT_OPT" != "--silent" ]]; then 
+        echo -e "${GREEN}[PKICTL]${NC} ${GITHUB_USERNAME}@${CERTS_BUNDLE}.crt -> ${YELLOW}${PKICTL_MEMBER_CERT_FILE}${NC}"
+        echo -e "${GREEN}[PKICTL]${NC} ${GITHUB_USERNAME}@${CERTS_BUNDLE}.key -> ${YELLOW}${PKICTL_MEMBER_KEY_FILE}${NC}"
+        echo -e "${GREEN}[PKICTL]${NC} ${GITHUB_USERNAME}@${CERTS_BUNDLE}.ca.crt -> ${YELLOW}${PKICTL_MEMBER_CA_CERT_FILE}${NC}"
+        echo -e "${GREEN}[PKICTL] ${YELLOW}[ATTEMPT]${NC} PKICTL_CONTEXT=${YELLOW}${PKICTL_CONTEXT}${NC}"
+    fi
+
+    local LOGIN_TOKEN=$(curl \
+            -s \
+            --request POST \
+            --noproxy '*' \
+            --data "${PAYLOAD}" \
+            --cert "${PKICTL_MEMBER_CERT_FILE}" \
+            --cacert "${PKICTL_MEMBER_CA_CERT_FILE}" \
+            --key "${PKICTL_MEMBER_KEY_FILE}" \
+            ${PKICTL_CONTEXT_HOST}/v1/auth/cert/login || true)
+
+    PKICTL_CONTEXT_TOKEN=$(echo ${LOGIN_TOKEN} | ${JQ} -r '.auth.client_token')
+    PKICTL_CONTEXT_TOKEN_DURATION=$(echo ${LOGIN_TOKEN} | ${JQ} -r '.auth.lease_duration')
+    CURRENT_TIMESTAMP=$(date +"%s")
+    PKICTL_CONTEXT_TOKEN_EXPIRATION=$((CURRENT_TIMESTAMP+PKICTL_CONTEXT_TOKEN_DURATION))
+
+    if [[ -z "$PKICTL_CONTEXT_TOKEN" || "$PKICTL_CONTEXT_TOKEN" == "null" ]]; then
+        echo -e "${RED}[ERROR]${NC} Vault login process using certificates failed. No ${YELLOW}PKICTL_CONTEXT_TOKEN${NC} for context ${YELLOW}${PKICTL_CONTEXT}${NC} retrieved. Please make sure you have configured the context properly."
+        exit 1
+    fi
+
+    local PKICTL_CONTEXT_TLS_CACERT=${PKICTL_MEMBER_CA_CERT_FILE}
+    local PKICTL_CONTEXT_TLS_CERT=${PKICTL_MEMBER_CERT_FILE}
+    local PKICTL_CONTEXT_TLS_KEY=${PKICTL_MEMBER_KEY_FILE}
+
+    $ANSIBLE_PLAYBOOK pki/playbook/pki-vault-context-login.yml \
+        -e "pkictl_context_token=${PKICTL_CONTEXT_TOKEN}" \
+        -e "pkictl_context_token_duration=${PKICTL_CONTEXT_TOKEN_DURATION}" \
+        -e "pkictl_context_token_expiration=${PKICTL_CONTEXT_TOKEN_EXPIRATION}" \
+        -e "pkictl_context_host=${PKICTL_CONTEXT_HOST}" \
+        -e "pkictl_context_tls_enabled=${PKICTL_CONTEXT_TLS_ENABLED}" \
+        -e "pkictl_context_tls_cacert=${PKICTL_CONTEXT_TLS_CACERT}" \
+        -e "pkictl_context_tls_cert=${PKICTL_CONTEXT_TLS_CERT}" \
+        -e "pkictl_context_tls_key=${PKICTL_CONTEXT_TLS_KEY}" \
+        -e "pkictl_context=${PKICTL_CONTEXT}" \
+        -e "pkictl_login_method=cert" \
+        -e "pkictl_directory=${CONTEXT_DIRECTORY}" > /dev/null
+
+    echo "Ansible Error Code: $?"
+
+    echo -e "${GREEN}[PKICTL]${NC} LOGGED-IN using: ${PKICTL_CONTEXT}"
+    source ${CONTEXT_DIRECTORY}/.login/pkictl.login.cert.${PKICTL_CONTEXT}
+    rm -f ${CONTEXT_DIRECTORY}/.login/.current || true &> /dev/null
+    cp ${CONTEXT_DIRECTORY}/.login/pkictl.login.cert.${PKICTL_CONTEXT} ${CONTEXT_DIRECTORY}/.login/.current
+    
+    if [[  "$SILENT_OPT" != "--silent" ]]; then 
+        ./pkictl vault context current
+    fi
+}
+
+if [ $# == 0 ]; then
+    exit 3
+fi
+
+if [[ " ${1} " == *"help"* ]] || [[ " ${1} " == *"--help"* ]];then
+    exit 3
+else
+    if [[ -z "$1" ]]; then
+        exit 3
+    else
+        vault-context-login-cert-validate $1
+        vault-context-login-cert-execute $1
+    fi
+fi

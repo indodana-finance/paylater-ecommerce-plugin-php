@@ -1,0 +1,12 @@
+- name: "Read Role Specification for {{ service_name }}-{{ service_environment }}'s AWS Resource"
+  include_vars: "{{ runtime_directory }}/{{ service_environment }}.yml"
+
+- name: Vault Role Name
+  debug:
+    var: vault_role_name
+
+- name: Generate vault-configure-role script
+  template:
+    src: vault-role-configure.j2
+    dest: "{{ runtime_directory }}/vault-role-configure"
+    mode: 0755

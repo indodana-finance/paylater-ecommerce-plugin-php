@@ -1,0 +1,4 @@
+- hosts: "localhost"
+  roles:
+  - role: database/bootstrap/postgres
+    when: "db_engine == 'postgres'"

@@ -1,0 +1,17 @@
+#!/bin/bash
+{% if vault_cluster.cluster.location == 'local' %}
+source {{ context_directory }}/.login/.current
+VAULT_ADDR=$PKICTL_CONTEXT_HOST \
+VAULT_CACERT=$PKICTL_CONTEXT_TLS_CACERT \
+VAULT_CLIENT_CERT=$PKICTL_CONTEXT_TLS_CERT \
+VAULT_CLIENT_KEY=$PKICTL_CONTEXT_TLS_KEY \
+VAULT_TOKEN=$PKICTL_CONTEXT_TOKEN \
+{% else %}
+source /home/vault/vault.init-local
+VAULT_ADDR={{ vault_cluster.protocol }}://{{ machine_ip }}:{{ member.port }} \
+VAULT_CACERT={{ member.trusted_ca_file }} \
+VAULT_CLIENT_CERT={{ member.cert_file }} \
+VAULT_CLIENT_KEY={{ member.key_file }} \
+VAULT_TOKEN=$VAULT_TOKEN \
+{% endif %}
+{{ vault_binary_directory }}/vault "$@"

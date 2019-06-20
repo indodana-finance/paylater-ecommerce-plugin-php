@@ -1,0 +1,14 @@
+#!/bin/bash
+function service-certs-distribute-help {
+    echo -e ""
+    echo -e "Distribute signed certificate to respective service host."
+    echo -e "You don't need to run this script for local services, as the certificate directory is usable for local services by default"
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} service certs distribute {CLUSTER_INVENTORY} {SERVICE_CERTS_BLUEPRINT} {TARGET_HOST}"
+    echo -e "${YELLOW}Example:${NC} ${GREEN}./pkictl${NC} service certs distribute prod etcd-01 etcd-01"
+    echo -e "         ${GREEN}./pkictl${NC} service certs distribute prod vault-etcd-client vault-01"
+    echo -e "${YELLOW}Help${NC}: ${YELLOW}{CLUSTER_INVENTORY}${NC} is the inventory file located in ${YELLOW}~/.inventory/inventory.d${NC} (following Ansible format)."
+    echo -e "      ${YELLOW}{SERVICE_CERTS_BLUEPRINT}${NC} blueprint name of the service certificate."
+    echo -e "      ${YELLOW}{TARGET_HOST}${NC} target hostname in inventory."
+}
+
+service-certs-distribute-help

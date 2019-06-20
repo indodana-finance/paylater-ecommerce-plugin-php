@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+function certs-member-revoke-help {
+    echo -e ""
+    echo -e "Revoke certificate(s) of a particular member. Unless you are revoking for a localhost, you need to be a certs-manager to revoke a certificate."
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} member certs revoke ${YELLOW}{MEMBER}${NC} ${YELLOW}{CLUSTER_INVENTORY}${NC} ${YELLOW}{CA_SERVER}${NC} ${YELLOW}{CA_TARGET}${NC}"
+    echo -e "${YELLOW}Example:${NC} ${GREEN}./pkictl${NC} member certs revoke github_username local local-ca intermediate-ca -- for local certificate revocation"
+    echo -e "         ${GREEN}./pkictl${NC} member certs revoke github_username stg1 stg1-ca intermediate-ca"
+    echo -e "${YELLOW}Help${NC}: ${YELLOW}{MEMBER}${NC} is a ${YELLOW}Github Username${NC} of the staff whose certificate(s) will be revoked"
+    echo -e "      ${YELLOW}{CLUSTER_INVENTORY}${NC} is the inventory file located in ${YELLOW}~/.inventory/inventory.d${NC} (following Ansible format)."
+    echo -e "      ${YELLOW}{CA_SERVER}${NC} server URL of the CA service. Use ${YELLOW}local-ca${NC} to revoke a local certificate"
+    echo -e "      ${YELLOW}{CA_TARGET}${NC} CA file to be used as the authority."
+}
+
+certs-member-revoke-help

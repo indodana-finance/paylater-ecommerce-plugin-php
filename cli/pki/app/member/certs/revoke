@@ -1,0 +1,307 @@
+#!/usr/bin/env bash
+set -e
+trap "exit" INT
+
+YQ=./.bin.pki/yq
+
+MEMBER=$1
+CLUSTER_INVENTORY=$2
+CA_SERVER=$3
+CA_TARGET=$4
+
+function member-certs-revoke-validate {
+    local INVENTORY_FILE=~/.host-inventory/inventory.d/${CLUSTER_INVENTORY}
+
+    if [[ ! -f "${INVENTORY_FILE}" ]]; then
+        echo -e "${RED}[ERROR]${NC} ${YELLOW}${clusterInventory}${NC} cluster inventory not found. Expected on: ${RED}[${inventoryFile}]${NC}"
+        echo -e "Try to run ${YELLOW}./pkictl inventory setup${NC} to setup inventories needed for pkictl"
+        exit 1
+    fi
+
+    MEMBER_CRT_GITHUB_REPOSITORY=$($YQ r pki/blueprint/config.yml "pkictl.db.github.member_crt_github_repository")
+    if [[ "$MEMBER_CRT_GITHUB_REPOSITORY" == "null" ]]; then
+        echo -e "${RED}[ERROR]${NC} Pkictl has not been configured properly to revoke member certificate. Please create config.yml[${YELLOW}pkictl.db.github.member_csr_github_repository${NC}] in ${YELLOW}pki/blueprint${NC}"
+        exit 1
+    fi
+
+    REVOKER_DB_GITHUB_REPOSITORY=$($YQ r pki/blueprint/config.yml "pkictl.db.github.approver_db_github_repository")
+    if [[ "${REVOKER_DB_GITHUB_REPOSITORY}" == "null" ]]; then
+        echo -e "${RED}[ERROR]${NC} Pkictl has not been configured properly to revoke member certificate. Please create config.yml[${YELLOW}pkictl.db.github.approver_db_github_repository${NC}] in ${YELLOW}pki/blueprint${NC}"
+        exit 1
+    fi
+
+    REVOKER_DB_FILE=$($YQ r pki/blueprint/config.yml "pkictl.db.github.approver_db_file")
+    if [[ "${REVOKER_DB_FILE}" == "null" ]]; then
+        echo -e "${RED}[ERROR]${NC} Pkictl has not been configured properly to revoke member certificate. Please create config.yml[${YELLOW}pkictl.db.github.approver_db_file${NC}] in ${YELLOW}pki/blueprint${NC}"
+        exit 1
+    fi
+}
+
+function validate-revoker {
+    local GITHUB_AUTH_USERNAME=$1
+    local GITHUB_AUTH_TOKEN=$2
+
+    REVOKER_DB_GITHUB_REPOSITORY=$($YQ r pki/blueprint/config.yml "pkictl.db.github.approver_db_github_repository")
+    REVOKER_DB_FILE=$($YQ r pki/blueprint/config.yml "pkictl.db.github.approver_db_file")
+
+    REVOKER_DB_TARGET_CLONE_DIRECTORY=$HOME/.pkictl/.revoker
+    rm -rf $REVOKER_DB_TARGET_CLONE_DIRECTORY
+
+    echo ""
+    echo -e "${GREEN}[PKICTL]${NC} Verifying revoker list. Cloning revoker repository ${YELLOW}${REVOKER_DB_GITHUB_REPOSITORY}${NC}"
+    AUTO_GITHUB_REVOKER=$(expect -c "
+        set timeout 5
+        spawn git clone ${REVOKER_DB_GITHUB_REPOSITORY} ${REVOKER_DB_TARGET_CLONE_DIRECTORY}
+        expect \"Cloning into '' ...\"
+        expect \"Username for 'https://github.com':\"
+        send \"${GITHUB_AUTH_USERNAME}\r\"
+        expect \"Password for 'https://${GITHUB_AUTH_USERNAME}@github.com':\"
+        send \"${GITHUB_AUTH_TOKEN}\r\"
+        set timeout 10
+        expect eof
+    ")
+    echo "$AUTO_GITHUB_REVOKER"
+
+    if [[ ! -f "${REVOKER_DB_TARGET_CLONE_DIRECTORY}/${REVOKER_DB_FILE}" ]]; then
+        echo -e "${RED}[ERROR]${NC} An error occurred when trying to verify account ${YELLOW}${GITHUB_AUTH_USERNAME}${NC} permission to issue certificate. Aborting..."
+        exit 1
+    fi
+
+    REVOKER_USER=$(cat ${REVOKER_DB_TARGET_CLONE_DIRECTORY}/${REVOKER_DB_FILE} | grep -w "${GITHUB_AUTH_USERNAME}")
+    if [[ "${REVOKER_USER}" == "" || -z "${REVOKER_USER}" ]]; then
+        echo -e "${RED}[ERROR]${NC} An error occurred, account ${YELLOW}${GITHUB_AUTH_USERNAME}${NC} has no permission to issue certificate. Aborting..."
+        exit 1
+    fi
+    
+    rm -rf ${REVOKER_DB_TARGET_CLONE_DIRECTORY}
+}
+
+function cleanup-directory {
+    echo -e "${GREEN}[PKICTL]${NC} Please wait a bit.. Cleaning up..."
+    rm -rf $@
+}
+
+function retrieve-crt-repo {
+    MEMBER_CRT_GITHUB_REPOSITORY=$1
+    MEMBER_CRT_TARGET_CLONE_DIRECTORY=$2
+    GITHUB_AUTH_USERNAME=$3
+    GITHUB_AUTH_TOKEN=$4
+
+    echo -e "${GREEN}[PKICTL]${NC} Getting CRT repository. Cloning Member CRT repository ${YELLOW}${MEMBER_CRT_GITHUB_REPOSITORY}${NC}"
+    AUTO_GITHUB_CRT=$(expect -c "
+        set timeout 5
+        spawn git clone ${MEMBER_CRT_GITHUB_REPOSITORY} ${MEMBER_CRT_TARGET_CLONE_DIRECTORY}
+        expect \"Cloning into '' ...\"
+        expect \"Username for 'https://github.com':\"
+        send \"${GITHUB_AUTH_USERNAME}\r\"
+        expect \"Password for 'https://${GITHUB_AUTH_USERNAME}@github.com':\"
+        send \"${GITHUB_AUTH_TOKEN}\r\"
+        set timeout 30
+        expect eof
+    ")
+    echo "${AUTO_GITHUB_CRT}"
+}
+
+function validate-crt-index {
+    MAX_INDEX=$1
+    TEST_INDEX=$2
+    VALIDATED_CRT_TO_REVOKE=$3
+
+    if [[ $VALIDATED_CRT_TO_REVOKE == *"${TEST_INDEX}"* ]]; then
+        echo -e "invalid"
+        return 0
+    fi
+
+    if [[ ! "${TEST_INDEX}" =~ ^[0-9]+$ ]]; then
+        echo -e "invalid"
+        return 0
+    fi
+
+    if [[ "${TEST_INDEX}" =~ ^0[0-9]+$ ]]; then
+        echo -e "invalid"
+        return 0
+    fi
+
+    if (($TEST_INDEX>=0 && $TEST_INDEX<=$MAX_INDEX)); then
+        echo -e "valid"
+        return 0
+    else
+        echo -e "invalid"
+        return 0
+    fi
+}
+
+function revoke-certificate {
+    CERTS=$1
+    MEMBER_CRT_TARGET_CLONE_DIRECTORY=$2
+
+    local INVENTORY_FILE=~/.host-inventory/inventory.d/${CLUSTER_INVENTORY}
+    local PKICTL_DIRECTORY=/usr/share/pki
+    local REVOKE_BY="name"
+
+    if [[ "${CLUSTER_INVENTORY}" == "local" ]]; then
+        echo -ne "\n${GREEN}[PKICTL]${NC} "
+        $ANSIBLE_PLAYBOOK pki/playbook/pki-certs-revoke.yml \
+            -i "${INVENTORY_FILE}" \
+            -e "ca_server=${CA_SERVER}" \
+            -e "ca_target=${CA_TARGET}" \
+            -e "pkictl_directory=${PKICTL_DIRECTORY}" \
+            -e "certs_to_revoke=${CERTS}" \
+            -e "revoke_by=${REVOKE_BY}" \
+            --ask-become-pass
+    else
+        $ANSIBLE_PLAYBOOK pki/playbook/pki-certs-revoke.yml \
+            -i "${INVENTORY_FILE}" \
+            -e "ca_server=${CA_SERVER}" \
+            -e "ca_target=${CA_TARGET}" \
+            -e "pkictl_directory=${PKICTL_DIRECTORY}" \
+            -e "certs_to_revoke=${CERTS}" \
+            -e "revoke_by=${REVOKE_BY}"
+    fi
+
+    pushd ${MEMBER_CRT_TARGET_CLONE_DIRECTORY} > /dev/null
+        IFS=',' read -ra CERT_LIST <<< ${CERTS}
+        for CERT in "${CERT_LIST[@]}"
+        do
+            CERT_NAME=${CERT}
+            rm -f "${MEMBER}/${CERT_NAME}.crt"
+            rm -f "${MEMBER}/${CERT_NAME}.ca.crt"
+            rm -f "${MEMBER}/${CERT_NAME}-ca-chain.crt"
+            rm -f "${MEMBER}/${CERT_NAME}.csr"
+            git add "${MEMBER}/${CERT_NAME}.crt"
+            git add "${MEMBER}/${CERT_NAME}.ca.crt"
+            git add "${MEMBER}/${CERT_NAME}-ca-chain.crt"
+            git add "${MEMBER}/${CERT_NAME}.csr"
+        done
+
+        git commit -m "[PKICTL] [REVOKE-by:${GITHUB_AUTH_USERNAME}] member.crt.revoke: ${CERTS}"
+        git push origin master
+
+        if [[ "$?" != "0" ]]; then
+            echo -e "${RED}[ERROR]${NC} An error occurred when trying to remove revoked CRT from the repository: ${YELLOW}${MEMBER_CRT_TARGET_CLONE_DIRECTORY}${NC}. Please re-run the script to try again."
+            cleanup-directory $MEMBER_CRT_TARGET_CLONE_DIRECTORY
+            exit 1
+        fi
+    popd > /dev/null
+}
+
+function member-certs-revoke-execute {
+    local INVENTORY_FILE=~/.host-inventory/inventory.d/${CLUSTER_INVENTORY}
+    
+    echo -e "${GREEN}[PKICTL]${NC} To revoke certificate, we will need to authenticate you using your GitHub identity and making sure that you are the authorized person to revoke the certificate.${NC}"
+    echo -e "${GREEN}[PKICTL]${NC} Please use your ${YELLOW}GITHUB_USERNAME${NC} as your GitHub username and your ${YELLOW}GITHUB_PERSONAL_ACCESS_TOKEN${NC} (with ${YELLOW}repo permission${NC}) when prompted to enter Github Password"
+
+    echo -ne "${GREEN}[PKICTL]${NC} Enter your GitHub Username: "
+    read GITHUB_AUTH_USERNAME
+    echo -ne "${GREEN}[PKICTL]${NC} Enter your GitHub Personal Access Token: "
+    read -s GITHUB_AUTH_TOKEN
+
+    if [[ "${CA_SERVER}" != "local-ca" ]]; then
+        validate-revoker $GITHUB_AUTH_USERNAME $GITHUB_AUTH_TOKEN
+    else
+        echo -e ""
+        echo -e "${GREEN}[PKICTL]${NC} Skipping revoker validation -- for ${YELLOW}local-ca${NC}"
+    fi
+
+    echo -e "${GREEN}[PKICTL]${NC} Revoker: ${YELLOW}${GITHUB_AUTH_USERNAME}${NC}, CA Server: ${YELLOW}$CA_SERVER${NC}"
+    echo -e "${GREEN}[PKICTL]${NC} Start revoking certificate..."
+
+    MEMBER_CRT_GITHUB_REPOSITORY=$($YQ r pki/blueprint/config.yml "pkictl.db.github.member_crt_github_repository")
+    MEMBER_CRT_TARGET_CLONE_DIRECTORY=$HOME/.pkictl/.crt
+
+    cleanup-directory $MEMBER_CRT_TARGET_CLONE_DIRECTORY
+
+    retrieve-crt-repo $MEMBER_CRT_GITHUB_REPOSITORY $MEMBER_CRT_TARGET_CLONE_DIRECTORY $GITHUB_AUTH_USERNAME $GITHUB_AUTH_TOKEN
+
+    IS_CHOOSING_CRT=1
+    while [[ $IS_CHOOSING_CRT == 1 ]]; do
+        echo -e "${GREEN}[PKICTL]${NC} ${YELLOW}Which certificate do you want to revoke for this member?${NC}"
+        echo -e "${GREEN}[PKICTL]${NC} ${YELLOW}=====================================================================${NC}"
+        echo -e ""
+        CRT_STRINGS=$(ls ${MEMBER_CRT_TARGET_CLONE_DIRECTORY}/${MEMBER} | grep -Po '.*(?<!ca-chain|ca)\.crt' | sed -e 's/\..*$//' | xargs echo)
+        IFS=' ' read -ra CRT_LIST <<< $CRT_STRINGS
+
+        for index in "${!CRT_LIST[@]}"
+        do
+            echo "[$index] ${CRT_LIST[index]}"
+        done
+        echo -e "[A] Revoke all certificates"
+        echo -e "[C] Cancel"
+        echo -e ""
+        echo -e "${GREEN}[PKICTL]${NC} ${YELLOW}=====================================================================${NC}"
+        echo -e "${GREEN}[PKICTL]${NC} Please type the index number for the next prompted input"
+        echo -e "${GREEN}[PKICTL]${NC} For revoking mutliple certificates, please separate the index number with comma and without space ${YELLOW}(e.g. 0,1,2)${NC}"
+        echo -e "${GREEN}[PKICTL]${NC} You can type ${YELLOW}A${NC} to revoke all certificates for this member"
+        echo -e "${GREEN}[PKICTL]${NC} You can type ${YELLOW}C${NC} to cancel"
+        echo -ne "${GREEN}[PKICTL]${NC} Enter the certificate index that you want to revoke: "
+        read CRT_TO_REVOKE_CHOICE
+
+        MAX_INDEX=$((${#CRT_LIST[@]}-1))
+        if [[ "$CRT_TO_REVOKE_CHOICE" =~ ^[Aa]$ ]];  then
+            for i in $(seq 0 $MAX_INDEX)
+            do
+                CRT_TO_REVOKE="$CRT_TO_REVOKE,$i"
+            done
+            CRT_TO_REVOKE="${CRT_TO_REVOKE:1}"
+        elif [[ "$CRT_TO_REVOKE_CHOICE" =~ ^[Cc]$ ]]; then
+            echo -e "${GREEN}[PKICTL]${NC} ${YELLOW}Revoke operation has been cancelled${NC}"
+            cleanup-directory $MEMBER_CRT_TARGET_CLONE_DIRECTORY
+            exit 0
+        else
+            CRT_TO_REVOKE=$CRT_TO_REVOKE_CHOICE
+        fi
+
+        if [[ -z "${CRT_TO_REVOKE}" || "${CRT_TO_REVOKE}" =~ ^[a-zA-Z]+$ ]]; then
+            echo -e "${GREEN}[PKICTL]${NC} ${RED}No certificate to revoke. Aborting...${NC}"
+            cleanup-directory $MEMBER_CRT_TARGET_CLONE_DIRECTORY
+            exit 1
+        fi
+
+        echo -e ""
+        echo -e "${GREEN}[PKICTL]${NC} ${YELLOW}Certificate(s) to revoke:${NC}"
+        VALIDATED_CRT_TO_REVOKE=""
+        IFS="," read -ra CRT_INDEX <<< $CRT_TO_REVOKE
+        for element in "${CRT_INDEX[@]}"
+        do
+            IS_INDEX_VALID=$(validate-crt-index $MAX_INDEX $element $VALIDATED_CRT_TO_REVOKE)
+            if [[ "$IS_INDEX_VALID" == "valid" ]]; then
+                MEMBER_CERT=${CRT_LIST[$element]}
+                echo -e "${GREEN}[$element] $MEMBER_CERT${NC}"
+                VALIDATED_CRT_TO_REVOKE="$VALIDATED_CRT_TO_REVOKE,$element"
+            fi
+        done
+        echo -ne "${GREEN}[PKICTL]${NC} Are you sure want to revoke the above certificates (y/N)? "
+        read REVOKE_CONFIRMATION
+        if [[ $REVOKE_CONFIRMATION =~ ^[Yy]$ ]]; then
+            IS_CHOOSING_CRT=0
+            break
+        fi
+        echo -e ""
+    done
+
+    IFS=',' read -ra CRT_INDEX <<< ${VALIDATED_CRT_TO_REVOKE:1}
+    for element in "${CRT_INDEX[@]}"
+    do
+        CERT_NAME=${CRT_LIST[element]}
+        CERTS_TO_REVOKE="$CERTS_TO_REVOKE,$CERT_NAME"
+    done
+    
+    revoke-certificate ${CERTS_TO_REVOKE:1} $MEMBER_CRT_TARGET_CLONE_DIRECTORY
+
+    cleanup-directory $MEMBER_CRT_TARGET_CLONE_DIRECTORY
+}
+
+if [ $# == 0 ]; then
+    exit 3
+fi
+
+if [[ " ${1} " == *"help"* ]] || [[ " ${1} " == *"--help"* ]]; then
+    exit 3
+else
+    if [[ -z "$1" ]] || [[ -z "$2" ]] || [[ -z "$3" ]] || [[ -z "$4" ]]; then
+        exit 3
+    else
+        member-certs-revoke-validate
+        member-certs-revoke-execute
+    fi
+fi

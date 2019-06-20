@@ -1,0 +1,80 @@
+- hosts: localhost
+  become: true
+
+  tasks:
+    - name: Stopping Vault services
+      systemd:
+        state: stopped
+        name: "{{ item }}"
+      with_items:
+        - vault-01
+        - vault-02
+
+    - name: Deleting existing Vault data
+      command: etcdctl del --prefix /vault/local
+
+    - name: Stopping etcd services
+      systemd:
+        state: stopped
+        name: "{{ item }}"
+      with_items:
+        - etcd-01
+        - etcd-02
+        - etcd-03
+
+    - name: Disabling Vault and etcd services
+      systemd:
+        enabled: false
+        name: "{{ item }}"
+      with_items:
+        - vault-01
+        - vault-02
+        - etcd-01
+        - etcd-02
+        - etcd-03
+
+    - name: Deleting Vault and etcd services register
+      file:
+        path: "/lib/systemd/system/{{ item }}.service"
+        state: absent
+      with_items:
+        - vault-01
+        - vault-02
+        - etcd-01
+        - etcd-02
+        - etcd-03
+
+    - name: Reloading daemon
+      systemd:
+        daemon_reload: yes
+
+    - name: Removing Vault and etcd configurations, helper scripts, and installation files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /opt/vault/
+        - /etc/vault/
+        - /opt/etcd/
+        - /etc/etcd/
+
+    - name: Removing Vault and etcd binary wrapper files
+      shell: "rm -f /usr/bin/{{ item }}*"
+      with_items:
+        - vault
+        - etcd
+
+    - name: Removing PKI directory
+      file:
+        path: /usr/share/pki/
+        state: absent
+
+    - name: Cleaning existing inventory
+      file:
+        path: "/home/{{ current_user }}/.host-inventory"
+        state: absent
+
+    - name: Cleaning pkictl workspace
+      file:
+        path: "/home/{{ current_user }}/.pkictl"
+        state: absent

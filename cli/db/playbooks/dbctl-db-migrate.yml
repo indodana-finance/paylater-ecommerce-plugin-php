@@ -1,0 +1,6 @@
+- hosts: "localhost"
+  roles:
+  - role: database/migrate/postgres
+    when: "db_engine == 'postgres'"
+  - role: database/migrate/mysql
+    when: "db_engine == 'mysql'"

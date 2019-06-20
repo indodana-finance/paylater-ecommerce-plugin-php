@@ -1,0 +1,13 @@
+#!/bin/bash
+function certs-member-use-help {
+    echo -e ""
+    echo -e "This is a helper function for Vault login to switch between certificates bundle." 
+    echo -e "${RED}DO NOT EXECUTE THIS SCRIPT DIRECTLY FROM TERMINAL${NC}"
+    echo -e "${RED}IT WILL DO NOTHING, EXCEPT PRINTING A SOURCE COMMAND${NC}"
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} member certs use ${YELLOW}{BLUEPRINT}${NC}"
+    echo -e "${YELLOW}Example:${NC} ${GREEN}./pkictl${NC} member certs use pkictl-dev -- for local dev"
+    echo -e "         ${GREEN}./pkictl${NC} member certs use pkictl-prod"
+    echo -e "${YELLOW}Help${NC}: ${YELLOW}{BLUEPRINT}${NC} is the certificate bundle blueprint name located in ${YELLOW}./blueprint/certs-bundle${NC}"
+}
+
+certs-member-use-help

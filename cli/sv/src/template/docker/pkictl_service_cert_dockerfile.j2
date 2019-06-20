@@ -1,0 +1,13 @@
+FROM busybox:latest
+
+ENV SERVICE_NAME={{ service_name }}
+ENV ENVIRONMENT={{ environment }}
+
+ENV BLUEPRINT={{ service_name }}-{{ environment }}
+ENV CERTIFICATE_BUNDLE={{ service_name }}-{{ environment }}
+
+RUN mkdir -p /usr/share/pki/certs/service/{{ service_name }}-{{ environment }}
+WORKDIR /usr/share/pki/certs/service
+
+COPY . ./{{ service_name }}-{{ environment }}
+RUN find ./{{ service_name }}-{{ environment }} -type f | xargs chmod 644

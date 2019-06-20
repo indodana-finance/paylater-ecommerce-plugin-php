@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+CONTEXT_DIRECTORY=$HOME/.pkictl/.context.d
+PKICTL_DIRECTORY=$HOME/.pkictl
+CURRENT_DIRECTORY=$(pwd)
+BLUEPRINT_DIRECTORY=$CURRENT_DIRECTORY/pki/blueprint/context
+rm -rf $CONTEXT_DIRECTORY
+mkdir -p $CONTEXT_DIRECTORY
+$ANSIBLE_PLAYBOOK ./pki/playbook/pki-vault-context-configure.yml \
+    -e "current_directory=$CURRENT_DIRECTORY" \
+    -e "pkictl_directory=$PKICTL_DIRECTORY" \
+    -e "blueprint_directory=$BLUEPRINT_DIRECTORY" \
+    -e "context_directory=$CONTEXT_DIRECTORY"

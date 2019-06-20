@@ -1,0 +1,16 @@
+- hosts: "{{ blueprint }}"
+  
+  pre_tasks:
+    - name: Check if Vault has been initialized and abort if previously initialized
+      stat:
+        path: /usr/bin/vault.initialized
+        register: remote_status
+      failed_when: remote_status.stat.exists
+      when: "vault_cluster.cluster.location != 'local'"
+
+  vars_files: 
+  - "{{ blueprint_file }}"  
+  
+  roles:
+    - vault/common
+    - vault/init

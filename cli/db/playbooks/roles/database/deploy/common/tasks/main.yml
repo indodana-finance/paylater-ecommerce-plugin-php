@@ -1,0 +1,25 @@
+- name: Setting Variables
+  set_fact:
+    db_identifier: "db|{{ db_deployment_type }}|{{ db_engine }}|{{ organization }}|{{ team }}|{{ product }}|{{ db_name }}|{{ db_environment }}" 
+    db_identifier_path: "db|{{ db_deployment_type }}|{{ db_engine }}|{{ organization }}|{{ team }}|{{ product }}|{{ db_name }}|{{ db_environment }}" 
+
+- name: DB Identifier
+  set_fact:
+    db_identifier: "{{ db_identifier | replace('|','-') }}"
+
+- name: DB Identifier
+  set_fact:
+    db_identifier: "{{ db_identifier | replace('_','-') }}"
+
+- name: DB Identifier - Debug
+  debug:
+    var: db_identifier
+
+- name: DB Identifier Path
+  set_fact:
+    db_identifier_path: "{{ db_identifier_path | replace('|','/') }}"
+
+- name: DB Identifier Path - Debug
+  debug:
+    var: db_identifier_path
+

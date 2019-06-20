@@ -1,0 +1,11 @@
+pkictl:
+  ca:
+    organization:
+      name: Cermati
+      unit: Security
+  db:
+    github:
+      member_csr_github_repository: "https://github.com/cermati/certs-indodana"
+      member_crt_github_repository: "https://github.com/cermati/certs-indodana"
+      approver_db_github_repository: "https://github.com/cermati/orgz-indodana"
+      approver_db_file: "certs-manager"

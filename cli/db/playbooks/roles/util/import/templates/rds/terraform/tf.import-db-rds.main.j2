@@ -1,0 +1,31 @@
+variable "access_key" {}
+variable "secret_key" {}
+
+variable "region" {
+  default = "ap-southeast-1"
+}
+
+{% if db_environment == "stg" or db_environment == "prod" %}
+terraform {
+  backend "etcdv3" {
+    endpoints = ["https://172.16.35.234:2379","https://172.17.38.250:22379","https://172.18.39.28:32379"]
+    lock      = true
+    prefix    = "{{ db_identifier_path }}/"
+    cacert_path = "{{ dbctl_ca_cert_file }}"
+    cert_path =  "{{ dbctl_cert_file }}"
+    key_path =  "{{ dbctl_key_file }}"
+    }
+}{% endif %}
+
+
+
+provider "aws" {
+  access_key = "${var.access_key}"
+  secret_key = "${var.secret_key}"
+  region     = "{{ rds_instances[0].db_provider_region }}"
+}
+
+
+module "{{ db_identifier }}" {
+  source = "./rds"
+}

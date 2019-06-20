@@ -1,0 +1,128 @@
+cert_auth_config:
+  path: cert/
+  roles:
+    - name: cermati-team-product-prod
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-team-product-prod
+      allowed_common_names:
+        - '*@indodana.com'
+        - '*@cermati.com'
+
+    - name: cermati-indodana-athena-prod
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-indodana-athena-prod
+      allowed_common_names:
+        - antony@indodana.com
+        - tpratama@cermati.com
+        - syang@indodana.com
+        - albertstevelino@cermati.com
+        - sendy@indodana.com
+        - ganjasmara@cermati.com
+        - rharyanto@cermati.com
+        - mroeha@cermati.com
+        - oby@cermati.com
+        - oni@cermati.com
+        - oni@indodana.com
+
+    - name: cermati-indodana-artemis-prod
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-indodana-artemis-prod
+      allowed_common_names:
+        - antony@indodana.com
+        - tpratama@cermati.com
+        - syang@indodana.com
+        - albertstevelino@cermati.com
+        - sendy@indodana.com
+        - ganjasmara@cermati.com
+        - rharyanto@cermati.com
+        - mroeha@cermati.com
+        - oby@cermati.com
+        - oni@cermati.com
+        - oni@indodana.com
+
+    - name: cermati-indodana-midas-prod
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-indodana-midas-prod
+      allowed_common_names:
+        - antony@indodana.com
+        - tpratama@cermati.com
+        - syang@indodana.com
+        - albertstevelino@cermati.com
+        - sendy@indodana.com
+        - ganjasmara@cermati.com
+        - rharyanto@cermati.com
+        - mroeha@cermati.com
+        - oby@cermati.com
+        - oni@cermati.com
+        - oni@indodana.com
+
+    - name: cermati-team-product-stg
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-team-product-stg
+      allowed_common_names:
+        - '*@indodana.com'
+        - '*@cermati.com'
+
+    - name: cermati-indodana-athena-stg
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-indodana-athena-stg
+      allowed_common_names:
+        - antony@indodana.com
+        - tpratama@cermati.com
+        - syang@indodana.com
+        - albertstevelino@cermati.com
+        - sendy@indodana.com
+        - ganjasmara@cermati.com
+        - rharyanto@cermati.com
+        - mroeha@cermati.com
+        - oby@cermati.com
+        - oni@cermati.com
+        - oni@indodana.com
+
+    - name: cermati-indodana-artemis-stg
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-indodana-artemis-stg
+      allowed_common_names:
+        - antony@indodana.com
+        - tpratama@cermati.com
+        - syang@indodana.com
+        - albertstevelino@cermati.com
+        - sendy@indodana.com
+        - ganjasmara@cermati.com
+        - rharyanto@cermati.com
+        - mroeha@cermati.com
+        - oby@cermati.com
+        - oni@cermati.com
+        - oni@indodana.com
+
+    - name: cermati-indodana-midas-stg
+      ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      ttl: 86400
+      policies:
+        - cermati-indodana-midas-stg
+      allowed_common_names:
+        - antony@indodana.com
+        - tpratama@cermati.com
+        - syang@indodana.com
+        - albertstevelino@cermati.com
+        - sendy@indodana.com
+        - ganjasmara@cermati.com
+        - rharyanto@cermati.com
+        - mroeha@cermati.com
+        - oby@cermati.com
+        - oni@cermati.com
+        - oni@indodana.com

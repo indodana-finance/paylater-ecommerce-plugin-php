@@ -1,0 +1,248 @@
+       _    _      _   _ 
+ _ __ | | _(_) ___| |_| |
+| '_ \| |/ / |/ __| __| |
+| |_) |   <| | (__| |_| |
+| .__/|_|\_\_|\___|\__|_|
+|_|                      
+
+pkictl is a DevOps Toolkit for provisioning Public Key Infrastructure (PKI)
+and Vault Secrets Management Cluster
+
+=======================================================================
+|   FOR DEVELOPERS                                                    |
+=======================================================================
+- This cli toolkit will help you to:
+1. Bootstrap a local PKI which includes local CA generation (root and intermediate),
+several OpenSSL wrapper scripts generation for initializing, signing,
+viewing, and revoking certificates.
+
+2. Bootstrap a local Vault (2 instances) and etcd (3 instances) cluster
+and using SSL certificates to communicate with each other.
+
+3. Initialize local Vault and create auto-unseal script.
+
+4. Configure local Vault auth methods, policies, and secrets engine.
+
+
+- How to completely setup a local PKI and Vault Secrets Management Cluster:
+0. If you have a previous installation and want to do a clean setup, please run this first:
+    $ ./pkictl cleanup
+
+1. Initiall tool setup
+    $ ./pkictl setup
+
+2. Bootstrap local PKI and required certificates and deploy Vault and etcd clusters
+    $ ./pkictl bootstrap local
+
+3. Unseal the local Vault cluster
+    $ ./pkictl vault unseal local local-vault
+
+4. Check whether vault is unsealed correctly
+    $ vault status
+    Check the Sealed value, it should be 'false' after successful unsealing
+
+5. After unsealing, you can interact with Vault using the vault cli
+(See: https://www.vaultproject.io/docs/secrets/)
+
+
+- How to get a valid member certificate to authenticate with Vault and other services:
+1. Generate a CSR
+    a. For local
+        $ ./pkictl member certs request pkictl-dev
+    b. For production
+        $ ./pkictl member certs request pkictl-prod
+    You will be asked to provide some personal information, like email address, Github Username, etc.
+
+2. Request Administrator/DevOps team member to sign your certificate (for production)
+    For local certficate signing, you can run:
+        $ ./pkictl member certs issue <your_github_username> local local-ca intermediate-ca
+
+3. Get the signed certificate
+    a. For local
+        $ ./pkictl member certs get pkictl-dev
+    b. For production
+        $ ./pkictl member certs get pkictl-prod
+
+
+- How to login using a different Vault account:
+1. Configure context
+    $ ./pkictl vault context configure
+
+2. Login as:
+    a. root-local
+        $ ./pkictl vault context login root-local
+
+    b. using Certificate
+        For local cluster
+            $ ./pkictl vault context login cert pkictl-dev
+
+        For production cluster
+            $ ./pkictl vault context login cert pkictl-prod
+
+- To check the current context
+    $ ./pkictl vault context current
+
+- How to cleanup installation:
+    $ ./pkictl cleanup
+
+
+=======================================================================
+|   FOR DEVOPS                                                        |
+=======================================================================
+- This cli toolkit will help to provision PKI and Vault cluster
+for non-local environment (e.g. staging, production)
+
+- How to completely setup a new non-local PKI and Vault:
+    ====================================
+    - Pre-requisite:
+    ====================================
+    1. One instance for CA host
+        (1 vCPU, 1 GB RAM --> t2.micro in AWS)
+    2. Two instances for Vault cluster
+        (at least 2 vCPU, 8 GB RAM for small cluster --> m5.large in AWS)
+    3. Three instances for etcd cluster
+        (at least 2 vCPU, 8 GB RAM for small cluster --> m5.large in AWS)
+    Instance Sizing References:
+        - https://learn.hashicorp.com/vault/operations/ops-reference-architecture#sizing-for-vault-servers
+        - https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/hardware.md
+
+    4. SSH private key to access the instances as root
+    5. VPN access to the internal VPC where those instances reside
+    6. Template and static files
+        - Inventory files
+            Same inventory file as Ansible format
+            Location: pki/files/inventory/<cluster_inventory>
+            The <cluster_inventory> name will be used for the entire provisioning process
+
+        - PKI templates
+            Templates for bootstrapping Certificate Authority and scripts for Certificate management
+            Location:
+                For each CA (root and intermediates):
+                    pki/files/pki-template/<ca_instance_group>/<ca_name>/init
+                    pki/files/pki-template/<ca_instance_group>/<ca_name>/sign
+                    pki/files/pki-template/<ca_instance_group>/<ca_name>/view
+                    pki/files/pki-template/<ca_instance_group>/<ca_name>/revoke
+                    pki/files/pki-template/<ca_instance_group>/<ca_name>/etc/ca.conf
+                
+                Toolkit:
+                    pki/files/pki-toolkit-template/pki-sign-csr
+        
+        - Database creation statements SQL files
+            Files which contain SQL query to create the temporary credentials
+            Location: pki/files/secrets/db/<cluster_inventory>/<vault_instance_group>/<db_name>/<role_name>-creation.sql
+
+        - SSH Role Options JSON files
+            JSON files which contain Vault Role Options for SSH secrets engine
+            (See: https://www.vaultproject.io/api/secret/ssh/index.html#create-role)
+            Location: pki/files/secrets/ssh/<cluster_inventory>/<vault_instance_group>/<target_hosts_group>/role-options/<role_name>.json
+
+        - Policy configuration files
+            Vault Policy configuration files in .hcl format
+            (See: https://www.vaultproject.io/docs/concepts/policies.html)
+            Location: pki/files/policy/<cluster_inventory>/<vault_instance_group>/<team_name>-<secrets_engine_name>-<role_name_if_any>.hcl
+
+    7. Blueprint files
+        - Service certificate blueprints
+            Blueprints for generating a certificate for a service
+            Location: pki/blueprint/certs/<cluster_inventory>/<service_name>/spec.yml
+
+        - Member certificate blueprints
+            Blueprints for generating a certificate for a member
+            Location: pki/blueprint/certs-bundle/<cert_bundle_name>.yml
+
+        - etcd cluster blueprints
+            Blueprints for deploying an etcd cluster
+            Location: pki/blueprint/etcd/<cluster_inventory>/<etcd_instance_group>/spec.yml
+
+        - Vault cluster blueprints
+            Blueprints for deploying a Vault cluster
+            Location: pki/blueprint/vault/<cluster_inventory>/<vault_instance_group>/spec.yml
+
+        - Secrets engine blueprints
+            Blueprints for setting up Vault secrets engine
+            Location: pki/blueprint/secrets/<secret_engine_name>/<cluster_inventory>/<vault_instance_group>/conf.yml
+
+        - Auth method blueprints
+            Blueprints for setting up Authentication methods in Vault
+            Location: pki/blueprint/auth/<auth_method_name>/<cluster_inventory>/<vault_instance_group>/conf.yml
+
+        - Context blueprints
+            Blueprints for configuring Vault login contexts
+            Location: pki/blueprint/context/<context_name>.yml
+
+    ====================================
+    - Deploy Commands (in sequence):
+    ====================================
+    1. Initial tool setup
+        $ ./pkictl setup
+
+    2. Inventory setup
+        $ ./pkictl inventory setup
+
+    3. Initialize Remote PKI
+        $ ./pkictl pki init remote <cluster_inventory> <ca_instance_group>
+
+    4. Create CSR for etcd (3 CSRs), Vault (2 CSRs), Vault-etcd client (1 CSR) and Vault client (1 CSR)
+        $ ./pkictl service certs request <cluster_inventory> <service_certificate_blueprint>
+
+    5. Issue the service certificates
+        $ ./pkictl service certs issue <cluster_inventory> <service_certificate_blueprint> <ca_name>
+
+    6. Distribute the service certificates
+        $ ./pkictl service certs distribute <cluster_inventory> <service_certificate_blueprint> <target_hostname>
+
+    7. Deploy etcd cluster
+        $ ./pkictl etcd deploy <cluster_inventory> <etcd_instance_group>
+
+    8. Deploy Vault cluster
+        $ ./pkictl vault deploy <cluster_inventory> <vault_instance_group>
+
+    9. Initialize Vault cluster
+        $ ./pkictl vault init <cluster_inventory> <vault_instance_group>
+
+    10. Unseal the Vault cluster
+        $ ./pkictl vault unseal <cluster_inventory> <vault_instance_group>
+
+
+- Available Vault Provisioning commands:
+    ====================================
+    Secrets Engine
+    ====================================
+    I. Key/Value
+        Setup the key/value secrets engine path
+            $ ./pkictl vault secrets kv setup <cluster_inventory> <vault_instance_group> <service_name>
+        All key/value entries should be inserted from Vault UI by authorized Administrator
+
+    II. Database
+        Setup the database secrets engine path, database connection, and role 
+            $ ./pkictl vault secrets db setup <cluster_inventory> <vault_instance_group> <db_name>
+
+    III. SSH
+        Setup the SSH secrets engine path, SSH CA public keys, and role
+            $ ./pkictl vault secrets ssh setup <cluster_inventory> <vault_instance_group> <host_target_group>
+
+        Distribute the SSH CA public keys to target hosts
+            $ ./pkictl vault secrets ssh distribute <cluster_inventory> <vault_instance_group> <host_target_group>
+
+    IV. AWS
+        Setup the AWS secrets engine path, AWS connection, and role
+            $ ./pkictl vault secrets aws setup <cluster_inventory> <vault_instance_group> <project_account_aws>
+
+    ====================================
+    Policy
+    ====================================
+    Setup Vault policies
+        $ ./pkictl vault policy setup <cluster_inventory> <vault_instance_group>
+
+    ====================================
+    Auth Method
+    ====================================
+    I. Certificate
+        Setup certificate authentication method
+            $ ./pkictl vault auth cert setup <cluster_inventory> <vault_instance_group>
+    
+    ====================================
+    Member Certificates
+    ====================================
+    Issuing a member certificate
+        $ ./pkictl member certs issue <member_github_username_to_sign> <cluster_inventory> <ca_instance_group> <ca_name>

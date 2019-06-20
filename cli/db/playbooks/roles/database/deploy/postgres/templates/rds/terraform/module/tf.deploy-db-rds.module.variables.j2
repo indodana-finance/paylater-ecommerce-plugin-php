@@ -1,0 +1,21 @@
+variable "identifier" {}
+
+variable "db_organization" {}
+variable "db_team" {}
+variable "db_product" {}
+variable "db_environment" {}
+
+variable "vpc_id" {}
+variable "vpc_name" {}
+variable "vpc_prefix" {}
+variable "vpc_subnet_ids" {
+  type = "list"
+}
+
+variable "rds_db_instance_class" {}
+variable "rds_db_instance_database_name" {}
+variable "rds_db_instance_engine" {}
+variable "rds_db_instance_engine_version" {}
+variable "rds_db_instance_username" {}
+variable "rds_db_instance_password" {}
+variable "rds_db_instance_storage_size" {}

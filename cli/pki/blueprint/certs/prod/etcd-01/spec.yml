@@ -1,0 +1,10 @@
+csr:
+  SAN:
+    - IP:10.100.1.10
+    - DNS:etcd-01.infra-management
+  CRL: http://ca.cermati.com/crl
+  OCSP: http://ca.cermati.com/ocsp
+  options:
+    organization: Cermati
+    unit: Production
+    name: etcd-01-prod

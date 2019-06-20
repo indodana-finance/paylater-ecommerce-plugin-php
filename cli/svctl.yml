@@ -1,0 +1,8 @@
+---
+
+# Path to the root project directory relative from the directory where this file
+# (and the `svctl` script) is located.
+# If you're installing svctl with BCL (as you're supposed to), by default BCL
+# will put the `svctl` script in the `cli/` directory, and the value for this
+# field should be '../'.
+project_directory: '../'

@@ -1,0 +1,13 @@
+# This file contains list of Kubernetes clusters that will host the service.
+# Consult the infra team as to what to put in this configuration file.
+---
+clusters:
+  name_of_the_first_cluster:
+    url: https://kube01.cermati.com
+    namespace: default
+    cloud_vendor: aliyun
+
+  name_of_the_second_cluster:
+    url: https://kube02.cermati.com
+    namespace: default
+    cloud_vendor: aws

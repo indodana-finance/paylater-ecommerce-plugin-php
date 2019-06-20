@@ -1,0 +1,14 @@
+- name: Read DB Specification
+  include_vars: "{{ db_directory }}/{{ db_environment }}.yml"
+  
+- name: Deploy RDS
+  include: "deploy-db-rds-tf.yml"
+  when: "db_deployment_type == 'rds'"
+
+- name: Deploy Apsara
+  include: "deploy-db-apsara-tf.yml"
+  when: "db_deployment_type == 'apsara'"
+
+- name: Deploy Hosted
+  include: "deploy-db-hosted.yml"
+  when: "db_deployment_type == 'hosted'"

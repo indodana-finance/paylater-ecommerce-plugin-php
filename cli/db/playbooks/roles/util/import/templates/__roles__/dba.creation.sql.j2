@@ -1,0 +1,2 @@
+CREATE ROLE "{{ '{{' }}name{{ '}}' }}" WITH LOGIN PASSWORD '{{ '{{' }}password{{ '}}' }}' VALID UNTIL '{{ '{{' }}expiration{{ '}}' }}';
+GRANT ALL PRIVILEGES ON DATABASE {{ db_name }} TO "{{ '{{' }}name{{ '}}' }}";

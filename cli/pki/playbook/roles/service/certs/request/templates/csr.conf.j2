@@ -1,0 +1,26 @@
+# TLS server certificate request
+
+# This file is used by the openssl req command. The subjectAltName cannot be
+# prompted for and must be specified in the SAN environment variable.
+
+[ req ]
+default_bits            = 4096                  # RSA key size
+encrypt_key             = no                    # Protect private key
+default_md              = sha512                # MD to use
+utf8                    = yes                   # Input is UTF-8
+string_mask             = utf8only              # Emit UTF-8 strings
+prompt                  = no                    # Prompt for DN
+distinguished_name      = server_dn             # DN template
+req_extensions          = server_reqext         # Desired extensions
+
+[ server_dn ]
+organizationName        = "{{ csr.options.organization }}"
+organizationalUnitName  = "{{ csr.options.unit }}"
+commonName              = "{{ csr.options.name }}"
+countryName             = "ID"
+
+[ server_reqext ]
+keyUsage                = critical,digitalSignature,keyEncipherment
+extendedKeyUsage        = serverAuth,clientAuth
+subjectKeyIdentifier    = hash
+subjectAltName          = ${ENV::SAN}

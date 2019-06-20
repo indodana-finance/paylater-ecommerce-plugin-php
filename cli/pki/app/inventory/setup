@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+trap "exit" INT
+
+function pki-inventory-setup-execute {
+    mkdir -p ~/.host-inventory/inventory.d/
+    cp ./pki/files/inventory/* ~/.host-inventory/inventory.d/
+    echo -e "${GREEN}[PKICTL]${NC} Successfully setup inventories${NC}"
+    echo -e "${GREEN}[PKICTL]${NC} Inventory directory: ${YELLOW}~/.host-inventory/inventory.d/${NC}"
+}
+
+pki-inventory-setup-execute

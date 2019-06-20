@@ -1,0 +1,17 @@
+- name: Include keystore_pass file for non-local signing
+  include_vars:
+    file: secrets.yml
+    name: default_keystore_pass
+  when: cluster != 'local'
+
+- name: Include keystore_pass file for local signing
+  include_vars:
+    file: local_secrets.yml
+    name: default_keystore_pass
+  when: cluster == 'local'
+
+- name: Sign CSR
+  command: "./pki-sign-csr service {{ blueprint }} {{ target_ca }} {{ default_keystore_pass }}"
+  args:
+    chdir: "{{ toolkit_directory }}"
+  become: true

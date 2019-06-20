@@ -1,0 +1,11 @@
+output "rds_db_identifier" {
+    value = "${var.identifier}"
+}
+
+output "rds_db_endpoint" {
+    value = "${aws_db_instance.rds_db_instance.endpoint}"
+}
+
+output "rds_db_arn" {
+    value = "${aws_db_instance.rds_db_instance.arn}"
+}

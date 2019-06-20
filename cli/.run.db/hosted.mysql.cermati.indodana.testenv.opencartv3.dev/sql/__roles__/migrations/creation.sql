@@ -1,0 +1,1 @@
+ALTER USER opencartv3_migrations IDENTIFIED BY '{{password}}'

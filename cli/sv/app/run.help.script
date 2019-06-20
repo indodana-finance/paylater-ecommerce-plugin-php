@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -e
+
+source sv/app/.helper/common
+
+echo ""
+echo -e "Run a built service. Additional arguments passed after" \
+        "${COLOR_YELLOW}--${COLOR_NORMAL} will be passed directly into the" \
+        "${COLOR_YELLOW}run()${COLOR_NORMAL} function inside the" \
+        "${COLOR_YELLOW}service${COLOR_NORMAL} file."
+echo ""
+echo "Example:"
+echo "  ./svctl run a_service an_env --env-file .env --load-config -- service args1 args2 args3"
+echo ""
+
+svctl_run "run" --help

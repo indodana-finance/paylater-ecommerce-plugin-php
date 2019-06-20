@@ -1,0 +1,80 @@
+- block:
+    - name: Create init-script
+      template:
+        src: init-vault.j2
+        dest: "{{ vault_scripts_directory }}/init-vault"
+        mode: 0755
+
+    - name: Create init-root-local-script
+      template:
+        src: init-root-local-vault.j2
+        dest: "{{ vault_scripts_directory }}/init-root-local-vault"
+        mode: 0755
+      when: "vault_cluster.cluster.location == 'local'"
+
+    - name: Create vault.initialized
+      template:
+        src: vault.j2
+        dest: /usr/bin/vault.initialized
+        mode: 0755
+
+    - name: Create vault-auto-unseal-script
+      template:
+        src: vault-unseal.j2
+        dest: "{{ vault_scripts_directory }}/vault.unseal"
+        mode: 0755
+
+    - name: Backup vault.deployed
+      copy:
+        src: /usr/bin/vault.deployed
+        dest: /usr/bin/vault
+        remote_src: yes
+      ignore_errors: true
+
+    - name: Execute init-script
+      shell:
+        cmd: |
+          {{ vault_scripts_directory }}/init-vault
+      run_once: true
+
+    - name: Backup Deployed Vault wrapper
+      command: mv /usr/bin/vault /usr/bin/vault.deployed
+      ignore_errors: true
+
+    - name: Make Vault initialized wrapper as main wrapper
+      copy:
+        src: /usr/bin/vault.initialized
+        dest: /usr/bin/vault
+        remote_src: yes
+        mode: 0755
+  become: true
+
+- name: Execute init-root-local-script
+  shell:
+    cmd: |
+      {{ vault_scripts_directory }}/init-root-local-vault
+  run_once: true
+  when: "vault_cluster.cluster.location == 'local'"
+
+- block:
+    - name: Get initial remote Vault root credentials
+      fetch:
+        src: "/home/vault/vault.init-local"
+        dest: "{{ context_directory }}/vault.init-{{ cluster }}-{{ blueprint }}"
+        mode: 0774
+        flat: yes
+      run_once: true
+      when: "vault_cluster.cluster.location != 'local'"
+    
+    - name: Distribute initial remote Vault root credentials
+      copy:
+        src: "{{ context_directory }}/vault.init-{{ cluster }}-{{ blueprint }}"
+        dest: "/home/vault/vault.init-local"
+        mode: 0774
+      when: "vault_cluster.cluster.location != 'local'"
+        
+    - name: Remove init-script
+      file:
+        state: absent
+        path: "{{ vault_scripts_directory }}/init-vault"
+  become: true

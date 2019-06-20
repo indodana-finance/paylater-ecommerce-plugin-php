@@ -1,0 +1,22 @@
+#!/bin/bash
+mkdir -p .bin.pki/
+mkdir -p .tmp.pki/
+set -e
+
+if [[ ! -f "./.bin.pki/jq" ]]; then
+    wget -O ./.bin.pki/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+    chmod 755 ./.bin.pki/jq
+fi
+
+if [[ ! -f "./.bin.pki/yq" ]]; then
+    wget -O ./.bin.pki/yq https://github.com/mikefarah/yq/releases/download/2.2.1/yq_linux_amd64
+    chmod 755 ./.bin.pki/yq
+fi
+
+sudo apt-get -y install expect
+sudo apt-get -y install pwgen
+
+if [[ ! -f "./.bin.pki/vault_1.1.0_linux_amd64.zip" ]]; then
+    wget -P ./.bin.pki/ https://releases.hashicorp.com/vault/1.1.0/vault_1.1.0_linux_amd64.zip
+fi
+unzip -o ./.bin.pki/vault_1.1.0_linux_amd64.zip -d ./.bin.pki/

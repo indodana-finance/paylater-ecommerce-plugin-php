@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -e
+trap "exit" INT
+
+function vault-deploy-validate {
+    local clusterInventory=$1
+    local blueprint=$2
+    local inventoryFile=~/.host-inventory/inventory.d/${clusterInventory}
+    local clusterBlueprintDirectory=./pki/blueprint/vault/${clusterInventory}
+    local clusterSpecBlueprintDirectory=./pki/blueprint/vault/${clusterInventory}/${blueprint}
+
+    if [[ ! -f "${inventoryFile}" ]]; then
+        echo -e "${RED}[ERROR]${NC} ${YELLOW}${clusterInventory}${NC} cluster inventory not found. Expected on: ${RED}[${inventoryFile}]${NC}"
+        echo -e "Try to run ${YELLOW}./pkictl inventory setup${NC} to setup inventories needed for pkictl"
+        exit 1
+    fi
+
+    if [[ ! -d "${clusterBlueprintDirectory}" ]]; then
+        echo -e "${RED}[ERROR]${NC} ${YELLOW}${clusterBlueprintDirectory}${NC} cluster blueprint inventory not found in blueprint folder. Expected on: ${RED}[${clusterBlueprintDirectory}]${NC}"
+        exit 1
+    fi
+
+    if [[ ! -d "${clusterSpecBlueprintDirectory}" ]]; then
+        echo -e "${RED}[ERROR]${NC} ${YELLOW}${clusterSpecBlueprintDirectory}${NC} cluster spec blueprint inventory not found in blueprint folder. Expected on: ${RED}[${clusterSpecBlueprintDirectory}]${NC}"
+        exit 1
+    fi
+}
+
+function vault-deploy-execute {
+    local clusterInventory=$1
+    local blueprint=$2
+    local inventoryFile=~/.host-inventory/inventory.d/${clusterInventory}
+    local currentDirectory=$(pwd)
+    local blueprintDirectory=${currentDirectory}/pki/blueprint
+    local blueprintFile=${currentDirectory}/pki/blueprint/vault/${clusterInventory}/${blueprint}/spec.yml
+
+    if [[ "${clusterInventory}" == "local" ]]; then
+        echo -ne "${GREEN}[PKICTL]${NC} "
+        $ANSIBLE_PLAYBOOK pki/playbook/pki-vault-deploy.yml \
+            -i "${inventoryFile}" \
+            -e "blueprint_directory=${blueprintDirectory}" \
+            -e "cluster=${clusterInventory}" \
+            -e "blueprint=${blueprint}" \
+            -e "blueprint_file=${blueprintFile}" \
+            --ask-become-pass
+    else
+        $ANSIBLE_PLAYBOOK pki/playbook/pki-vault-deploy.yml \
+            -i "${inventoryFile}" \
+            -e "blueprint_directory=${blueprintDirectory}" \
+            -e "cluster=${clusterInventory}" \
+            -e "blueprint=${blueprint}" \
+            -e "blueprint_file=${blueprintFile}"
+    fi
+}
+
+if [ $# == 0 ]; then
+    exit 3
+fi
+
+if [[ " ${1} " == *"help"* ]] || [[ " ${1} " == *"--help"* ]];then
+    exit 3
+else
+    if [[ -z "$1" ]] || [[ -z "$2" ]]; then
+        exit 3
+    else
+        vault-deploy-validate $1 $2
+        vault-deploy-execute $1 $2
+    fi
+fi

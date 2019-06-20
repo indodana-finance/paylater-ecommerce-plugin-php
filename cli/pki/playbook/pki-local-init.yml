@@ -1,0 +1,16 @@
+- hosts: "{{ ca_server }}"
+  become: true
+
+  pre_tasks:
+    - name: Remove existing PKI directory
+      file:
+        path: "{{ pkictl_directory }}"
+        state: absent
+
+    - name: Ensure keytool has been installed
+      apt:
+        name: default-jre
+        state: present
+
+  roles:
+    - "pki/init"

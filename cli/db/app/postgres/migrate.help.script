@@ -1,0 +1,10 @@
+#!/bin/bash
+function db-migrate-help {
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./dbctl ${NC}postgres migrate {${YELLOW}BLUEPRINT${NC}:according blueprint} {${YELLOW}ENVIRONMENT${NC}:dev|stg|prod} {${YELLOW}SCHEMA${NC}:according folder in __migrations__}"
+    echo -e "${YELLOW}Example:${NC} ${GREEN}./dbctl ${NC}postgres${NC} migrate template_database public dev"
+    echo -e "         ${GREEN}./dbctl${NC} postgres${NC} migrate template_database stg public"
+    echo -e "         ${GREEN}./dbctl${NC} postgres${NC} migrate template_database prod public"
+    echo -e "         ${GREEN}./dbctl${NC} postgres${NC} migrate template_database dev public"
+}
+
+db-migrate-help

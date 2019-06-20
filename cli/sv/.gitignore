@@ -1,0 +1,4 @@
+# Gitignore file for BCL package publish command
+*.pyc
+./src/build/
+./src/dist/

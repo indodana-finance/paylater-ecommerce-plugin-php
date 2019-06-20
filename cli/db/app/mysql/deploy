@@ -1,0 +1,396 @@
+#!/bin/bash
+set -e
+trap "exit" INT
+
+source ./db/app/meta 
+source ./db/app/namespace
+
+yq=./.bin.db/yq
+jq=./.bin.db/jq
+CURRENT_DIRECTORY=$(pwd)
+
+function configure-secrets-to-aws-secretsmanager {
+    DB_DIRECTORY=$1
+    echo -e "${YELLOW} NOTE: We will need to synchronize the DB Credential to Secrets Management - AWS. Please make sure that the process completed successfully.${NC}."
+    sleep "5"
+    mkdir -p $DB_DIRECTORY/.bin.db
+    cp ./.bin.db/jq $DB_DIRECTORY/.bin.db/jq
+    cp ./.bin.db/yq $DB_DIRECTORY/.bin.db/yq
+    pushd $DB_DIRECTORY
+    bash ./.creds-upload-aws-sm
+    popd
+}
+
+
+function configure-secrets-to-vault {
+    DB_DIRECTORY=$1
+    echo -e "${YELLOW} NOTE: We will need to synchronize the DB Credential to Secrets Management - Vault. Please make sure that the process completed successfully.${NC}"
+    sleep "5"
+    mkdir -p $DB_DIRECTORY/.bin.db
+    cp ./.bin.db/jq $DB_DIRECTORY/.bin.db/jq
+    cp ./.bin.db/yq $DB_DIRECTORY/.bin.db/yq
+    cp ./.bin.db/vault $DB_DIRECTORY/.bin.db/vault
+    pushd $DB_DIRECTORY
+    bash ./.creds-upload-vault
+    popd
+}
+
+function execute-db-deploy-rds-confirmation {
+    DB_DIRECTORY=$1
+    rm -f $DB_DIRECTORY/rds_db.json
+    rm -f $DB_DIRECTORY/TFAPPLYOUTPUT
+    rm -f $DB_DIRECTORY/AWSSMUPLOADOUTPUT
+    rm -f $DB_DIRECTORY/VAULTUPLOADOUTPUT
+    
+    echo -e "${YELLOW} NOTE: After the procedure we will need to synchronize the DB Credential to Secrets Management - AWS.${NC}"
+    echo -e "${YELLOW} Are you sure you have configured the AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY correctly and have verified that you have the required permission to do this?${NC}"
+    echo -e "${RED}DANGER: Failure to do this may require you to need to re-execute the script again to operate correctly.${NC}."
+    echo -n '(type yes to proceed): '
+    read AWSVALID
+    if [[ "$AWSVALID" == "yes" ]]; then
+      echo -e "${YELLOW} NOTE: After the procedure We will need to synchronize the DB Credential to Secrets Management - Vault.${NC}"
+      echo -e "${YELLOW} Are you sure you have configured the GITHUB_TOKEN & GITHUB_USERNAME correctly and have verified that you have the required permission to do this?${NC}"
+      echo -e "${RED}DANGER: Failure to do this may require you to need to re-execute the script again to operate correctly.${NC}."
+      echo -n '(type yes to proceed): '
+      read VAULTVALID
+      if [[ "$VAULTVALID" == "yes" ]]; then
+        echo -e "${YELLOW} NOTE: We will perform DB Deployment Procedure. Please confirm all the details correctly before proceeding.${NC}"
+      else 
+        exit 1
+      fi
+    else
+      exit 1
+    fi
+}
+
+function execute-db-deploy-apsara-confirmation {
+    DB_DIRECTORY=$1
+    rm -f $DB_DIRECTORY/apsara_db.json
+    rm -f $DB_DIRECTORY/TFAPPLYOUTPUT
+    rm -f $DB_DIRECTORY/VAULTUPLOADOUTPUT
+    
+    echo -e "${YELLOW} NOTE: After the procedure We will need to synchronize the DB Credential to Secrets Management - Vault.${NC}"
+    echo -e "${YELLOW} Are you sure you have configured the GITHUB_USERNAME & CERTIFICATE correctly and have verified that you have the required permission to do this?${NC}"
+    echo -e "${RED}DANGER: Failure to do this may require you to need to re-execute the script again to operate correctly.${NC}."
+    echo -n '(type yes to proceed): '
+    read VAULTVALID
+    if [[ "$VAULTVALID" == "yes" ]]; then
+      echo -e "${YELLOW} NOTE: We will perform DB Deployment Procedure. Please confirm all the details correctly before proceeding.${NC}"
+    else 
+      exit 1
+    fi
+}
+
+function execute-db-deploy-rds-tfapply {
+    DB_DIRECTORY=$1
+    echo -e "${RED}DANGER:${NC} ${YELLOW}PLEASE WAIT PATIENTLY UNTIL ALL PROCEDURE COMPLETED PROPERLY. IF THERE IS TROUBLE PLEASE CALL ASSISTANCE TO INFRA-TEAM IMMEDIATELY${NC}"
+    echo -e "${YELLOW}WILL INVOKE TERRAFORM APPLY. Please type exactly 'yes' if you are prompted by Terraform.${NC}" 
+    sleep "5"
+    mkdir -p $DB_DIRECTORY/.bin.db
+    cp ./.bin.db/terraform $DB_DIRECTORY/.bin.db/terraform
+    pushd $DB_DIRECTORY
+    ./tfapply
+    popd
+}
+
+function execute-db-deploy-apsara-tfapply {
+    DB_DIRECTORY=$1
+    ENVIRONMENT=$2
+    DB_NAME=$3
+
+    echo -e "${RED}DANGER:${NC} ${YELLOW}PLEASE WAIT PATIENTLY UNTIL ALL PROCEDURE COMPLETED PROPERLY. IF THERE IS TROUBLE PLEASE CALL ASSISTANCE TO INFRA-TEAM IMMEDIATELY${NC}"
+    echo -e "${YELLOW}WILL INVOKE TERRAFORM APPLY. Please type exactly 'yes' if you are prompted by Terraform.${NC}" 
+    sleep "5"
+    mkdir -p $DB_DIRECTORY/.bin.db
+    cp ./.bin.db/terraform $DB_DIRECTORY/.bin.db/terraform
+    cp ./.bin.db/jq $DB_DIRECTORY/.bin.db/jq
+    cp ./.bin.db/yq $DB_DIRECTORY/.bin.db/yq
+
+    pushd $DB_DIRECTORY
+    ./tfapply
+    TFAPPLY=$(cat TFAPPLYOUTPUT)
+    popd
+
+    if [ "$TFAPPLY" == "SUCCESS" ]; then
+      pushd $DB_DIRECTORY
+          DB_HOST=$(cat apsara_db.json | $jq -r .apsara_db_host.value)
+          DB_USER=$(cat apsara_db.json | $jq -r .apsara_db_user.value)
+          DB_PORT=$(cat apsara_db.json | $jq -r .apsara_db_port.value)
+          DB_PASSWORD=$(cat MYSQLPASSWORD)
+      popd
+
+      echo -e "${GREEN}[DBCTL]${NC} Waiting for Terraform changes successfully propagated (15 seconds sleep pause)"
+      sleep 15
+
+      SSH_TUNNEL_ENABLED=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.enabled')
+      if [[ "$SSH_TUNNEL_ENABLED" == "true" ]]; then
+        echo -e "${GREEN}[DBCTL]${NC} Will bootstrap Apsara DB Database via SSH tunnel"
+        DB_SSH_TUNNEL_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_port')
+        DB_SSH_TUNNEL_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_host')
+        
+        ./dbctl tunnel create ${DB_NAME} mysql ${ENVIRONMENT}
+        pushd ${DB_DIRECTORY}
+          mysql < sql/create-db.sql -h 127.0.0.1 --port=${DB_SSH_TUNNEL_PORT} -u $DB_USER --password=$DB_PASSWORD
+        popd
+        ./dbctl tunnel destroy ${DB_NAME} mysql ${ENVIRONMENT}
+
+        echo -e "db.apsara.deployed.tunnel.host: ${DB_SSH_TUNNEL_HOST}" > $DB_DIRECTORY/deployed_db_details.yml
+        echo -e "db.apsara.deployed.tunnel.port: ${DB_SSH_TUNNEL_PORT}" > $DB_DIRECTORY/deployed_db_details.yml
+        echo -e "db.apsara.deployed.db.host: ${DB_HOST}" >> $DB_DIRECTORY/deployed_db_details.yml
+        echo -e "db.apsara.deployed.db.port: ${DB_PORT}" >> $DB_DIRECTORY/deployed_db_details.yml
+
+        $yq w -s $DB_DIRECTORY/deployed_db_details.yml $DB_DIRECTORY/${ENVIRONMENT}.yml > $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml
+        rm -f $DB_DIRECTORY/deployed_db_details.yml
+      else
+        echo -e "${GREEN}[DBCTL]${NC} Will bootstrap Apsara DB Database"
+        mysql < sql/create-db.sql -h ${DB_HOST} --port=${DB_PORT} -u $DB_USER --password=$DB_PASSWORD    
+      fi
+    fi
+}
+
+function db-deploy-validate {
+    local DB_NAME=$1
+    local ENVIRONMENT=$2
+    local BLUEPRINT_DIRECTORY=$(pwd)/db/blueprint
+    local BLUEPRINT_DATABASE_FILE=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/${ENVIRONMENT}.yml
+
+    if [[ ! -f "${BLUEPRINT_DATABASE_FILE}" ]]; then
+        echo -e "${RED}ERROR:${NC} No database specification file found for ${YELLOW}${DB_NAME}/${ENVIRONMENT}.yml${NC}. [${YELLOW}${BLUEPRINT_DATABASE_FILE}${NC}]"
+        exit 1
+    fi
+
+    DB_DEPLOYMENT_TYPE=$($yq r $BLUEPRINT_DATABASE_FILE 'db.deployment')
+    if [[ "$DB_DEPLOYMENT_TYPE" != "hosted" && "$DB_DEPLOYMENT_TYPE" != "rds" && $DB_DEPLOYMENT_TYPE != "apsara" ]]; then
+        echo -e "${RED}ERROR:${NC} Deployment type is not supported for ${YELLOW}${DB_NAME}/${ENVIRONMENT}.yml${NC}. [Deployment-Type: ${YELLOW}${DEPLOYMENT_TYPE}${NC} - supported: ${YELLOW}hosted, rds${NC}]"
+        exit 1
+    fi
+
+    if [[ -z "$GITHUB_USERNAME" ]]; then
+      echo -e "${RED}[ERROR]${NC} No GITHUB_USERNAME specified. Please export it to your environment variable."
+      exit 1
+    fi
+
+    if [[ "$DB_DEPLOYMENT_TYPE" == "rds" ]]; then
+      if [[ -z "$AWS_ACCESS_KEY_ID" ]]; then
+        echo -e "${RED}[ERROR]${NC} No AWS_ACCESS_KEY_ID specified. Please export it to your environment variable."
+        exit 1
+      fi
+      if [[ -z "$AWS_SECRET_ACCESS_KEY" ]]; then
+        echo -e "${RED}[ERROR]${NC} No AWS_SECRET_ACCESS_KEY specified. Please export it to your environment variable."
+        exit 1
+      fi
+    fi
+
+    if [[ "$DB_DEPLOYMENT_TYPE" == "apsara" ]]; then
+      if [[ -z "$ALICLOUD_ACCESS_KEY_ID" ]]; then
+        echo -e "${RED}[ERROR]${NC} No ALICLOUD_ACCESS_KEY_ID specified. Please export it to your environment variable."
+        exit 1
+      fi
+      if [[ -z "$ALICLOUD_SECRET_ACCESS_KEY" ]]; then
+        echo -e "${RED}[ERROR]${NC} No ALICLOUD_SECRET_ACCESS_KEY specified. Please export it to your environment variable."
+        exit 1
+      fi
+    fi
+}
+
+function db-deploy-execute {
+    local DB_NAME=$1
+    local ENVIRONMENT=$2
+    
+    local BLUEPRINT_DIRECTORY=$(pwd)/db/blueprint
+    local BLUEPRINT_DATABASE_FILE=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/${ENVIRONMENT}.yml
+    
+    DB_DEPLOYMENT_TYPE=$($yq r $BLUEPRINT_DATABASE_FILE 'db.deployment')
+    export IDENTIFIER=${DB_DEPLOYMENT_TYPE}.mysql.${ORGANIZATION}.${TEAM}.${PRODUCT}.${DB_NAME}.${ENVIRONMENT}
+    export DB_DIRECTORY=$CURRENT_DIRECTORY/.run.db/${IDENTIFIER}
+    mkdir -p ${DB_DIRECTORY}
+
+    cp -r $BLUEPRINT_DIRECTORY/mysql/${DB_NAME}/${ENVIRONMENT}.yml \
+        $DB_DIRECTORY/${ENVIRONMENT}.yml
+
+    local TF_BACKEND=$($yq r $BLUEPRINT_DATABASE_FILE 'tf.backend')
+    local TF_CERTS_BUNDLE=$($yq r $BLUEPRINT_DATABASE_FILE tf.$TF_BACKEND.tls.certs_bundle)
+    local TF_TLS_ENABLED=$($yq r $BLUEPRINT_DATABASE_FILE tf.$TF_BACKEND.tls.enabled)
+    local DBCTL_TF_CERT_FILE=""
+    local DBCTL_TF_KEY_FILE=""
+    local DBCTL_TF_CA_CERT_FILE=""
+    if [[ "$TF_CERTS_BUNDLE" != "null" ]]; then 
+      echo -e "${GREEN}[DBCTL]${NC} Importing PKI Certificate for TF : [[member]]:${YELLOW}$GITHUB_USERNAME${NC}@[[certs_bundle]]:${YELLOW}$TF_CERTS_BUNDLE${NC}"
+      $(./pkictl member certs use $TF_CERTS_BUNDLE)
+      DBCTL_TF_CERT_FILE=$PKICTL_MEMBER_CERT_FILE
+      DBCTL_TF_KEY_FILE=$PKICTL_MEMBER_KEY_FILE
+      DBCTL_TF_CA_CERT_FILE=$PKICTL_MEMBER_CA_CERT_FILE
+    else
+      if [[ "$TF_TLS_ENABLED" == "true" ]]; then
+        echo -e "${RED}[ERROR]${NC} No TF certs_bundle specified even though TF TLS is enabled."
+        exit 1
+      fi
+    fi
+
+    local VAULT_CERTS_BUNDLE=$($yq r $BLUEPRINT_DATABASE_FILE 'secrets.vault.tls.certs_bundle')
+    local VAULT_TLS_ENABLED=$($yq r $BLUEPRINT_DATABASE_FILE 'secrets.vault.tls.enabled')
+    local DBCTL_VAULT_CERT_FILE=""
+    local DBCTL_VAULT_KEY_FILE=""
+    local DBCTL_VAULT_CA_CERT_FILE=""
+    if [[ "$VAULT_CERTS_BUNDLE" != "null" ]]; then 
+      echo -e "${GREEN}[DBCTL]${NC} Importing PKI Certificate for Secrets Manager (Vault) : [[member]]:${YELLOW}$GITHUB_USERNAME${NC}@[[certs_bundle]]:${YELLOW}$VAULT_CERTS_BUNDLE${NC}"
+      $(./pkictl member certs use $VAULT_CERTS_BUNDLE)
+      DBCTL_VAULT_CERT_FILE=$PKICTL_MEMBER_CERT_FILE
+      DBCTL_VAULT_KEY_FILE=$PKICTL_MEMBER_KEY_FILE
+      DBCTL_VAULT_CA_CERT_FILE=$PKICTL_MEMBER_CA_CERT_FILE
+    else
+      if [[ "$VAULT_TLS_ENABLED" == "true" ]]; then
+        echo -e "${RED}[ERROR]${NC} No Vault certs_bundle specified even though Vault TLS is enabled."
+        exit 1
+      fi
+    fi
+
+    local VAULT_LOGIN_CONTEXT=${ORGANIZATION}-${TEAM}-${PRODUCT}-${ENVIRONMENT}
+    local DBCTL_VAULT_TOKEN=""
+    ./pkictl vault context login cert $VAULT_LOGIN_CONTEXT 
+    $(./pkictl vault context get)
+    DBCTL_VAULT_TOKEN=$PKICTL_CONTEXT_TOKEN
+    
+    YOUR_SUDO_PASS=""
+    if [[ "$ENVIRONMENT" == "dev" ]]; then
+      echo -ne "\n${GREEN}[DBCTL]${NC} Enter your sudo password: "
+      read -s YOUR_SUDO_PASS
+      echo "\n"
+    fi
+
+    local DB_PROVIDER_INSTANCE_ID=""
+    local DB_PROVIDER_INSTANCE_HOST=""
+    # Currently instance mode only enabled in Apsara
+    if [[ "$DB_DEPLOYMENT_TYPE" == "apsara" ]]; then
+      DB_PROVIDER_INSTANCE_ID=$($yq r $BLUEPRINT_DATABASE_FILE db.apsara.db_provider_instance.id)
+      DB_PROVIDER_INSTANCE_HOST=$($yq r $BLUEPRINT_DATABASE_FILE db.apsara.db_provider_instance.host)
+    fi
+
+    if [[ "$DB_PROVIDER_INSTANCE_ID" != "" ]] && [[ "$DB_PROVIDER_INSTANCE_ID" != "null" ]] && [[ "$DB_PROVIDER_INSTANCE_HOST" != "" ]] && [[ "$DB_PROVIDER_INSTANCE_HOST" != "null" ]]; then
+      echo -e "\n${GREEN}[DBCTL]${NC} DBCTL deploy instance mode. Will populate and bootstrap DB instance: ${YELLOW}<$DB_PROVIDER_INSTANCE_ID>${NC}"
+      ansible-playbook db/playbooks/dbctl-db-deploy-imported.yml \
+        -e "db_engine=mysql" \
+        -e "db_deployment_type=$DB_DEPLOYMENT_TYPE" \
+        -e "db_name=${DB_NAME}" \
+        -e "db_environment=${ENVIRONMENT}" \
+        -e "db_directory=${DB_DIRECTORY}" \
+        -e "db_ssh_tunnel_port=${DB_SSH_TUNNEL_PORT}" \
+        -e "organization=${ORGANIZATION}" \
+        -e "team=${TEAM}" \
+        -e "product=${PRODUCT}" \
+        -e "dbctl_tf_cert_file=${DBCTL_TF_CERT_FILE}" \
+        -e "dbctl_tf_key_file=${DBCTL_TF_KEY_FILE}" \
+        -e "dbctl_tf_ca_cert_file=${DBCTL_TF_CA_CERT_FILE}" \
+        -e "dbctl_vault_cert_file=${DBCTL_VAULT_CERT_FILE}" \
+        -e "dbctl_vault_key_file=${DBCTL_VAULT_KEY_FILE}" \
+        -e "dbctl_vault_ca_cert_file=${DBCTL_VAULT_CA_CERT_FILE}" \
+        -e "dbctl_vault_token=${DBCTL_VAULT_TOKEN}" \
+        -e "ansible_sudo_pass='${YOUR_SUDO_PASS}'"
+
+      if [[ "$DB_DEPLOYMENT_TYPE" == "apsara" ]]; then
+        execute-db-deploy-apsara-confirmation $DB_DIRECTORY
+        execute-db-deploy-apsara-tfapply $DB_DIRECTORY $ENVIRONMENT $DB_NAME
+        TFAPPLY=$(cat $DB_DIRECTORY/TFAPPLYOUTPUT)
+        if [ "$TFAPPLY" == "SUCCESS" ]; then
+          configure-secrets-to-vault $DB_DIRECTORY
+          VAULTUPLOAD=$(cat $DB_DIRECTORY/VAULTUPLOADOUTPUT)
+          if [ "$VAULTUPLOAD" == "SUCCESS" ]; then
+            echo -e "${GREEN} [SUCCESS] ${NC} Successfully synchronize DB Credential to Secrets Management - Vault"
+          else
+            echo -e "${RED}ERROR: Upload DB Credentials to Vault IS NOT COMPLETED properly. Please do re-deploy.${NC}"
+            exit 1
+          fi
+        else
+          echo -e "${RED}ERROR: TERRAFORM APPLY IS NOT INVOKED. DB Deploy procedure will not continue. Please do re-deploy.${NC}"
+          exit 1
+        fi
+      fi
+    else
+      ansible-playbook db/playbooks/dbctl-db-deploy.yml \
+        -e "db_engine=mysql" \
+        -e "db_deployment_type=$DB_DEPLOYMENT_TYPE" \
+        -e "db_name=${DB_NAME}" \
+        -e "db_environment=${ENVIRONMENT}" \
+        -e "db_directory=${DB_DIRECTORY}" \
+        -e "organization=${ORGANIZATION}" \
+        -e "team=${TEAM}" \
+        -e "product=${PRODUCT}" \
+        -e "dbctl_tf_cert_file=${DBCTL_TF_CERT_FILE}" \
+        -e "dbctl_tf_key_file=${DBCTL_TF_KEY_FILE}" \
+        -e "dbctl_tf_ca_cert_file=${DBCTL_TF_CA_CERT_FILE}" \
+        -e "dbctl_vault_cert_file=${DBCTL_VAULT_CERT_FILE}" \
+        -e "dbctl_vault_key_file=${DBCTL_VAULT_KEY_FILE}" \
+        -e "dbctl_vault_ca_cert_file=${DBCTL_VAULT_CA_CERT_FILE}" \
+        -e "dbctl_vault_token=${DBCTL_VAULT_TOKEN}" \
+        -e "ansible_sudo_pass='${YOUR_SUDO_PASS}'"
+
+
+      if [[ "$DB_DEPLOYMENT_TYPE" == "rds" ]]; then
+        execute-db-deploy-rds-confirmation $DB_DIRECTORY
+        execute-db-deploy-rds-tfapply $DB_DIRECTORY
+        TFAPPLY=$(cat $DB_DIRECTORY/TFAPPLYOUTPUT)
+        if [ "$TFAPPLY" == "SUCCESS" ]; then
+          configure-secrets-to-aws-secretsmanager $DB_DIRECTORY
+          AWSSMUPLOAD=$(cat $DB_DIRECTORY/AWSSMUPLOADOUTPUT)
+          if [ "$AWSSMUPLOAD" == "SUCCESS" ]; then
+            echo -e "${GREEN} [SUCCESS] ${NC} Successfully synchronize DB Credential to Secrets Management - AWS"
+            configure-secrets-to-vault $DB_DIRECTORY
+            VAULTUPLOAD=$(cat $DB_DIRECTORY/VAULTUPLOADOUTPUT)
+            if [ "$VAULTUPLOAD" == "SUCCESS" ]; then
+              echo -e "${GREEN} [SUCCESS] ${NC} Successfully synchronize DB Credential to Secrets Management - Vault"
+            else
+              echo -e "${RED}ERROR: Upload DB Credentials to Vault IS NOT COMPLETED properly. Please do re-deploy.${NC}" 
+              exit 1
+            fi
+          else
+            echo -e "${RED}ERROR: Upload DB Credentials to AWS Secrets Manager IS NOT COMPLETED properly. DB Deploy procedure will not continue. Please do re-deploy.${NC}" 
+            exit 1
+          fi
+        else
+          echo -e "${RED}ERROR: TERRAFORM APPLY IS NOT INVOKED. DB Deploy procedure will not continue. Please do re-deploy.${NC}"  
+          exit 1
+        fi
+      elif [[ "$DB_DEPLOYMENT_TYPE" == "apsara" ]]; then
+        execute-db-deploy-apsara-confirmation $DB_DIRECTORY
+        execute-db-deploy-apsara-tfapply $DB_DIRECTORY $ENVIRONMENT $DB_NAME
+        TFAPPLY=$(cat $DB_DIRECTORY/TFAPPLYOUTPUT)
+        if [ "$TFAPPLY" == "SUCCESS" ]; then
+          configure-secrets-to-vault $DB_DIRECTORY
+          VAULTUPLOAD=$(cat $DB_DIRECTORY/VAULTUPLOADOUTPUT)
+          if [ "$VAULTUPLOAD" == "SUCCESS" ]; then
+            echo -e "${GREEN} [SUCCESS] ${NC} Successfully synchronize DB Credential to Secrets Management - Vault"
+          else
+            echo -e "${RED}ERROR: Upload DB Credentials to Vault IS NOT COMPLETED properly. Please do re-deploy.${NC}" 
+            exit 1
+          fi
+        else
+          echo -e "${RED}ERROR: TERRAFORM APPLY IS NOT INVOKED. DB Deploy procedure will not continue. Please do re-deploy.${NC}"  
+          exit 1
+        fi
+      elif [[ "$DB_DEPLOYMENT_TYPE" == "hosted" ]]; then
+        configure-secrets-to-vault $DB_DIRECTORY
+        VAULTUPLOAD=$(cat $DB_DIRECTORY/VAULTUPLOADOUTPUT)
+        if [ "$VAULTUPLOAD" == "SUCCESS" ]; then
+          echo -e "${GREEN} [SUCCESS] ${NC} Successfully synchronize DB Credential to Secrets Management - Vault"
+        else
+          echo -e "${RED}ERROR: Upload DB Credentials to Vault IS NOT COMPLETED properly. Please do re-deploy.${NC}" 
+          exit 1
+        fi
+      fi
+    fi
+}
+
+if [ $# == 0 ]; then
+    exit 3
+fi
+
+if [[ " ${1} " == *"help"* ]] || [[ " ${1} " == *"--help"* ]];then
+    exit 3
+else
+    if [[ -z "$1" ]] || [[ -z "$2" ]]; then
+        exit 3
+    else
+        db-deploy-validate $1 $2
+        db-deploy-execute $1 $2
+    fi
+fi

@@ -1,0 +1,65 @@
+# ------------------------------------------------------------------------------
+# Build image
+# ------------------------------------------------------------------------------
+FROM {{ build_repository }}/{{ build_image }} as builder
+
+{% if build_time_envs and (build_time_envs | length) > 0 -%}
+# Environment variables
+{% for env in (build_time_envs | dictsort) -%}
+  ENV {{ env[0] }} {{ env[1] }}
+{% endfor -%}
+{% endif %}
+
+# Switch to build user
+USER {{ build_user }}
+RUN mkdir -p /home/{{ build_user }}/{{ service_name }}
+WORKDIR /home/{{ build_user }}/{{ service_name }}
+
+# Copy project directory
+COPY --chown={{ build_user }}:{{ build_user }} . /home/{{ build_user }}/{{ service_name }}
+
+{% if build_time_mounts and (build_time_mounts | length) > 0 -%}
+# Copy mount directories to appropriate paths
+{% for mount in build_time_mounts -%}
+  COPY --chown={{ build_user }}:{{ build_user }} {{ mount.mount_directory }} {{ mount.target_directory }}
+{% endfor -%}
+
+{% if build_time_mount_command -%}
+# Process the mounted files as root
+USER root
+RUN {{ build_time_mount_command }}
+
+# Switch back to build user
+USER {{ build_user }}
+{% endif %}
+{% endif %}
+
+# Change directory to svctl directory and execute the build script
+RUN cd {{ svctl_directory }} && ./svctl build "{{ service_name }}" "{{ environment }}"
+
+# ------------------------------------------------------------------------------
+# Base image
+# ------------------------------------------------------------------------------
+FROM {{ base_repository }}/{{ base_image }}
+
+USER {{ base_user }}
+RUN mkdir -p /home/{{ base_user }}/{{ service_name }}
+WORKDIR /home/{{ base_user }}/{{ service_name }}
+
+# Copy svctl and its files
+RUN mkdir -p {{ svctl_directory }}
+COPY --chown={{ base_user }}:{{ base_user }} {{ svctl_directory }}/svctl {{ svctl_directory }}/
+COPY --chown={{ base_user }}:{{ base_user }} {{ svctl_directory }}/svctl.yml {{ svctl_directory }}/
+COPY --chown={{ base_user }}:{{ base_user }} {{ svctl_directory }}/sv {{ svctl_directory }}/sv
+COPY --chown={{ base_user }}:{{ base_user }} .services.d .services.d
+
+# Copy build artifacts from builder container
+RUN mkdir -p {{ build_directory }}
+COPY --from=builder --chown={{ base_user }}:{{ base_user }} /home/{{ build_user }}/{{ service_name }}/{{ build_directory }} {{ build_directory }}
+
+# Run the postbuild script
+RUN cd {{ svctl_directory }} && ./svctl postbuild "{{ service_name }}" "{{ environment }}"
+
+# Use svctl to start the service
+WORKDIR /home/{{ base_user }}/{{ service_name }}/{{ svctl_directory }}
+ENTRYPOINT [ "./svctl", "run", "{{ service_name }}", "{{ environment }}" ]

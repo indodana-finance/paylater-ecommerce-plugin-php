@@ -1,0 +1,46 @@
+vault_etcd_addresses:
+  - https://127.0.0.1:2379
+  - https://127.0.0.1:22379
+  - https://127.0.0.1:32379
+vault_cluster:  
+  cluster:
+    name: local
+    location: local
+  environment: development
+  domain: ""
+  protocol: https
+  tls:
+    enabled: true
+  ttl:
+    max_lease: 768h
+    default_lease: 4h
+  options:
+    prefix: ""
+    log_level: info
+  members:
+    vault-01:
+      port: 8200
+      cert_file: /usr/share/pki/certs/service/vault-01-dev/vault-01-dev-ca-chain.crt
+      key_file: /usr/share/pki/certs/service/vault-01-dev/.private/vault-01-dev.key
+      trusted_ca_file: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      backend: etcd  
+      etcd:
+        addresses: "{{ vault_etcd_addresses }}"
+        tls:
+          enabled: true
+          cert_file: /usr/share/pki/certs/service/vault-etcd-client-dev/vault-etcd-client-dev.crt
+          key_file: /usr/share/pki/certs/service/vault-etcd-client-dev/.private/vault-etcd-client-dev.key
+          trusted_ca_file: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+    vault-02:
+      port: 28200
+      cert_file: /usr/share/pki/certs/service/vault-02-dev/vault-02-dev-ca-chain.crt
+      key_file: /usr/share/pki/certs/service/vault-02-dev/.private/vault-02-dev.key
+      trusted_ca_file: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      backend: etcd  
+      etcd:
+        addresses: "{{ vault_etcd_addresses }}"
+        tls:
+          enabled: true
+          cert_file: /usr/share/pki/certs/service/vault-etcd-client-dev/vault-etcd-client-dev.crt
+          key_file: /usr/share/pki/certs/service/vault-etcd-client-dev/.private/vault-etcd-client-dev.key
+          trusted_ca_file: /usr/share/pki/pki/intermediate-ca/ca-chain.crt

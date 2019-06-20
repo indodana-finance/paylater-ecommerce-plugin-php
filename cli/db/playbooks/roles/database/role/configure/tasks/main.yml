@@ -1,0 +1,21 @@
+- name: Read DB Specification
+  include_vars: "{{ db_directory }}/{{ db_environment }}.yml"
+
+- name: Try to override (if option enabled / available)
+  set_fact:
+    v11_db_identifier_path: "v1.1/{{ secrets.vault.option.namespace.organization }}/{{ secrets.vault.option.namespace.team }}/db/{{ db_deployment_type }}/{{ db_engine }}/{{ secrets.vault.option.namespace.product }}/{{ secrets.vault.option.namespace.database }}/{{ db_environment }}"
+  when: "secrets.vault.option is defined and secrets.vault.option.namespace is defined"
+
+- name: Overrided identifier path
+  debug:
+    msg: "{{ v11_db_identifier_path }}"
+
+- name: DB Role Name
+  debug:
+    var: db_role_name
+
+- name: Generate configure-role scripts
+  template:
+    src: vault/role-configure.j2
+    dest: "{{ db_directory }}/role-configure"
+    mode: 0755

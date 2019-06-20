@@ -1,0 +1,7 @@
+- name: Include vars value file
+  include_vars: vars/env.yml
+
+- name: Populate .env
+  template:
+    src: templates/env.j2
+    dest: "{{ env_directory }}/.env"

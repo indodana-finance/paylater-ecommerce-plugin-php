@@ -1,0 +1,5 @@
+- name: Deploy pki-sign-csr
+  copy:
+    src: "{{ pki_toolkit_directory }}/pki-sign-csr"
+    dest: "{{ pki_directory }}/pki-sign-csr"
+    mode: 0755

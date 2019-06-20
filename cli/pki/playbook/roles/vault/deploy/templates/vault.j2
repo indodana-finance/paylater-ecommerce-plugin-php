@@ -1,0 +1,6 @@
+#!/bin/bash
+VAULT_ADDR={{ vault_cluster.protocol }}://{{ machine_ip }}:{{ member.port }} \
+VAULT_CACERT={{ member.trusted_ca_file }} \
+VAULT_CLIENT_CERT={{ member.cert_file }} \
+VAULT_CLIENT_KEY={{ member.key_file }} \
+{{ vault_binary_directory }}/vault "$@"

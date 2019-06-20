@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+if [[ ! -d ".env.db" ]]; then
+    sudo apt-get install virtualenv
+    virtualenv .env.db
+    source .env.db/bin/activate
+    pip install ansible==2.4.0.0
+fi
+source .env.db/bin/activate
+
+export ANSIBLE_PLAYBOOK=./.env.db/bin/ansible-playbook
+
+export SILENT_OPT="--silent"
+
+source db/framework/complete
+source db/framework/help
+source db/framework/utils
+source db/framework/cli
+
+cli "$@"

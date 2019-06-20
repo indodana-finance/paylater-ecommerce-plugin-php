@@ -1,0 +1,11 @@
+- name: Ensure .login directory
+  file:
+    path: "{{ pkictl_directory }}/.login"
+    state: directory
+    mode: 0755
+
+- name: Create pkictl login script
+  template:
+    src: pkictl.login.j2
+    dest: "{{ pkictl_directory }}/.login/pkictl.login.{{ pkictl_login_method }}.{{ pkictl_context }}"
+    mode: 0755

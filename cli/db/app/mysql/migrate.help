@@ -1,0 +1,1 @@
+This command will migrate schema provided in migrations folder in blueprint directory. In the process of migration, it will create SSH tunnel from localhost to the database server. 

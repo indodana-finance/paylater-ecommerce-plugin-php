@@ -1,0 +1,9 @@
+#!/bin/bash
+function vault-auth-get-service-token-help {
+    echo -e ""
+    echo -e "Generate service token using AppRole auth method."
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} vault auth get-service-token {APPLICATION_NAME} {ENVIRONMENT}"
+    echo -e "${YELLOW}Example:${NC} ${GREEN}./pkictl${NC} vault auth get-service-token sampleapp dev"
+}
+
+vault-auth-get-service-token-help

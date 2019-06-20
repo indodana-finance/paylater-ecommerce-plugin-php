@@ -1,0 +1,16 @@
+- name: Get list of initialized auth endpoints
+  command: vault auth list -format yaml
+  register: auths_out
+
+- name: Parse auth endpoints list
+  set_fact:
+    auths: "{{ auths_out.stdout | from_yaml }}"
+
+- name: Get endpoint existence
+  set_fact:
+    endpoint_existed: "{{ auths[cert_auth_config.path] is defined and auths[cert_auth_config.path]['type'] == 'cert' }}"
+
+- name: Enable Cert Auth Method
+  command: "vault auth enable -path={{ cert_auth_config.path }} cert"
+  run_once: true
+  when: not endpoint_existed

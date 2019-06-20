@@ -1,0 +1,65 @@
+- hosts: "{{ cluster }}-ca"
+
+  vars_files:
+    - "{{ blueprint_file }}"
+
+  tasks:
+    - name: Copy the signed certificate and key to local temp
+      synchronize:
+        src: "{{ pki_dir }}/certs/service/{{ blueprint }}"
+        dest: "{{ tmp_dir }}"
+        mode: pull
+
+    - name: Copy CA certificates to local temp
+      fetch:
+        src: "{{ pki_dir }}/pki/intermediate-ca/ca-chain.crt"
+        dest: "{{ tmp_dir }}/intermediate-ca/ca-chain.crt"
+        flat: yes
+
+- hosts: "{{ target_service }}"
+  become: true
+
+  vars_files:
+    - "{{ blueprint_file }}"
+
+  tasks:
+    - name: Clean previous certificates
+      file:
+        path: "{{ pki_dir }}"
+        state: absent
+
+    - name: Ensure target certificate directory
+      file:
+        path: "{{ pki_dir }}/certs/service/{{ blueprint }}"
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+
+    - name: Ensure target CA directory
+      file:
+        path: "{{ pki_dir }}/pki/intermediate-ca"
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+
+    - name: Copy the signed certificate and key to the target service host
+      synchronize:
+        src: "{{ tmp_dir }}/{{ blueprint }}/"
+        dest: "{{ pki_dir }}/certs/service/{{ blueprint }}/"
+        mode: push    
+
+    - name: Copy CA certificate defined in the blueprint to the target service host
+      copy:
+        src: "{{ tmp_dir }}/intermediate-ca/ca-chain.crt"
+        dest: "{{ pki_dir }}/pki/intermediate-ca/ca-chain.crt"
+        owner: root
+        group: root
+
+    - name: Set proper ownership
+      file:
+        path: "{{ pki_dir }}/certs/service/{{ blueprint }}"
+        owner: root
+        group: root
+        recurse: yes

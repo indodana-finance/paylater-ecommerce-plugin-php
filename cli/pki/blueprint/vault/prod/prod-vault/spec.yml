@@ -1,0 +1,46 @@
+vault_etcd_addresses:
+  - https://etcd-01.infra-management:2379
+  - https://etcd-02.infra-management:2379
+  - https://etcd-03.infra-management:2379
+vault_cluster:  
+  cluster:
+    name: prod
+    location: prod
+  environment: production
+  domain: ".infra-management" # must include the dot prefix
+  protocol: https
+  tls:
+    enabled: true
+  ttl:
+    max_lease: 768h
+    default_lease: 4h
+  options:
+    prefix: ""
+    log_level: info
+  members:
+    vault-01:
+      port: 8200
+      cert_file: /usr/share/pki/certs/service/vault-01/vault-01-ca-chain.crt
+      key_file: /usr/share/pki/certs/service/vault-01/.private/vault-01.key
+      trusted_ca_file: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      backend: etcd  
+      etcd:
+        addresses: "{{ vault_etcd_addresses }}"
+        tls:
+          enabled: true
+          cert_file: /usr/share/pki/certs/service/vault-etcd-client/vault-etcd-client.crt
+          key_file: /usr/share/pki/certs/service/vault-etcd-client/.private/vault-etcd-client.key
+          trusted_ca_file: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+    vault-02:
+      port: 8200
+      cert_file: /usr/share/pki/certs/service/vault-02/vault-02-ca-chain.crt
+      key_file: /usr/share/pki/certs/service/vault-02/.private/vault-02.key
+      trusted_ca_file: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
+      backend: etcd  
+      etcd:
+        addresses: "{{ vault_etcd_addresses }}"
+        tls:
+          enabled: true
+          cert_file: /usr/share/pki/certs/service/vault-etcd-client/vault-etcd-client.crt
+          key_file: /usr/share/pki/certs/service/vault-etcd-client/.private/vault-etcd-client.key
+          trusted_ca_file: /usr/share/pki/pki/intermediate-ca/ca-chain.crt

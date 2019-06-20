@@ -1,0 +1,17 @@
+- hosts: "{{ ca_server }}"
+  become: true
+
+  pre_tasks:
+    - name: Check if remote PKI has been initialized
+      stat:
+        path: "{{ pkictl_directory }}"
+      register: remote_status
+      failed_when: remote_status.stat.exists
+
+    - name: Ensure keytool has been installed
+      apt:
+        name: default-jre
+        state: present
+
+  roles:
+    - "pki/init"

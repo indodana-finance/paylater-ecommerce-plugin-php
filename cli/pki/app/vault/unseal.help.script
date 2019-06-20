@@ -1,0 +1,12 @@
+#!/bin/bash
+function vault-unseal-help {
+    echo -e ""
+    echo -e "Unseal a Vault cluster"
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} vault unseal ${YELLOW}{CLUSTER}${NC} ${YELLOW}{BLUEPRINT}${NC}"
+    echo -e "${YELLOW}Example:${NC} ${GREEN}./pkictl${NC} vault unseal local local-vault -- ${GREEN}for local deployment${NC}"
+    echo -e "         ${GREEN}./pkictl${NC} vault unseal stg1-cermati stg1-cermati-vault"
+    echo -e "${YELLOW}Help${NC}: ${YELLOW}{CLUSTER_INVENTORY}${NC} is the inventory file located in ${YELLOW}~/.inventory/inventory.d${NC} (following Ansible format)."
+    echo -e "      ${YELLOW}{BLUEPRINT}${NC} will be correlated with the ${YELLOW}instance-grouping/cluster-grouping${NC} inside the inventory file."    
+}
+
+vault-unseal-help

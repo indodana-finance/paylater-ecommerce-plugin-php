@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -e
+trap "exit" INT
+
+function vault-policy-setup-validate {
+    local clusterInventory=$1
+    local blueprint=$2
+    local inventoryFile=~/.host-inventory/inventory.d/${clusterInventory}
+    local policiesDirectory=./pki/files/policy/${clusterInventory}/${blueprint}
+
+    if [[ ! -f "${inventoryFile}" ]]; then
+        echo -e "${RED}[ERROR]${NC} ${YELLOW}${clusterInventory}${NC} cluster inventory not found. Expected on: ${RED}[${inventoryFile}]${NC}"
+        echo -e "Try to run ${YELLOW}./pkictl inventory setup${NC} to setup inventories needed for pkictl"
+        exit 1
+    fi
+
+    if [[ ! -d "${policiesDirectory}" ]]; then
+        echo -e "${RED}[ERROR]${NC} ${YELLOW}${policiesDirectory}${NC} policy directory not found. Expected on: ${RED}[${policiesDirectory}]${NC}"
+        exit 1
+    fi
+}
+
+function vault-policy-setup-execute {
+    local clusterInventory=$1
+    local blueprint=$2
+    local inventoryFile=~/.host-inventory/inventory.d/${clusterInventory}
+    local currentDirectory=$(pwd)
+    local policiesDirectory=${currentDirectory}/pki/files/policy/${clusterInventory}/${blueprint}
+    local policies=$(ls ${policiesDirectory} | cut -d "." -f 1 | tr '\n' ',' | sed 's/.$//')
+    
+    if [[ "${clusterInventory}" == "local" ]]; then
+        echo -ne "${GREEN}[PKICTL]${NC} "
+        $ANSIBLE_PLAYBOOK pki/playbook/pki-vault-policy-setup.yml \
+            -i "${inventoryFile}" \
+            -e "blueprint=${blueprint}" \
+            -e "{\"policies\":[${policies}]}" \
+            -e "policies_dir=${policiesDirectory}" \
+            --ask-become-pass
+    else
+        $ANSIBLE_PLAYBOOK pki/playbook/pki-vault-policy-setup.yml \
+            -i "${inventoryFile}" \
+            -e "blueprint=${blueprint}" \
+            -e "{\"policies\":[${policies}]}" \
+            -e "policies_dir=${policiesDirectory}"
+    fi
+}
+
+if [ $# == 0 ]; then
+    exit 3
+fi
+
+if [[ " ${1} " == *"help"* ]] || [[ " ${1} " == *"--help"* ]];then
+    exit 3
+else
+    if [[ -z "$1" ]] || [[ -z "$2" ]]; then
+        exit 3
+    else
+        vault-policy-setup-validate $1 $2
+        vault-policy-setup-execute $1 $2
+    fi
+fi

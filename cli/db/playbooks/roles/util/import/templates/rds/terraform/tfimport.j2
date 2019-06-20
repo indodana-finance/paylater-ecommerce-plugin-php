@@ -1,0 +1,8 @@
+#!/bin/bash
+etcdctl del "{{ db_identifier }}/default"
+TERRAFORM_EXEC="./.bin/terraform"
+$TERRAFORM_EXEC init
+$TERRAFORM_EXEC import \
+  -var "access_key=$AWS_ACCESS_KEY_ID" \
+  -var "secret_key=$AWS_SECRET_ACCESS_KEY" \
+  module.{{ db_identifier }}.aws_db_instance.rds_db_instance {{ rds_instances[0].db_provider_instance.name }}

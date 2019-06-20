@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+source sv/app/.helper/common
+
+if [ ! -f pkictl ]; then
+  logger_error "Please install PKICTL first"
+
+  exit 1
+fi
+
+svctl_run "pki.build_initcontainer" "$@"

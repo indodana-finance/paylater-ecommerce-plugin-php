@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -e
+trap "exit" INT
+
+CLUSTER_INVENTORY=$1
+CA_SERVER=$2
+
+function pki-toolkit-deploy-validate {
+    local INVENTORY_FILE=~/.host-inventory/inventory.d/${CLUSTER_INVENTORY}
+    local CURRENT_DIRECTORY=$(pwd)
+    local PKI_TOOLKIT_DIRECTORY=${CURRENT_DIRECTORY}/pki/files/pki-toolkit-template
+
+    if [[ ! -f "${INVENTORY_FILE}" ]]; then
+        echo -e "${RED}[ERROR]${NC} ${YELLOW}${CLUSTER_INVENTORY}${NC} cluster inventory not found. Expected on: ${RED}[${INVENTORY_FILE}]${NC}"
+        echo -e "Try to run ${YELLOW}./pkictl inventory setup${NC} to setup inventories needed for pkictl"
+        exit 1
+    fi
+
+    if [[ ! -d "${PKI_TOOLKIT_DIRECTORY}" ]]; then
+        echo -e "${RED}[ERROR]${NC} ${YELLOW}${clusterInventory}${NC} PKI toolkit not found. Expected on: ${RED}[${PKI_TOOLKIT_DIRECTORY}]${NC}"
+        exit 1
+    fi
+}
+
+function pki-toolkit-deploy-execute {
+    local INVENTORY_FILE=~/.host-inventory/inventory.d/${CLUSTER_INVENTORY}
+    local CURRENT_DIRECTORY=$(pwd)
+    local PKI_TOOLKIT_DIRECTORY=${CURRENT_DIRECTORY}/pki/files/pki-toolkit-template
+    local PKI_DIRECTORY=/usr/share/pki
+
+    if [[ "${CLUSTER_INVENTORY}" == "local" ]]; then
+        echo -ne "${GREEN}[PKICTL]${NC} "
+        $ANSIBLE_PLAYBOOK pki/playbook/pki-toolkit-deploy.yml \
+            -i "${INVENTORY_FILE}" \
+            -e "pki_toolkit_directory=${PKI_TOOLKIT_DIRECTORY}" \
+            -e "pki_directory=${PKI_DIRECTORY}" \
+            -e "ca_server=${CA_SERVER}" \
+            --ask-become-pass
+    else
+        $ANSIBLE_PLAYBOOK pki/playbook/pki-toolkit-deploy.yml \
+            -i "${INVENTORY_FILE}" \
+            -e "pki_toolkit_directory=${PKI_TOOLKIT_DIRECTORY}" \
+            -e "pki_directory=${PKI_DIRECTORY}" \
+            -e "ca_server=${CA_SERVER}"
+    fi
+}
+
+if [ $# == 0 ]; then
+    exit 3
+fi
+
+if [[ " ${1} " == *"help"* ]] || [[ " ${1} " == *"--help"* ]];then
+    exit 3
+else
+    if [[ -z "$1" ]]; then
+        exit 3
+    else        
+        pki-toolkit-deploy-validate
+        pki-toolkit-deploy-execute
+    fi
+fi

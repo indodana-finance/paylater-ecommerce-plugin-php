@@ -1,0 +1,11 @@
+#!/bin/bash
+function vault-auth-cert-setup-help {
+    echo -e ""
+    echo -e "Setup a cert Auth Method on a Vault cluster"
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} vault auth cert setup ${YELLOW}{CLUSTER_INVENTORY}${NC} ${YELLOW}{BLUEPRINT}${NC}"
+    echo -e "${YELLOW}Example:${NC} ${GREEN}./pkictl${NC} vault auth cert setup stg1-cermati stg1-cermati-vault"
+    echo -e "${YELLOW}Help${NC}: ${YELLOW}{CLUSTER_INVENTORY}${NC} is the inventory file located in ${YELLOW}~/.inventory/inventory.d${NC} (following Ansible format)."
+    echo -e "      ${YELLOW}{BLUEPRINT}${NC} will be correlated with the ${YELLOW}instance-grouping/cluster-grouping${NC} inside the inventory file."
+}
+
+vault-auth-cert-setup-help

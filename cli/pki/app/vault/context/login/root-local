@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+CONTEXT_DIRECTORY=$HOME/.pkictl
+source $CONTEXT_DIRECTORY/.login/PKICTL.login.root-local-vault-01.dev
+rm -f ~/$CONTEXT_DIRECTORY/.login/.current &>> /dev/null
+cp $CONTEXT_DIRECTORY/.login/PKICTL.login.root-local-vault-01.dev $CONTEXT_DIRECTORY/.login/.current
+./pkictl vault context current

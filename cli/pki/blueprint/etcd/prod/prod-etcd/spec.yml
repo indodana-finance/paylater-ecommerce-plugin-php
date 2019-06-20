@@ -1,0 +1,39 @@
+etcd_cluster:
+  environment: production
+  protocol: https
+  domain: ".infra-management" # must include the dot prefix
+  tls:
+    enabled: true
+  options:
+    prefix: ""
+  members: 
+    etcd-01:
+      data_dir: "etcd-01/data"
+      wal_dir: "etcd-01/wal"
+      client_urls_port: 2379
+      peer_urls_port: 2380
+      client_cert_file: "/usr/share/pki/certs/service/etcd-01/etcd-01.crt"
+      client_key_file: "/usr/share/pki/certs/service/etcd-01/.private/etcd-01.key"
+      peers_cert_file: "/usr/share/pki/certs/service/etcd-01/etcd-01.crt"
+      peers_key_file: "/usr/share/pki/certs/service/etcd-01/.private/etcd-01.key"
+      trusted_ca_file: "/usr/share/pki/pki/intermediate-ca/ca-chain.crt"
+    etcd-02:
+      data_dir: "etcd-02/data"
+      wal_dir: "etcd-02/wal"
+      client_urls_port: 2379
+      peer_urls_port: 2380
+      client_cert_file: "/usr/share/pki/certs/service/etcd-02/etcd-02.crt"
+      client_key_file: "/usr/share/pki/certs/service/etcd-02/.private/etcd-02.key"
+      peers_cert_file: "/usr/share/pki/certs/service/etcd-02/etcd-02.crt"
+      peers_key_file: "/usr/share/pki/certs/service/etcd-02/.private/etcd-02.key"
+      trusted_ca_file: "/usr/share/pki/pki/intermediate-ca/ca-chain.crt"
+    etcd-03:
+      data_dir: "etcd-03/data"
+      wal_dir: "etcd-03/wal"
+      client_urls_port: 2379
+      peer_urls_port: 2380  
+      client_cert_file: "/usr/share/pki/certs/service/etcd-03/etcd-03.crt"
+      client_key_file: "/usr/share/pki/certs/service/etcd-03/.private/etcd-03.key"
+      peers_cert_file: "/usr/share/pki/certs/service/etcd-03/etcd-03.crt"
+      peers_key_file: "/usr/share/pki/certs/service/etcd-03/.private/etcd-03.key"
+      trusted_ca_file: "/usr/share/pki/pki/intermediate-ca/ca-chain.crt"

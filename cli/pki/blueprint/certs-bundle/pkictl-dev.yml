@@ -1,0 +1,3 @@
+csr:
+  SAN:
+    - email:{{ email }}

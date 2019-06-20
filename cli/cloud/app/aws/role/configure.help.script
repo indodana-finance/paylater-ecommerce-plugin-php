@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+function cloud-aws-vault-configure-help {
+    echo -e ""
+    echo -e "Configure a map of Vault role to AWS role"
+    echo -e "Please make sure you have configured these things:"
+    echo -e "- ${YELLOW}GITHUB_USERNAME${NC} environment variable"
+    echo -e "- ${YELLOW}AWS_VAULT_ACCESS_KEY${NC} and ${YELLOW}AWS_VAULT_ACCESS_SECRET_KEY${NC} environment variable"
+    echo -e "- ${YELLOW}cloudctl-{ENVIRONMENT}${NC} certificate bundle"
+    echo -e "- ${YELLOW}Blueprint file${NC}"
+    echo -e ""
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./cloudctl${NC} aws role configure ${YELLOW}{SERVICE_NAME}${NC} ${YELLOW}{ENVIRONMENT}${NC} ${YELLOW}{ROLE}${NC}"
+    echo -e "${YELLOW}Example:${NC} ${GREEN}./cloudctl${NC} aws role configure midasapp local admin"
+    echo -e "         ${GREEN}./cloudctl${NC} aws role configure midasapp stg app"
+    echo -e "${YELLOW}Help${NC}: ${YELLOW}{SERVICE_NAME}${NC} is the name of the service"
+    echo -e "      ${YELLOW}{ENVIRONMENT}${NC} is the runtime environment of the service"
+    echo -e "      ${YELLOW}{ROLE}${NC} is the role name which will be used in Vault (valid value: app, admin, readonly). It will be mapped to AWS allowed assume role with format: <serviceName><Environment><Role> (e.g midasAppStgApp)"
+}
+
+cloud-aws-vault-configure-help

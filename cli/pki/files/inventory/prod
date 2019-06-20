@@ -1,0 +1,14 @@
+[prod-etcd]
+etcd-01.infra-management ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/infra-management-nbas.pem
+etcd-02.infra-management ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/infra-management-nbas.pem
+etcd-03.infra-management ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/infra-management-nbas.pem
+
+[prod-vault]
+vault-01.infra-management ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/infra-management-nbas.pem
+vault-02.infra-management ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/infra-management-nbas.pem
+
+[prod-ca]
+ca.infra-management ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/infra-management-nbas.pem
+
+[prod-loadbalancer]
+loadbalancer.infra-management ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/infra-management-nbas.pem

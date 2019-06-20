@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+set -e
+trap "exit" INT
+
+YQ=./.bin.pki/yq
+
+function member-certs-use-validate {
+    local BLUEPRINT=$1
+    local CURRENT_DIRECTORY=$(pwd)
+    local BLUEPRINT_DIRECTORY=$CURRENT_DIRECTORY/pki/blueprint/certs-bundle
+
+    if [[ -z "${GITHUB_USERNAME}" ]]; then
+        echo -e "${RED}[ERROR]${NC} No ${YELLOW}GITHUB_USERNAME${NC} environment variable found. Please set it using command ${YELLOW}export GITHUB_USERNAME=<your-github-username>${NC}"
+        exit 1
+    fi
+    
+    if [[ ! -d "$BLUEPRINT_DIRECTORY" ]]; then
+        echo -e "${RED}[ERROR]${NC} Blueprint directory ${YELLOW}${BLUEPRINT_DIRECTORY}${NC} not found."
+        exit 1
+    fi
+    
+    if [[ ! -f "$BLUEPRINT_DIRECTORY/${BLUEPRINT}.yml" ]]; then
+        echo -e "${RED}[ERROR]${NC} Blueprint file ${YELLOW}${BLUEPRINT_DIRECTORY}/${BLUEPRINT}.yml${NC} not found."
+        exit 1
+    fi
+}
+
+function member-certs-use-execute {
+    local BLUEPRINT=$1
+    local PKICTL_DIRECTORY=/usr/share/pki
+
+    local MEMBER=${GITHUB_USERNAME}
+    local DEVICE_IDENTIFIER=$(cat /etc/machine-id)
+    
+    export PKICTL_MEMBER_CONTEXT=${MEMBER}@${DEVICE_IDENTIFIER}@${BLUEPRINT}
+    export PKICTL_MEMBER_CERT_FILE=${PKICTL_DIRECTORY}/certs/member/${MEMBER}@${DEVICE_IDENTIFIER}@${BLUEPRINT}/${MEMBER}@${DEVICE_IDENTIFIER}@${BLUEPRINT}.crt
+    export PKICTL_MEMBER_KEY_FILE=${PKICTL_DIRECTORY}/certs/member/${MEMBER}@${DEVICE_IDENTIFIER}@${BLUEPRINT}/.private/${MEMBER}@${DEVICE_IDENTIFIER}@${BLUEPRINT}.key
+    export PKICTL_MEMBER_CA_CERT_FILE=${PKICTL_DIRECTORY}/certs/member/${MEMBER}@${DEVICE_IDENTIFIER}@${BLUEPRINT}/${MEMBER}@${DEVICE_IDENTIFIER}@${BLUEPRINT}.ca.crt
+    export PKICTL_MEMBER_PKCS12_FILE=${PKICTL_DIRECTORY}/certs/member/${MEMBER}@${DEVICE_IDENTIFIER}@${BLUEPRINT}/${MEMBER}@${DEVICE_IDENTIFIER}@${BLUEPRINT}.p12
+
+    local PKICTL_WORKING_DIRECTORY=$HOME/.pkictl
+    mkdir -p ${PKICTL_WORKING_DIRECTORY}/.certs.bundle.d
+    rm -f ${PKICTL_WORKING_DIRECTORY}/.certs.bundle.d/${MEMBER}.${DEVICE_IDENTIFIER}.${BLUEPRINT} || true
+    
+    if [[ ! -f "$PKICTL_MEMBER_CERT_FILE" ]]; then
+        echo -e "${RED}[ERROR]${NC} Pkictl member certificate file not found. Expected in: ${YELLOW}${PKICTL_MEMBER_CERT_FILE}${NC}"
+        exit 1
+    fi
+
+    if [[ ! -f "$PKICTL_MEMBER_KEY_FILE" ]]; then
+        echo -e "${RED}[ERROR]${NC} Pkictl member key file not found. Expected in: ${YELLOW}${PKICTL_MEMBER_KEY_FILE}${NC}"
+        exit 1
+    fi
+
+    if [[ ! -f "$PKICTL_MEMBER_CA_CERT_FILE" ]]; then
+        echo -e "${RED}[ERROR]${NC} Pkictl member CA certificate file not found. Expected in: ${YELLOW}${PKICTL_MEMBER_CA_CERT_FILE}${NC}"
+        exit 1
+    fi
+
+    if [[ ! -f "$PKICTL_MEMBER_PKCS12_FILE" ]]; then
+        echo -e "${RED}[ERROR]${NC} Pkictl member PKCS12 file not found. Expected in: ${YELLOW}${PKICTL_MEMBER_PKCS12_FILE}${NC}"
+        exit 1
+    fi
+
+    echo "export PKICTL_MEMBER_CONTEXT=${PKICTL_MEMBER_CONTEXT}" > $PKICTL_WORKING_DIRECTORY/.certs.bundle.d/${MEMBER}.${DEVICE_IDENTIFIER}.${BLUEPRINT}
+    echo "export PKICTL_MEMBER_CERT_FILE=${PKICTL_MEMBER_CERT_FILE}" >>  $PKICTL_WORKING_DIRECTORY/.certs.bundle.d/${MEMBER}.${DEVICE_IDENTIFIER}.${BLUEPRINT}
+    echo "export PKICTL_MEMBER_KEY_FILE=${PKICTL_MEMBER_KEY_FILE}" >> $PKICTL_WORKING_DIRECTORY/.certs.bundle.d/${MEMBER}.${DEVICE_IDENTIFIER}.${BLUEPRINT}
+    echo "export PKICTL_MEMBER_CA_CERT_FILE=${PKICTL_MEMBER_CA_CERT_FILE}" >> $PKICTL_WORKING_DIRECTORY/.certs.bundle.d/${MEMBER}.${DEVICE_IDENTIFIER}.${BLUEPRINT}
+    echo "export PKICTL_MEMBER_PKCS12_FILE=${PKICTL_MEMBER_PKCS12_FILE}" >> $PKICTL_WORKING_DIRECTORY/.certs.bundle.d/${MEMBER}.${DEVICE_IDENTIFIER}.${BLUEPRINT}
+
+    echo "source $PKICTL_WORKING_DIRECTORY/.certs.bundle.d/${MEMBER}.${DEVICE_IDENTIFIER}.${BLUEPRINT}"
+}
+
+if [ $# == 0 ]; then
+    exit 3
+fi
+
+
+if [[ " ${1} " == *"help"* ]] || [[ " ${1} " == *"--help"* ]];then
+    exit 3
+else
+    if [[ -z "$1" ]]; then
+        exit 3
+    else
+        member-certs-use-validate $1
+        member-certs-use-execute $1
+    fi
+fi

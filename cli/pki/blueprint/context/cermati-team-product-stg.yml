@@ -1,0 +1,8 @@
+cermati-team-product-stg:
+  host: "https://vault.cermati.com:8443"
+  tls:
+    enabled: true
+    certs_bundle: pkictl-stg
+  auth:
+    method: tls
+    role_name: cermati-team-product-stg

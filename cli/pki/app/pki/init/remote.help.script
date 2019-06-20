@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+function pki-init-remote-help {
+    echo -e ""
+    echo -e "Initialize remote Public Key Infrastructure"
+    echo -e "${RED}THIS COMMAND WILL NOT EXECUTE WHEN THE REMOTE CA HAS BEEN PREVIOUSLY INITIALIZED${NC}"
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} pki init remote ${YELLOW}{CLUSTER_INVENTORY}${NC} ${YELLOW}{CA_SERVER}${NC}"
+    echo -e "${YELLOW}Example:${NC} ${GREEN}./pkictl${NC} pki init remote stg1 stg1-ca"
+    echo -e "${YELLOW}Help${NC}: ${YELLOW}{CLUSTER_INVENTORY}${NC} is the inventory file located in ${YELLOW}~/.inventory/inventory.d${NC} (following Ansible format)."
+    echo -e "      ${YELLOW}{CA_SERVER}${NC} the remote CA_SERVER group defined inside the inventory file."
+}
+
+pki-init-remote-help

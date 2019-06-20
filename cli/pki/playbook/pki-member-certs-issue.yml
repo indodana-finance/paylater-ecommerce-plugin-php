@@ -1,0 +1,4 @@
+- hosts: "{{ ca_server }}"
+
+  roles:
+    - "member/certs/issue"

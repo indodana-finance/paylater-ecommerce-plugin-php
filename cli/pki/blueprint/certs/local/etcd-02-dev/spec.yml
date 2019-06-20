@@ -1,0 +1,10 @@
+csr:
+  SAN:
+    - IP:127.0.0.1
+    - DNS:localhost
+  CRL: http://localhost:22222/crl
+  OCSP: http://localhost:22222/ocsp
+  options:
+    organization: Cermati
+    unit: Development
+    name: etcd-02-dev

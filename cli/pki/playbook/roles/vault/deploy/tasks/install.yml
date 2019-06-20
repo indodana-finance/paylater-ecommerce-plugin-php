@@ -1,0 +1,54 @@
+- block:
+    - name: Check Vault package checksum file
+      stat:
+        path: "{{ vault_install_directory }}/{{ vault_shasums }}"
+      register: vault_checksum
+
+    - name: Get Vault package checksum file
+      get_url:
+        url: "{{ vault_checksum_file_url }}"
+        dest: "{{ vault_install_directory }}/{{ vault_shasums }}"
+      when: not vault_checksum.stat.exists | bool  
+
+    - name: Get Vault package checksum
+      shell: "grep {{ vault_pkg }} {{ vault_install_directory }}/{{ vault_shasums }}"
+      register: vault_sha256
+
+    - name: Check Vault package file
+      stat:
+        path: "{{ vault_install_directory }}/{{ vault_pkg }}"
+      register: vault_package
+
+    - name: Download Vault, verify the checksum
+      get_url:
+        url: "{{ vault_zip_url }}"
+        dest: "{{ vault_install_directory }}/{{ vault_pkg }}"
+        checksum: "sha256:{{ vault_sha256.stdout.split(' ')|first }}"
+        timeout: "60"
+      when: not vault_package.stat.exists | bool
+
+    - name: Ensure Unzip is installed
+      apt:
+        name: unzip
+        state: present
+
+    - name: Unarchive Vault and install binary
+      unarchive:
+        remote_src: yes
+        src: "{{ vault_install_directory }}/{{ vault_pkg }}"
+        dest: "{{ vault_binary_directory }}"
+        owner: "{{ vault_user }}"
+        group: "{{ vault_group }}"
+        mode: "0755"
+
+    # For vault to not require root privilege
+    # https://www.vaultproject.io/guides/operations/production.html
+    - name: Enable non root mlock capability
+      command: "setcap cap_ipc_lock=+ep {{ vault_binary_directory }}/vault"
+
+    - name: Create vault wrapper
+      template:
+        src: "vault.j2"
+        dest: "/usr/bin/vault"
+        mode: 0755
+  become: true

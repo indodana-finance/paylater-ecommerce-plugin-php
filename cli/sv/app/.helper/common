@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Python source / Pyinstaller binary helper
+svctl_run() {
+  if [[ -f sv/dist/main ]]; then
+    sv/dist/main "$@"
+  else
+    python3.7 sv/src/main.py "$@"
+  fi
+}
+
+svctl_binary_check() {
+  if [[ -f sv/dist/main ]]; then
+    echo "BINARY"
+  else
+    echo "SOURCE"
+  fi
+}
+
+# Logger helper functions
+logger_info() {
+  echo -e "${COLOR_CYAN}[INFO]${COLOR_NORMAL}   $@"
+}
+
+logger_ok() {
+  echo -e "${COLOR_GREEN}[OK]${COLOR_NORMAL}     $@"
+}
+
+logger_warn() {
+  echo -e "${COLOR_YELLOW}[WARN]${COLOR_NORMAL}   $@" >&2
+}
+
+logger_error() {
+  echo -e "${COLOR_RED}[ERROR]${COLOR_NORMAL}  $@" >&2
+}

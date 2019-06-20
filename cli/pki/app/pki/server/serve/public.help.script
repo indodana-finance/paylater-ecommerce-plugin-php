@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+function pki-server-serve-help {
+    echo -e ""
+    echo -e "Serve a HTTP server for Certificate Authority for public"
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} pki server serve"
+    echo -e "${YELLOW}Note:${NC} Please run ${GREEN}./pkictl pki server setup${NC} first when starting the server for the first time"
+}
+
+pki-server-serve-help

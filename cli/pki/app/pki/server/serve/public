@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+trap "exit" INT
+
+CURRENT_DIRECTORY=$(pwd)
+NODE_VERSION="10.15.1"
+NVM_DIR=${CURRENT_DIRECTORY}/.bin.pki/.nvm
+NODE_BIN=${NVM_DIR}/versions/node/v${NODE_VERSION}/bin/node
+NPM_BIN=${NVM_DIR}/versions/node/v${NODE_VERSION}/bin/npm
+NPX_BIN=${NVM_DIR}/versions/node/v${NODE_VERSION}/bin/npx
+
+SERVER_DIR=${CURRENT_DIRECTORY}/pki/server
+
+pushd ${SERVER_DIR} > /dev/null
+    $NODE_BIN src/public/index.js
+popd > /dev/null

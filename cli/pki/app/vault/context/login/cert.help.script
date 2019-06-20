@@ -1,0 +1,11 @@
+#!/bin/bash
+function vault-context-login-cert-help {
+    echo -e ""
+    echo -e "Login to a Vault cluster using TLS certificate bundle"
+    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} vault context login cert ${YELLOW}{CONTEXT}${NC}"
+    echo -e "${YELLOW}Example:${NC} ${GREEN}./pkictl${NC} vault context login cert dev -- for local Vault login using dev Context"
+    echo -e "         ${GREEN}./pkictl${NC} vault context login cert cermati-stg"
+    echo -e "${YELLOW}Help${NC}: ${YELLOW}{CONTEXT}${NC} is the context name configured using ${YELLOW}./pkictl vault context configure${NC} command"
+}
+
+vault-context-login-cert-help

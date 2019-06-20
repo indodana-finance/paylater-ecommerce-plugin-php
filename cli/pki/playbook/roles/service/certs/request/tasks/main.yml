@@ -1,0 +1,35 @@
+- name: Reading blueprint
+  include_vars: "{{ blueprint_directory }}/spec.yml"
+
+- name: View CSR settings
+  debug:
+    var: csr
+
+- block:
+    - name: Ensure directory
+      file:
+        path: "{{ csr_directory }}"
+        state: directory
+      
+    - name: Create CSR configuration
+      template:
+        src: csr.conf.j2
+        dest: "{{ csr_directory }}/csr.conf"
+      
+    - name: Create generate script
+      template:
+        src: generate.j2
+        dest: "{{ csr_directory }}/generate"
+        mode: 0755
+      
+    - name: Create view script
+      template:
+        src: view.j2
+        dest: "{{ csr_directory }}/view"
+        mode: 0755
+      
+    - name: Execute generate script
+      shell: "./generate"
+      args:
+        chdir: "{{ csr_directory }}"
+  become: "{{ method == 'request' }}"

@@ -1,0 +1,4 @@
+/node_modules
+/.build
+/.svctl_docker_mount
+/.env.db

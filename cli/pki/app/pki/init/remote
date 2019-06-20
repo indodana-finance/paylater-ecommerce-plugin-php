@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -e
+trap "exit" INT
+
+function pki-init-remote-validate {
+    local CLUSTER_INVENTORY=$1
+    local CA_SERVER=$2
+    local INVENTORY_FILE=~/.host-inventory/inventory.d/${CLUSTER_INVENTORY}
+    local PKICTL_DIRECTORY=/usr/share/pki
+    local CURRENT_DIRECTORY=$(pwd)
+    local PKI_TEMPLATE_DIRECTORY=${CURRENT_DIRECTORY}/pki/files/pki-template/${CA_SERVER}
+    local PKI_TOOLKIT_DIRECTORY=${CURRENT_DIRECTORY}/pki/files/pki-toolkit-template
+
+    if [[ ! -f "${INVENTORY_FILE}" ]]; then
+        echo -e "${RED}[ERROR]${NC} ${YELLOW}${CLUSTER_INVENTORY}${NC} cluster inventory not found. Expected on: ${RED}[${INVENTORY_FILE}]${NC}"
+        echo -e "Try to run ${YELLOW}./pkictl inventory setup${NC} to setup inventories needed for pkictl"
+        exit 1
+    fi
+    
+    if [[ ! -d "${PKI_TEMPLATE_DIRECTORY}" ]]; then
+        echo -e "${RED}[ERROR]${NC} ${YELLOW}${clusterInventory}${NC} PKI template directory not found. Expected on: ${RED}[${PKI_TEMPLATE_DIRECTORY}]${NC}"
+        exit 1
+    fi
+
+    if [[ ! -d "${PKI_TOOLKIT_DIRECTORY}" ]]; then
+        echo -e "${RED}[ERROR]${NC} ${YELLOW}${clusterInventory}${NC} PKI toolkit not found. Expected on: ${RED}[${PKI_TOOLKIT_DIRECTORY}]${NC}"
+        exit 1
+    fi
+
+    if [[ "${CLUSTER_INVENTORY}" == "local" ]]; then
+        echo -e "${RED}[ERROR]${NC} Please use ${YELLOW}./pkictl pki init local${NC} for local initialization"
+        exit 1
+    fi
+}
+
+function pki-init-remote-execute {
+    local CLUSTER_INVENTORY=$1
+    local CA_SERVER=$2
+    local INVENTORY_FILE=~/.host-inventory/inventory.d/${CLUSTER_INVENTORY}
+    local PKICTL_DIRECTORY=/usr/share/pki
+    local CURRENT_DIRECTORY=$(pwd)
+    local PKI_TEMPLATE_DIRECTORY=${CURRENT_DIRECTORY}/pki/files/pki-template/${CA_SERVER}
+    local PKI_TOOLKIT_DIRECTORY=${CURRENT_DIRECTORY}/pki/files/pki-toolkit-template
+
+    $ANSIBLE_PLAYBOOK pki/playbook/pki-remote-init.yml \
+        -i "${INVENTORY_FILE}" \
+        -e "ca_server=${CA_SERVER}" \
+        -e "pkictl_directory=${PKICTL_DIRECTORY}" \
+        -e "pki_template_directory=${PKI_TEMPLATE_DIRECTORY}" \
+        -e "pki_toolkit_directory=${PKI_TOOLKIT_DIRECTORY}"
+
+    local EXIT_CODE=$?;
+    if [[ "${EXIT_CODE}" != "0" ]]; then
+        if [[ "${EXIT_CODE}" == "2" ]]; then
+            echo -e "${RED}PKI server ${CA_SERVER} at ${CLUSTER_INVENTORY} has been initialized. Aborting...${NC}"
+        fi
+        exit ${EXIT_CODE}
+    fi
+}
+
+if [ $# == 0 ]; then
+    exit 3
+fi
+
+if [[ " ${1} " == *"help"* ]] || [[ " ${1} " == *"--help"* ]];then
+    exit 3
+else
+    if [[ -z "$1" ]] || [[ -z "$2" ]]; then
+        exit 3
+    else        
+        pki-init-remote-validate $1 $2
+        pki-init-remote-execute $1 $2
+    fi
+fi

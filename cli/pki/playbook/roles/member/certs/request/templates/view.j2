@@ -1,0 +1,13 @@
+#!/bin/bash
+export TARGET=$1
+if [[ $TARGET == "csr" ]]; then
+    openssl req \
+        -in {{ member }}@{{ device_identifier }}@{{ blueprint }}.csr \
+        -noout \
+        -text
+elif [[ $TARGET == "crt" ]]; then
+    openssl x509 \
+        -in {{ member }}@{{ device_identifier }}@{{ blueprint }}.crt \
+        -noout \
+        -text
+fi

@@ -1,0 +1,8 @@
+- name: Preparing migrations
+  debug:
+    msg: "Preparing migrations environment {{ db_engine }} - {{ db_name }} - {{ db_environment }} - {{ db_migrations_directory }}"
+
+- name: Generating flyway build.gradle
+  template:
+    src: "flyway.build.gradle.j2"
+    dest: "{{ db_migrations_directory }}/build.gradle"

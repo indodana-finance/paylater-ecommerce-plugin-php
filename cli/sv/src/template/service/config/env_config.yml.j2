@@ -1,0 +1,146 @@
+---
+# ------------------------------------------------------------------------------
+# This file contains configurations about environment-specific files, secrets,
+# and environment variables (subsequently referred as "environment artifacts" or
+# just "artifacts") that are required by the service to run.
+#
+# Feel free to delete any comment that bloats this file, including this block.
+#
+# The documentation of this file is as follows:
+#
+#   ## Document root
+#   This file contains exactly one field, `artifacts`. This field is an mapping
+#   that contains valid environment artifact sources: 'config' and 'vault'
+#
+#
+#   ## artifacts.config
+#   This mapping contains information about environment artifacts that originate
+#   from the files located in the project root directory.
+#
+#   ### artifacts.config.version
+#   Version of this configuration template. Should not be changed manually.
+#
+#   ### artifacts.config.files
+#   List of mappings, each specifies how to load a config file. Each mapping in
+#   this list contains two fields:
+#     - path: relative path to the file located in the project root directory
+#     - mount: how to mount the file into Kubernetes. Contains two fields:
+#       - type: how to mount the file, either "env", "file" or "directory". If
+#           "env", the file is assumed to be in DOTENV format and will be loaded
+#           as environment variables. If "file", the file will be mounted into
+#           the service's container, in the service's working directory. If
+#           "directory", all files inside `path` will be mounted into
+#           `mount.path` while keeping the original directory structure
+#       - path: only used when `type` is "file". Specifies the path to where
+#           the file should be mounted, relative to the service's working
+#           directory
+#
+#
+#   ## artifacts.vault
+#   This mapping contains information about environment artifacts that originate
+#   from Hashicorp Vault. For this to work, you'll need to set `pki.enabled` to
+#   `true` in the service's `config.yml` file.
+#
+#   ### artifacts.vault.version
+#   Version of this configuration template. Should not be changed manually.
+#
+#   ### artifacts.vault.url
+#   URL of the Vault. Should look like this: https://vault.cermati.com:8443
+#
+#   ### artifacts.vault.role
+#   The Vault role granted to the service by PKICTL
+#
+#   ### artifacts.vault.pkictl_service_blueprint
+#   (Optional) Blueprint name used by PKICTL when generating service certificate
+#   for this service. By default will use the service's name
+#
+#   ### artifacts.vault.secrets
+#   List of mappings, each specifies how to load a Vault secret. Each mapping in
+#   this list contains several fields:
+#     - path: the path of the Vault secret. Run Vault with `-output-curl-string`
+#         to get the proper path to use in this field.
+#     - type: the type of the secret, either "kv" or "db"
+#     - kv: a mapping containing one optional field. Only used when type is `kv`
+#       - key: Optional field that maps into a key in the KV data specified by
+#           `mount.path`. If this field is specified, then only the contents of
+#           said key will be written into the file. Only to be used when
+#           `mount.type` is "file"
+#     - mount: how to mount the file into Kubernetes. Contains two fields:
+#       - type: how to mount the secret, either "env" or "file". If "env", the
+#           secret will be loaded as environment variables. If "file", the file
+#           will be mounted into the service's container, in the service's
+#           working directory as a DOTENV file
+#       - path: only used when `type` is "file". Specifies the path to where
+#           the file should be mounted, relative to the service's working
+#           directory
+#
+# ------------------------------------------------------------------------------
+
+artifacts:
+  config:
+    version: v1
+    files:
+      # Example: load `config/production/environment` DOTENV file to environment
+      #          variables
+      # - path: config/production/environment
+      #   mount:
+      #     type: env
+
+      # Example: load config file `config/production/dotenv` into working
+      #          directory as `.env`
+      # - path: config/production/dotenv
+      #   mount:
+      #     type: file
+      #     path: .env
+
+      # Example: load every file in `config/production/dir` directory and mount
+      #          those as files in the runtime directory `.`
+      # - path: config/production/dir/
+      #   mount:
+      #     type: directory
+      #     path: .
+
+  vault:
+    version: v1
+    url: https://vault.cermati.com:8443
+    role: cermati-indodana-midas-stg
+
+    # NOTE: set `pki.enabled` to `true` in the service's `config.yml` file
+
+    secrets:
+      # Example: load Vault KV `v1.1/cermati/indodana/kv/athena/stg/environment` to
+      #          environment variables
+      # - type: kv
+      #   path: v1.1/cermati/indodana/kv/athena/stg/environment
+      #   mount:
+      #     type: env
+
+      # Example: load Vault KV `v1.1/cermati/indodana/kv/athena/stg/environment` as a
+      #          file `.env` in working directory
+      # - type: kv
+      #   path: v1.1/cermati/indodana/kv/athena/stg/environment
+      #   mount:
+      #     type: file
+      #     path: .env
+
+      # Example: load Vault KV `v1.1/cermati/indodana/kv/athena/stg/google_application_credentials.json`
+      #          and store only the key `content` as a file `google_application_credentials.json`
+      #          in working directory
+      # - type: kv
+      #   path: v1.1/cermati/indodana/kv/athena/stg/google_application_credentials.json
+      #   kv:
+      #     key: content
+      #   mount:
+      #     type: file
+      #     path: google_application_credentials.json
+
+      # Example: get dynamic Vault credential for database `v1.1/cermati/indodana/db/apsara/postgres/midas/midas/stg/creds/readonly`
+      #          to environment variables, storing the username in 'MIDAS_DB_USER' key
+      #          and the password into 'MIDAS_DB_PASSWORD'
+      # - type: db
+      #   path: v1.1/cermati/indodana/db/apsara/postgres/midas/midas/stg/creds/readonly
+      #   db:
+      #     user_key: MIDAS_DB_USER
+      #     pass_key: MIDAS_DB_PASSWORD
+      #   mount:
+      #     type: env

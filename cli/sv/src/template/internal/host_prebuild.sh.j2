@@ -1,0 +1,14 @@
+set -e
+
+export SERVICE_NAME="{{ service_name }}"
+export ENVIRONMENT="{{ environment }}"
+export BUILD_DIRECTORY="{{ build_directory }}"
+
+source "{{ svctl_directory }}/sv/app/.helper/common"
+source "{{ service_definition_script }}"
+
+if type -t host_prebuild > /dev/null; then
+  host_prebuild "$SERVICE_NAME" "$ENVIRONMENT" "$BUILD_DIRECTORY"
+else
+  logger_warn "Host pre-build script for ${COLOR_YELLOW}$SERVICE_NAME${COLOR_NORMAL} is not defined"
+fi

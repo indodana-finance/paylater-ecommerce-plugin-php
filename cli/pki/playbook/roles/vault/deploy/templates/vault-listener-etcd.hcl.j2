@@ -1,0 +1,38 @@
+{% set _vault_plus_one_port = member.port | int + 1 -%}
+
+cluster_name = "{{ vault_cluster.cluster.name }}"
+api_addr = "{{ vault_cluster.protocol }}://{{ machine_ip }}:{{ member.port }}"
+cluster_addr = "{{ vault_cluster.protocol }}://{{ machine_ip }}:{{ _vault_plus_one_port }}"
+
+ui = "true"
+
+listener "tcp" {
+  address = "{{ machine_ip }}:{{ member.port }}"
+  cluster_address = "{{ machine_ip }}:{{ _vault_plus_one_port }}"
+{% if not vault_cluster.tls.enabled %}
+  tls_disable = "true"
+{% else %}
+  tls_disable = "false"
+  tls_cert_file = "{{ member.cert_file }}"
+  tls_key_file = "{{ member.key_file }}"
+  tls_require_and_verify_client_cert  = "true"
+  tls_client_ca_file = "{{ member.trusted_ca_file }}"
+{% endif %}
+}
+
+{% if member.backend == "etcd" %}
+storage "etcd" {
+  address = "{% for etcd_address in member.etcd.addresses %}{{ etcd_address }}{{ "," if not loop.last else "" }}{% endfor %}"
+  etcd_api = "v3"
+  ha_enabled = "true"
+  path = "vault/{{ vault_cluster.cluster.name }}/"
+{% if member.etcd.tls.enabled %}
+  tls_cert_file = "{{ member.etcd.tls.cert_file }}"
+  tls_key_file = "{{ member.etcd.tls.key_file }}"
+  tls_ca_file = "{{ member.etcd.tls.trusted_ca_file }}"
+{% endif %}
+}
+{% endif %}
+
+max_lease_ttl = "{{ vault_cluster.ttl.max_lease }}"
+default_lease_ttl = "{{ vault_cluster.ttl.default_lease }}"

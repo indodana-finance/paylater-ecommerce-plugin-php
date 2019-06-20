@@ -1,0 +1,10 @@
+- hosts: "{{ blueprint }}"
+  
+  tasks:
+    - name: Create policies
+      shell: echo "$POLICY_CONTENT" | vault policy write {{ item }} -
+      environment:
+        POLICY_CONTENT: "{{ lookup('file','{{ policies_dir }}/{{ item }}.hcl') }}"
+      with_items:
+        - "{{ policies }}"
+      run_once: true

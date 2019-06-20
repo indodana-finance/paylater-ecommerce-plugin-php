@@ -1,0 +1,8 @@
+- hosts: "{{ blueprint }}"
+  
+  vars_files: 
+    - "{{ blueprint_file }}"  
+
+  roles:
+    - vault/common
+    - vault/unseal

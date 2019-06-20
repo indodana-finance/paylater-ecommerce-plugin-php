@@ -1,0 +1,50 @@
+#!/bin/bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+REVOKE_BY=$1
+NAME=$2
+
+function help {
+    echo -e "Usage: ./revoke {REVOKE_BY} {NAME}"
+    echo -e "${YELLOW}REVOKE_BY${NC} defines whether the supplied name is a serial or a certificate filename. (Valid value: serial / name)"
+    echo -e "${YELLOW}NAME${NC}"
+    echo -e "     if ${YELLOW}REVOKE_BY${NC} = serial, ${YELLOW}NAME${NC} should be certificate serial number."
+    echo -e "     if ${YELLOW}REVOKE_BY${NC} = name, ${YELLOW}NAME${NC} should be Linux compatible file name format."
+    echo -e "The command will read file using supplied NAME in ./.certs (for serial method) or ./certs (for name method) folder."
+}
+
+if [[ -z "$NAME" ]]; then
+    help
+    exit
+fi
+
+if [[ "${REVOKE_BY}" == "name" ]]; then
+    CRT_DIRECTORY="certs"
+    CRT_EXTENSION="crt"
+elif [[ "${REVOKE_BY}" == "serial" ]]; then
+    CRT_DIRECTORY=".certs"
+    CRT_EXTENSION="pem"
+fi
+
+if [[ ! -f "${CRT_DIRECTORY}/$NAME.${CRT_EXTENSION}" ]]; then
+    echo -e "File ${RED}${CRT_DIRECTORY}/${NAME}.${CRT_EXTENSION}${NC} does not exist. Please verify whether the Certificate has been initiated successfully."
+    exit
+fi
+
+openssl ca -config ./etc/ca.conf -revoke $CRT_DIRECTORY/$NAME.${CRT_EXTENSION}
+if [[ $? -eq 0 ]]; then
+    echo -e "Successfully revoke certificate: ${YELLOW}${CRT_DIRECTORY}/${NAME}.${CRT_EXTENSION}${NC}. Generating ${YELLOW}ca.crl${NC}"
+    openssl ca -config ./etc/ca.conf -gencrl -out ./ca.crl
+    echo -e "Successfully generate ${YELLOW}ca.crl${NC} for ${YELLOW}intermediate CA${NC}"
+
+    pushd ../root-ca/ > /dev/null
+        openssl ca -config ./etc/ca.conf -gencrl -out ./ca.crl
+        echo -e "Successfully generate ${YELLOW}ca.crl${NC} for ${YELLOW}root CA${NC}"
+    popd > /dev/null
+else
+    echo -e "Failed to revoke certificate: ${RED}${CRT_DIRECTORY}/${NAME}.crt${NC}"
+fi
