@@ -1,0 +1,63 @@
+# ignore .env files
+.env
+
+venv/
+.venv/
+
+# Editor or IDE specific folder and files
+.idea/
+.vscode/
+.ignored/
+
+*.pyc
+*.out
+
+/.config/
+/config/
+
+*.retry
+
+*.swp
+
+.bin/
+.bin.*/
+.env/
+.env.*/
+.tmp/
+.tmp.*/
+.build/
+.build.*/
+.run/
+.run.*/
+.credentials.*/
+
+.pki/
+
+.gradle/
+
+vault_password.txt
+NAMESPACE
+
+# BCL file and cli directory
+/BCLFile
+/cli
+
+# svctl service definition directory
+.services.d/
+
+# svctl config file
+svctl.yml
+
+# svctl pyinstaller directories
+sv/dist/
+sv/src/build/
+sv/src/dist/
+
+# svctl Docker build-time temporary directory
+.svctl_docker_mount
+
+# ignore node_modules
+node_modules
+
+# ignore package-lock.json
+package-lock.json
