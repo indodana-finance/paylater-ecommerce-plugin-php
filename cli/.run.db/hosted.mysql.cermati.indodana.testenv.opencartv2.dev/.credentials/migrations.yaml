@@ -1,8 +1,0 @@
-data:
-  password: A1a-IzXz3O5yjpI38atR
-  username: v-cert-cerma-migrations-tDhkV708
-lease_duration: 3600
-lease_id: v1.1/cermati/indodana/db/hosted/mysql/testenv/opencartv2/dev/creds/migrations/qNjt19LLoBmXzFkU3sHtPXXv
-renewable: true
-request_id: 1b105de2-45c0-c148-adc8-270d9c296605
-warnings: null

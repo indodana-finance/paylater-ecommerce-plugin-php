@@ -1,1 +1,0 @@
-ALTER USER prestashop_migrations IDENTIFIED BY '{{password}}'

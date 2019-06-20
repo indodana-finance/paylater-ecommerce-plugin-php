@@ -1,1 +1,0 @@
-ALTER USER magento2_migrations IDENTIFIED BY '{{password}}'

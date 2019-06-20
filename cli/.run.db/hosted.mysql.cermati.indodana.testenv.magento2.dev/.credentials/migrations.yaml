@@ -1,8 +1,0 @@
-data:
-  password: A1a-WpzU5E9XwCI5KzOB
-  username: v-cert-cerma-migrations-46IRubtu
-lease_duration: 3600
-lease_id: v1.1/cermati/indodana/db/hosted/mysql/testenv/magento2/dev/creds/migrations/a7h8Gpm5bHCiemrBhd9ZEAZw
-renewable: true
-request_id: cb6f45d6-0106-db84-a094-1679989c1b6e
-warnings: null
