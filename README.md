@@ -94,6 +94,7 @@ cd cli && ./svctl run service_name dev
 
 ## Administrative Account
 Congratulation you've reach this part, now to make life easier, we've set up some administrative accounts for you to try. Here it is:
+
 | Service               | Username             | Password        |
 | --------------------- |:--------------------:|:---------------:|
 | Opencart, Woocommerce | admin                | admin           |
