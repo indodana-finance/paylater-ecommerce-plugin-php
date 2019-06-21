@@ -37,11 +37,11 @@ cert_auth_config:
         - '*@cermati.com'
         - '*@indodana.com'
 
-    - name: cermati-indodana-testenv-dev
+    - name: cermati-indodana-pios-dev
       ca_cert: /usr/share/pki/pki/intermediate-ca/ca-chain.crt
       ttl: 86400
       policies:
-        - cermati-indodana-testenv-dev
+        - cermati-indodana-pios-dev
       allowed_common_names:
         - '*@cermati.com'
         - '*@indodana.com'

@@ -2,65 +2,65 @@
 # ---------------------------------------------------------------------
 # v1.1.0 - supported +
 # ---------------------------------------------------------------------
-path "sys/mounts/v1.1/cermati/indodana/db/hosted/mysql/testenv/+/dev" {
+path "sys/mounts/v1.1/cermati/indodana/db/hosted/mysql/pios/+/dev" {
   capabilities = ["read", "create", "update", "list"]
 }
 
-path "v1.1/cermati/indodana/db/hosted/mysql/testenv/+/dev/config/*" {
+path "v1.1/cermati/indodana/db/hosted/mysql/pios/+/dev/config/*" {
   capabilities = ["read", "create", "update", "list"]
 }
 
-path "v1.1/cermati/indodana/db/hosted/mysql/testenv/+/dev/roles/*" {
+path "v1.1/cermati/indodana/db/hosted/mysql/pios/+/dev/roles/*" {
   capabilities = ["read", "create", "update", "list"]
 }
 
-path "v1.1/cermati/indodana/db/hosted/mysql/testenv/+/dev/creds/*" {
+path "v1.1/cermati/indodana/db/hosted/mysql/pios/+/dev/creds/*" {
   capabilities = ["read", "create", "update", "list"]
 }
 
-path "sys/mounts/v1.1/cermati/indodana/db/rds/mysql/testenv/+/dev" {
+path "sys/mounts/v1.1/cermati/indodana/db/rds/mysql/pios/+/dev" {
   capabilities = ["read", "create", "update", "list"]
 }
 
-path "v1.1/cermati/indodana/db/rds/mysql/testenv/+/dev/config/*" {
+path "v1.1/cermati/indodana/db/rds/mysql/pios/+/dev/config/*" {
   capabilities = ["read", "create", "update", "list"]
 }
 
-path "v1.1/cermati/indodana/db/rds/mysql/testenv/+/dev/roles/*" {
+path "v1.1/cermati/indodana/db/rds/mysql/pios/+/dev/roles/*" {
   capabilities = ["read", "create", "update", "list"]
 }
 
-path "v1.1/cermati/indodana/db/rds/mysql/testenv/+/dev/creds/*" {
+path "v1.1/cermati/indodana/db/rds/mysql/pios/+/dev/creds/*" {
   capabilities = ["read", "create", "update", "list"]
 }
 
-path "sys/mounts/v1.1/cermati/indodana/db/apsara/mysql/testenv/+/dev" {
+path "sys/mounts/v1.1/cermati/indodana/db/apsara/mysql/pios/+/dev" {
   capabilities = ["read", "create", "update", "list"]
 }
 
-path "v1.1/cermati/indodana/db/apsara/mysql/testenv/+/dev/config/*" {
+path "v1.1/cermati/indodana/db/apsara/mysql/pios/+/dev/config/*" {
   capabilities = ["read", "create", "update", "list"]
 }
 
-path "v1.1/cermati/indodana/db/apsara/mysql/testenv/+/dev/roles/*" {
+path "v1.1/cermati/indodana/db/apsara/mysql/pios/+/dev/roles/*" {
   capabilities = ["read", "create", "update", "list"]
 }
-path "v1.1/cermati/indodana/db/apsara/mysql/testenv/+/dev/creds/*" {
-  capabilities = ["read", "create", "update", "list"]
-}
-
-path "sys/mounts/v1.1/cermati/indodana/kv/testenv" {
+path "v1.1/cermati/indodana/db/apasara/mysql/pios/+/dev/creds/*" {
   capabilities = ["read", "create", "update", "list"]
 }
 
-path "v1.1/cermati/indodana/kv/testenv/*" {
+path "sys/mounts/v1.1/cermati/indodana/kv/pios" {
   capabilities = ["read", "create", "update", "list"]
 }
 
-path "sys/auth/v1.1/cermati/indodana/testenv/dev" {
+path "v1.1/cermati/indodana/kv/pios/*" {
+  capabilities = ["read", "create", "update", "list"]
+}
+
+path "sys/auth/v1.1/cermati/indodana/pios/dev" {
   capabilities = ["read", "create", "update", "list", "sudo"]
 }
-path "auth/v1.1/cermati/indodana/testenv/dev/role/*" {
+path "auth/v1.1/cermati/indodana/pios/dev/role/*" {
   capabilities = ["read", "create", "update", "list"]
 }
 # ---------------------------------------------------------------------
@@ -87,27 +87,27 @@ path "sys/policies/acl/*" {
 # # ---------------------------------------------------------------------
 # # v1.1.0-alt version - can be used with Vault v1.1.+ the old-structure
 # # ---------------------------------------------------------------------
-# path "sys/mounts/v1.1.alt/db/hosted/mysql/cermati/indodana/testenv/+/dev" {
+# path "sys/mounts/v1.1.alt/db/hosted/mysql/cermati/indodana/pios/+/dev" {
 #   capabilities = ["read", "create", "update", "list"]
 # }
 # 
-# path "v1.1.alt/db/hosted/mysql/cermati/indodana/testenv/+/dev/config/*" {
+# path "v1.1.alt/db/hosted/mysql/cermati/indodana/pios/+/dev/config/*" {
 #   capabilities = ["read", "create", "update", "list"]
 # }
 # 
-# path "v1.1.alt/db/hosted/mysql/cermati/indodana/testenv/+/dev/roles/*" {
+# path "v1.1.alt/db/hosted/mysql/cermati/indodana/pios/+/dev/roles/*" {
 #   capabilities = ["read", "create", "update", "list"]
 # }
 # 
-# path "v1.1.alt/db/hosted/mysql/cermati/indodana/testenv/+/dev/creds/*" {
+# path "v1.1.alt/db/hosted/mysql/cermati/indodana/pios/+/dev/creds/*" {
 #   capabilities = ["read", "create", "update", "list"]
 # }
 # 
-# path "sys/mounts/v1.1.alt/kv/cermati/indodana/testenv" {
+# path "sys/mounts/v1.1.alt/kv/cermati/indodana/pios" {
 #   capabilities = ["read", "create", "update", "list"]
 # }
 # 
-# path "v1.1.alt/kv/cermati/indodana/testenv/*" {
+# path "v1.1.alt/kv/cermati/indodana/pios/*" {
 #   capabilities = ["read", "create", "update", "list"]
 # }
 # # ---------------------------------------------------------------------
@@ -120,21 +120,21 @@ path "sys/policies/acl/*" {
 #   capabilities = ["read", "create", "update", "list"]
 # }
 # 
-# path "v1.0/cermati/indodana/db/hosted/mysql/config/dev-testenv-*" {
+# path "v1.0/cermati/indodana/db/hosted/mysql/config/dev-pios-*" {
 #   capabilities = ["read", "create", "update", "list"]
 # }
 # 
-# path "v1.0/cermati/indodana/db/hosted/mysql/roles/dev-testenv-*" {
+# path "v1.0/cermati/indodana/db/hosted/mysql/roles/dev-pios-*" {
 #   capabilities = ["read", "create", "update", "list"]
 # }
 # 
-# path "v1.0/cermati/indodana/db/hosted/mysql/creds/dev-testenv-*" {
+# path "v1.0/cermati/indodana/db/hosted/mysql/creds/dev-pios-*" {
 #   capabilities = ["read", "create", "update", "list"]
 # }
-# path "sys/mounts/v1.0/cermati/indodana/kv/testenv" {
+# path "sys/mounts/v1.0/cermati/indodana/kv/pios" {
 #   capabilities = ["read", "create", "update", "list"]
 # }
-# path "v1.0/cermati/indodana/kv/testenv/*" {
+# path "v1.0/cermati/indodana/kv/pios/*" {
 #   capabilities = ["read", "create", "update", "list"]
 # }
 # # ---------------------------------------------------------------------

@@ -2450,6 +2450,16 @@ CREATE TABLE `ps_employee` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `ps_employee`
+--
+
+LOCK TABLES `ps_employee` WRITE;
+/*!40000 ALTER TABLE `ps_employee` DISABLE KEYS */;
+INSERT INTO `ps_employee` VALUES (1,1,1,'Prestashop','Admin','admin@prestashop.com','$2y$10$2zSU4Cs4G.iH64VZgGYve.6eVhaHRKc4R30EnJLuS07nD8ND1qVQm','2019-06-20 22:05:52','2019-05-21','2019-06-21','0000-00-00','0000-00-00',1,NULL,NULL,'default','theme.css',1,0,1,1,1,0,0,0,NULL,NULL,'0000-00-00 00:00:00');
+/*!40000 ALTER TABLE `ps_employee` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `ps_employee_shop`
 --
 

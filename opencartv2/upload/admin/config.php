@@ -1,11 +1,11 @@
 <?php
 // HTTP
-define('HTTP_SERVER', 'http://localhost:9007/admin/');
-define('HTTP_CATALOG', 'http://localhost:9007/');
+define('HTTP_SERVER', 'http://localhost:6102/admin/');
+define('HTTP_CATALOG', 'http://localhost:6102/');
 
 // HTTPS
-define('HTTPS_SERVER', 'http://localhost:9007/admin/');
-define('HTTPS_CATALOG', 'http://localhost:9007/');
+define('HTTPS_SERVER', 'http://localhost:6102/admin/');
+define('HTTPS_CATALOG', 'http://localhost:6102/');
 
 // DIR
 define('DIR_APPLICATION', '/home/gwahyu/Developments/opencartv2/admin/');

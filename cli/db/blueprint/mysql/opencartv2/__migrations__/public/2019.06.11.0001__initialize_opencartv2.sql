@@ -3426,7 +3426,7 @@ CREATE TABLE `oc_user` (
 
 LOCK TABLES `oc_user` WRITE;
 /*!40000 ALTER TABLE `oc_user` DISABLE KEYS */;
-INSERT INTO `oc_user` VALUES (1,1,'admin','a00244af9dd37d1d95fd681f9b83e610c2e1c3ec','7UP1ry90B','John','Doe','admin@admin.com','','','127.0.0.1',1,'2019-06-20 10:38:42');
+INSERT INTO `oc_user` VALUES (1,1,'admin','8f211096e6415e640eeb27a95bf518f17d2e8ce5','cDdbHNIWC','John','Doe','admin@opencartv2.com','','','',1,'2019-06-21 16:01:35');
 /*!40000 ALTER TABLE `oc_user` ENABLE KEYS */;
 UNLOCK TABLES;
 

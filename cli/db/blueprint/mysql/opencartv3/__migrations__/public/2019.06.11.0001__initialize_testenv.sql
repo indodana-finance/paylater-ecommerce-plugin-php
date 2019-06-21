@@ -3850,6 +3850,16 @@ CREATE TABLE `oc_user` (
 -----------------------------------------------------------
 
 --
+-- Dumping data for table `oc_user`
+--
+
+LOCK TABLES `oc_user` WRITE;
+/*!40000 ALTER TABLE `oc_user` DISABLE KEYS */;
+INSERT INTO `oc_user` VALUES (1,1,'admin','238df24e283e66be4bf8b17a99978d0a1c9f798a','SmjoxLu8q','John','Doe','admin@opencartv3.com','','','',1,'2019-06-21 16:00:31');
+/*!40000 ALTER TABLE `oc_user` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `oc_user_group`
 --
 

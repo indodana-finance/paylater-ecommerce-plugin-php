@@ -395,7 +395,7 @@ CREATE TABLE `wc_users` (
 
 LOCK TABLES `wc_users` WRITE;
 /*!40000 ALTER TABLE `wc_users` DISABLE KEYS */;
-INSERT INTO `wc_users` VALUES (1,'gerywahyu','$P$BnoCfZkg3LFAmRYsnLpm1wt1Gto3EH1','gerywahyu','gerywahyunugraha@gmail.com','','2019-06-19 10:25:46','',0,'gerywahyu');
+INSERT INTO `wc_users` VALUES (1,'admin','$1$obnL4cZJ$EdoBC718PVFCz4bRf7uQb1','admin','admin@woocommerce.com','','2019-06-19 10:25:46','',0,'admin');
 /*!40000 ALTER TABLE `wc_users` ENABLE KEYS */;
 UNLOCK TABLES;
 

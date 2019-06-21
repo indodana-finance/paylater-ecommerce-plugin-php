@@ -14,6 +14,7 @@ const PRODUCT = process.env.PRODUCT;
 const IDENTIFIER = `hosted.mysql.${ORGANIZATION}.${TEAM}.${PRODUCT}.opencartv2.dev`;
 const DBCTL_CREDENTIAL_FILE = `../../../cli/.run.db/${IDENTIFIER}/.credentials/app.yaml`
 const CONFIG_RELATIVE_PATH = "upload/config.php";
+const ADMIN_CONFIG_RELATIVE_PATH = "upload/admin/config.php";
 
 function getCredential() {
   try {
@@ -31,19 +32,20 @@ function readCredential() {
   return credentials;
 }
 
-function writeCredential(username, password) {
+function writeCredentialToTemplate(username, password, inputPath, outputPath) {
   nunjucks.configure({ autoescape: true });
-  const result = nunjucks.render("config.njk", {
+  const result = nunjucks.render(inputPath, {
     db_username: username,
     db_password: password
   });
-  const outputFd = fs.openSync(CONFIG_RELATIVE_PATH, "w");
+  const outputFd = fs.openSync(outputPath, "w");
   fs.writeSync(outputFd, result);
 }
 
 function refreshCredential(currentTimestamp) {
   const credentials = readCredential();
-  writeCredential(credentials.data.username, credentials.data.password);
+  writeCredentialToTemplate(credentials.data.username, credentials.data.password, "config.njk", CONFIG_RELATIVE_PATH);
+  writeCredentialToTemplate(credentials.data.username, credentials.data.password, "admin.config.njk", ADMIN_CONFIG_RELATIVE_PATH);
 
   // Lease duration was defined in seconds, thus we times it by a thousand to get ms
   return currentTimestamp + credentials.lease_duration * 1000;
