@@ -11,6 +11,16 @@ Each platform was modified to fit into Cermati's DBCTL workflow. To simplify, du
 
 This is done by using NodeJS worker that will get a new credential 10 minutes before expiry time.
 
+To simplify the process, we hardcode the deployment port, so make sure it doesn't clash with another application. Here is the mapping that we used, don't worry we tried to make the port as unique as possible.
+
+| Service     | Version | PHP Version | Port |
+| ----------  |:-------:|:-----------:| ---- |
+| OpenCart    | 1.5.6.4 | 5.6         | 6101 |
+| OpenCart    | 2.3.0.2 | 5.6         | 6102 |
+| OpenCart    | 3.0.3.2 | 5.6         | 6103 |
+| Prestashop  | 1.7.5.2 | 7.2         | 6104 |
+| Woocommerce | 3.6.4   | 7.2         | 6105 |
+
 ## Requirements
 
 Due to framework dependence on PHP and its modules, you will need to install all of this dependency to continue. This can be done using this command. Also because each framework supports different PHP version we'll need to install two version of PHP (5.6 and 7.2) and install all the modules for each PHP versions.
@@ -46,6 +56,10 @@ sudo apt install php5.6-fpm php7.1-fpm
 ```
 
 ## Installation and Migration
+If you haven't use any ctl program, run this command to download the necessary files
+```
+./dbctl setup
+```
 
 To deploy and migrate database, you will need to use DBCTL. To use DBCTL in your local environment, you will need to set up Public Key Infrastructure (PKI) in your computer first. The guide to do this can be seen here.
 
