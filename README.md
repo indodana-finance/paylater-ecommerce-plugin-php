@@ -1,4 +1,4 @@
-# Paylater Online Installment System (PIOS)
+# Paylater Indodana Online Shop (PIOS)
 
 This repository contains sevent most used ecommerce platform based on PHP, such as:
 
