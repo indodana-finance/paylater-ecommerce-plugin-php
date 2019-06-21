@@ -61,7 +61,7 @@ If you haven't use any ctl program, run this command to download the necessary f
 ./dbctl setup
 ```
 
-To deploy and migrate database, you will need to use DBCTL. To use DBCTL in your local environment, you will need to set up Public Key Infrastructure (PKI) in your computer first. The guide to do this can be seen here.
+To deploy and migrate database, you will need to use DBCTL. To use DBCTL in your local environment, you will need to set up Public Key Infrastructure (PKI) in your computer first. The guide to do this can be seen in this [document](https://github.com/cermati/getting-started/blob/master/docs/tutorials/setting-up-pki-certificates-for-development.md).
 
 After completing the above commands, we'll be deploying our database using DBCTL. To do this run this command
 ```
@@ -91,6 +91,16 @@ Actually, after each build the PHP file will already be serve by NGINX, but tryi
 ```
 cd cli && ./svctl run service_name dev
 ```
+
+## Administrative Account
+Congratulation you've reach this part, now to make life easier, we've set up some administrative accounts for you to try. Here it is:
+| Service               | Username             | Password        |
+| --------------------- |:--------------------:|:---------------:|
+| Opencart, Woocommerce | admin                | admin           |
+| Prestashop            | admin@prestashop.com | adminprestashop | 
+
+## Plugin Development
+Plugin Development will be covered on each services, see you there!
 
 ## Troubleshoots
 ### Vault Login Process Related
