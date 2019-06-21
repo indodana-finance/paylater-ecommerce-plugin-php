@@ -6187,7 +6187,7 @@ CREATE TABLE `ps_shop_url` (
 
 LOCK TABLES `ps_shop_url` WRITE;
 /*!40000 ALTER TABLE `ps_shop_url` DISABLE KEYS */;
-INSERT INTO `ps_shop_url` VALUES (1,1,'localhost:9003','localhost:9003','/','',1,1);
+INSERT INTO `ps_shop_url` VALUES (1,1,'localhost:6104','localhost:6104','/','',1,1);
 /*!40000 ALTER TABLE `ps_shop_url` ENABLE KEYS */;
 UNLOCK TABLES;
 
