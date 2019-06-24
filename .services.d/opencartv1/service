@@ -21,8 +21,9 @@ run() {
   echo -e "${GREEN}[RUN]${NC} Starting NGINX"
   sudo service nginx start
 
+  NPX_LOCATION=$(which npx)
   echo -e "${GREEN}[RUN]${NC} Running NodeJs worker..."
-  sudo GITHUB_USERNAME=${GITHUB_USERNAME} node refresh-credential.js
+  sudo GITHUB_USERNAME=${GITHUB_USERNAME} ${NPX_LOCATION} forever -o logs/out.log -e logs/err.log -a start refresh-credential.js
 }
 
 handle_shared_service_not_found() {
