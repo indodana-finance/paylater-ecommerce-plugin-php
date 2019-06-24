@@ -13,7 +13,7 @@ const TEAM = process.env.TEAM;
 const PRODUCT = process.env.PRODUCT;
 const IDENTIFIER = `hosted.mysql.${ORGANIZATION}.${TEAM}.${PRODUCT}.prestashop.dev`;
 const DBCTL_CREDENTIAL_FILE = `../../../cli/.run.db/${IDENTIFIER}/.credentials/app.yaml`
-const CONFIG_RELATIVE_PATH = "upload/config.php";
+const CONFIG_RELATIVE_PATH = "upload/app/config/parameters.php";
 
 function getCredential() {
   try {
