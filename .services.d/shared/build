@@ -10,6 +10,7 @@ pushd ${BUILD_DIRECTORY}
   # Build directory is owned by nginx user (www-data)
   # We will need to sudo to safely remove the directory
   sudo rm -rf upload
+  sudo rm -rf logs
   rm -f *
 popd
 
