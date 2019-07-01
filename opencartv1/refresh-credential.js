@@ -16,16 +16,16 @@ const DBCTL_CREDENTIAL_FILE = `../../../cli/.run.db/${IDENTIFIER}/.credentials/a
 const CONFIG_RELATIVE_PATH = "upload/config.php";
 const ADMIN_CONFIG_RELATIVE_PATH = "upload/admin/config.php";
 
-function getCredential() {
+function getCredential(environment) {
   try {
-    execSync("./helper.sh", { stdio: "inherit", shell: "/bin/bash", env: process.env });
+    execSync(`./helper.sh ${environment}`, { stdio: "inherit", shell: "/bin/bash", env: process.env });
   } catch(error) {
     console.log(error);
   }
 }
 
 function readCredential() {
-  getCredential();
+  getCredential(process.env.ENVIRONMENT);
   const credentials = yaml.safeLoad(
     fs.readFileSync(DBCTL_CREDENTIAL_FILE, "utf8")
   );
