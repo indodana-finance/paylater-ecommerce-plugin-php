@@ -47,17 +47,14 @@ function refreshCredential(currentTimestamp) {
   writeCredentialToTemplate(credentials.data.username, credentials.data.password, "config.njk", CONFIG_RELATIVE_PATH);
   writeCredentialToTemplate(credentials.data.username, credentials.data.password, "admin.config.njk", ADMIN_CONFIG_RELATIVE_PATH);
 
-  // Lease duration was defined in seconds, thus we times it by a thousand to get ms
-  return currentTimestamp + credentials.lease_duration * 1000;
+  refreshTimestamp = currentTimestamp + credentials.lease_duration * 1000;
+  console.log("Next Credential Refresh: " + new Date(refreshTimestamp));
+
+  setTimeout(function() {
+    const currentTimestampForNextRefresh = Date.now();
+    refreshCredential(currentTimestampForNextRefresh);
+  }, refreshTimestamp - currentTimestamp);
 }
 
-let refreshTimestamp = 0;
-while (true) {
-  let currentTimestamp = Date.now();
-  // We need to refresh credentials 10 minutes (600000 ms) before it expires
-  if (currentTimestamp > refreshTimestamp - 600000) {
-    refreshTimestamp = refreshCredential(currentTimestamp);
-    console.log("Current timestamp: " + currentTimestamp);
-    console.log("Next Credential Refresh: " + refreshTimestamp);
-  }
-}
+const currentTimestamp = Date.now();
+refreshCredential(currentTimestamp);
