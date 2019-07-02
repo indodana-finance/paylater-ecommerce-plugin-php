@@ -21,6 +21,21 @@ function configure-secrets-to-aws-secretsmanager {
     popd
 }
 
+function configure-remote-secrets-to-vault {
+  DB_DIRECTORY=$1
+  DB_HOST=$2
+  DB_USER=$3
+  echo -e "${YELLOW} NOTE: We will need to synchronize the DB Credential to Secrets Management - Vault. Please make sure that the process completed successfully.${NC}"
+  sleep "5"
+  mkdir -p $DB_DIRECTORY/.bin.db
+  cp ./.bin.db/jq $DB_DIRECTORY/.bin.db/jq
+  cp ./.bin.db/yq $DB_DIRECTORY/.bin.db/yq
+  cp ./.bin.db/vault $DB_DIRECTORY/.bin.db/vault
+  pushd $DB_DIRECTORY
+    scp $DB_USER@$DB_HOST:$DB_DIRECTORY/.creds-upload-vault $DB_DIRECTORY/.creds-upload-vault
+    bash ./.creds-upload-vault
+  popd
+}
 
 function configure-secrets-to-vault {
     DB_DIRECTORY=$1
@@ -378,7 +393,11 @@ function db-deploy-execute {
           exit 1
         fi
       elif [[ "$DB_DEPLOYMENT_TYPE" == "hosted" ]]; then
-        configure-secrets-to-vault $DB_DIRECTORY
+        if [[ "$DB_HOST" != "localhost" ]]; then
+          configure-remote-secrets-to-vault $DB_DIRECTORY $DB_HOST $DB_USER
+        else
+          configure-secrets-to-vault $DB_DIRECTORY
+        fi
         VAULTUPLOAD=$(cat $DB_DIRECTORY/VAULTUPLOADOUTPUT)
         if [ "$VAULTUPLOAD" == "SUCCESS" ]; then
           echo -e "${GREEN} [SUCCESS] ${NC} Successfully synchronize DB Credential to Secrets Management - Vault"
