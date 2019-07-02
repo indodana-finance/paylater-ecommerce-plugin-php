@@ -19,7 +19,6 @@ run() {
   local NC='\033[0m' # No Color
 
   echo -e "${GREEN}[RUN]${NC} Starting NGINX"
-  sudo service nginx start
 
   NPX_LOCATION=$(which npx)
   echo -e "${GREEN}[RUN]${NC} Running NodeJs worker..."
