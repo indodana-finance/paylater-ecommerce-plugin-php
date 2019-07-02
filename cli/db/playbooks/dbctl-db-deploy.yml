@@ -1,4 +1,4 @@
-- hosts: "localhost"
+- hosts: "all"
   roles:
   - role: "database/common"
   - role: "database/deploy/postgres"

@@ -1,7 +1,8 @@
 db:
   deployment: hosted
   hosted:
-    db_host: "localhost"
+    db_host: "139.59.119.126"
+    ssh_user: "root"
     db_provider_root_credential:
       username: root
       password_length: 32
