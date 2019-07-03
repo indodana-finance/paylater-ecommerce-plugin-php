@@ -1,8 +1,6 @@
 const nunjucks = require("nunjucks");
-const yaml = require("js-yaml");
 const request = require("request-promise");
 const fs = require("fs");
-const execSync = require('child_process').execSync;
 const dotenv = require("dotenv");
 
 dotenv.config({
@@ -12,35 +10,34 @@ dotenv.config({
 const ORGANIZATION = process.env.ORGANIZATION;
 const TEAM = process.env.TEAM;
 const PRODUCT = process.env.PRODUCT;
-const ENVIORNMENT = process.env.ENVIORNMENT;
+const ENVIRONMENT = process.env.ENVIRONMENT;
 
-const IDENTIFIER = `hosted.mysql.${ORGANIZATION}.${TEAM}.${PRODUCT}.opencartv1.${ENVIORNMENT}`;
-const DBCTL_CREDENTIAL_FILE = `../../../cli/.run.db/${IDENTIFIER}/.credentials/app.yaml`
 const CONFIG_RELATIVE_PATH = "upload/config.php";
 const ADMIN_CONFIG_RELATIVE_PATH = "upload/admin/config.php";
 
-const CACERT_FILE_PATH = "/usr/share/pki/certs/service/pios/pios-stg.ca.crt";
-const CERT_FILE_PATH = "/usr/share/pki/certs/service/pios/pios-stg.crt";
-const KEY_FILE_PATH = "/usr/share/pki/certs/service/pios/.private/pios-stg.key";
+const CACERT_FILE_PATH = "/usr/share/pki/certs/service/pios-stg/pios-stg.ca.crt";
+const CERT_FILE_PATH = "/usr/share/pki/certs/service/pios-stg/pios-stg.crt";
+const KEY_FILE_PATH = "/usr/share/pki/certs/service/pios-stg/.private/pios-stg.key";
 
 const VAULT_BASE_URL = "https://vault.cermati.com:8443";
 
 async function getToken(name) {
+  console.log(name);
   const options = {
     url: `${VAULT_BASE_URL}/v1/auth/cert/login`,
     cert: fs.readFileSync(CERT_FILE_PATH),
     key: fs.readFileSync(KEY_FILE_PATH),
     ca: fs.readFileSync(CACERT_FILE_PATH),
-    form: {
+    form: JSON.stringify({
       "name": name
-    }
+    })
   };
-  const response = await request.post(options);
-  return response.data.auth.client_token;
+  const response = JSON.parse(await request.post(options));
+  return response.auth.client_token;
 }
 
 function getCredentialEndpoint(role) {
-  return `v1.1/${ORGANIZATION}/${TEAM}/db/hosted/mysql/${PRODUCT}/opencartv1/${ENVIORNMENT}/creds/${role}`;
+  return `v1.1/${ORGANIZATION}/${TEAM}/db/hosted/mysql/${PRODUCT}/opencartv1/${ENVIRONMENT}/creds/${role}`;
 }
 
 async function getCredential(token, role) {
@@ -54,16 +51,27 @@ async function getCredential(token, role) {
       "X-Vault-Token": token
     }
   }
-  return request.get(options).then(response => response.data);
+  const response = JSON.parse(await request.get(options));
+  return response;
 }
 
 async function readCredential() {
-  const name = `${ORGANIZATION}-${TEAM}-${PRODUCT}-${environment}`;
+  const name = `${ORGANIZATION}-${TEAM}-${PRODUCT}-${ENVIRONMENT}`;
   const role = "app";
 
-  const token = await getToken(role);
-  const credentials = await getCredential(token, role);
-  return credentials;
+  let token = "";
+  try {
+    token = await getToken(name);
+  } catch (error) {
+    console.log("Unable to get token", error.message);
+  }
+  try {
+    const credentials = await getCredential(token, role);
+    return credentials;
+  } catch (error) {
+    console.log("Unable to get credentials", error.message);
+    return null;
+  }
 }
 
 function writeCredentialToTemplate(username, password, inputPath, outputPath) {
@@ -78,6 +86,12 @@ function writeCredentialToTemplate(username, password, inputPath, outputPath) {
 
 async function refreshCredential(currentTimestamp) {
   const credentials = await readCredential();
+  
+  if (credentials === null) {
+    console.log("Failure happens in one of our processes, Aborting...");
+    return;
+  }
+
   writeCredentialToTemplate(credentials.data.username, credentials.data.password, "config.njk", CONFIG_RELATIVE_PATH);
   writeCredentialToTemplate(credentials.data.username, credentials.data.password, "admin.config.njk", ADMIN_CONFIG_RELATIVE_PATH);
 
