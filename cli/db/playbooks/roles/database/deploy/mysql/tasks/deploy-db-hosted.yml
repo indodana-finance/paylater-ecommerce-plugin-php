@@ -50,8 +50,14 @@
     dest: "{{ db_directory }}/.creds-upload-vault"
     mode: 0755
 
+- name: Transfer database creation file to remote server
+  command: "rsync -r {{ db_directory }} {{ remote_user }}@{{ remote_host }}:~/.pios.run.db"
+
 - name: Execute create-db script
-  shell: "mysql < {{ db_directory }}/sql/create-db.sql"
+  shell: "mysql < ~/.pios.run.db/{{ run_db_identifier }}/sql/create-db.sql"
   become: yes
   become_method: sudo
   become_user: root
+  remote_user: "{{ remote_user }}"
+  delegate_to:
+    "{{ remote_host }}"

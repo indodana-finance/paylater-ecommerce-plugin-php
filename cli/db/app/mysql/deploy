@@ -32,8 +32,9 @@ function configure-remote-secrets-to-vault {
   cp ./.bin.db/yq $DB_DIRECTORY/.bin.db/yq
   cp ./.bin.db/vault $DB_DIRECTORY/.bin.db/vault
   pushd $DB_DIRECTORY
-    scp $DB_USER@$DB_HOST:$DB_DIRECTORY/.creds-upload-vault $DB_DIRECTORY/.creds-upload-vault
-    bash ./.creds-upload-vault
+    scp -r $DB_USER@$DB_HOST:$DB_DIRECTORY/* $DB_DIRECTORY
+    scp $DB_USER@$DB_HOST:$DB_DIRECTORY/.creds-upload-vault $DB_DIRECTORY
+    bash .creds-upload-vault
   popd
 }
 
@@ -330,7 +331,7 @@ function db-deploy-execute {
         DB_USER=$(whoami)
       fi
 
-      ansible-playbook db/playbooks/dbctl-db-deploy.yml -i "$DB_HOST," \
+      ansible-playbook db/playbooks/dbctl-db-deploy.yml \
         -e "db_engine=mysql" \
         -e "db_deployment_type=$DB_DEPLOYMENT_TYPE" \
         -e "db_name=${DB_NAME}" \
@@ -347,7 +348,8 @@ function db-deploy-execute {
         -e "dbctl_vault_ca_cert_file=${DBCTL_VAULT_CA_CERT_FILE}" \
         -e "dbctl_vault_token=${DBCTL_VAULT_TOKEN}" \
         -e "ansible_sudo_pass='${YOUR_SUDO_PASS}'" \
-        --user $DB_USER
+        -e "remote_user=$DB_USER" \
+        -e "remote_host=$DB_HOST"
 
 
       if [[ "$DB_DEPLOYMENT_TYPE" == "rds" ]]; then
@@ -393,11 +395,7 @@ function db-deploy-execute {
           exit 1
         fi
       elif [[ "$DB_DEPLOYMENT_TYPE" == "hosted" ]]; then
-        if [[ "$DB_HOST" != "localhost" ]]; then
-          configure-remote-secrets-to-vault $DB_DIRECTORY $DB_HOST $DB_USER
-        else
-          configure-secrets-to-vault $DB_DIRECTORY
-        fi
+        configure-secrets-to-vault $DB_DIRECTORY
         VAULTUPLOAD=$(cat $DB_DIRECTORY/VAULTUPLOADOUTPUT)
         if [ "$VAULTUPLOAD" == "SUCCESS" ]; then
           echo -e "${GREEN} [SUCCESS] ${NC} Successfully synchronize DB Credential to Secrets Management - Vault"
