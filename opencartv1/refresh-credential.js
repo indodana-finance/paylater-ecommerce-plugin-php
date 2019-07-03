@@ -7,6 +7,8 @@ dotenv.config({
   path: "../../../cli/NAMESPACE"
 });
 
+const HOST = process.env.HOST;
+
 const ORGANIZATION = process.env.ORGANIZATION;
 const TEAM = process.env.TEAM;
 const PRODUCT = process.env.PRODUCT;
@@ -78,7 +80,8 @@ function writeCredentialToTemplate(username, password, inputPath, outputPath) {
   nunjucks.configure({ autoescape: true });
   const result = nunjucks.render(inputPath, {
     db_username: username,
-    db_password: password
+    db_password: password,
+    host: HOST
   });
   const outputFd = fs.openSync(outputPath, "w");
   fs.writeSync(outputFd, result);

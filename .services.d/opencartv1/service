@@ -12,6 +12,7 @@ run() {
   local SERVICE_NAME=$1
   local ENVIRONMENT=$2
   local BUILD_DIRECTORY=$3
+  local HOST=$4
 
   local RED='\033[0;31m'
   local GREEN='\033[0;32m'
@@ -22,7 +23,10 @@ run() {
 
   NPX_LOCATION=$(which npx)
   echo -e "${GREEN}[RUN]${NC} Running NodeJs worker..."
-  sudo GITHUB_USERNAME=${GITHUB_USERNAME} ENVIRONMENT=${ENVIRONMENT} ${NPX_LOCATION} forever -o logs/out.log -e logs/err.log -a start refresh-credential.js
+  sudo GITHUB_USERNAME=${GITHUB_USERNAME} \
+    ENVIRONMENT=${ENVIRONMENT} \
+    HOST=${HOST} \
+    ${NPX_LOCATION} forever -o logs/out.log -e logs/err.log -a start refresh-credential.js
 }
 
 handle_shared_service_not_found() {
