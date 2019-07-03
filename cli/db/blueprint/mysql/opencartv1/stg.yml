@@ -11,4 +11,4 @@ secrets:
     host: "https://vault.cermati.com:8443"
     tls: 
       enabled: true
-      certs_bundle: dbctl-prod
+      certs_bundle: dbctl-stg
