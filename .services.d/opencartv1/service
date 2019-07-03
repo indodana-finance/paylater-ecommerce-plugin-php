@@ -26,7 +26,7 @@ run() {
 
   echo -e "${GREEN}[RUN]${NC} Starting NGINX"
   NODE=$(which node)
-  sudo HOST=${HOST} PORT=${PORT} ${NODE} geenrate-nginx-config.js
+  sudo HOST=${HOST} PORT=${PORT} ${NODE} generate-nginx-config.js
 
   NPX=$(which NPX)
   echo -e "${GREEN}[RUN]${NC} Running NodeJs worker..."
