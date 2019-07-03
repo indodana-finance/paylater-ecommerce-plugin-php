@@ -15,7 +15,7 @@ run() {
   local HOST=$4
   local PORT=$5
 
-  if [[ ! -z $5 ]]; then
+  if [[ -z $5 ]]; then
     PORT="80"
   fi
 
