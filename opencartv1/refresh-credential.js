@@ -1,5 +1,6 @@
 const nunjucks = require("nunjucks");
 const yaml = require("js-yaml");
+const request = require("request-promise");
 const fs = require("fs");
 const execSync = require('child_process').execSync;
 const dotenv = require("dotenv");
@@ -16,16 +17,40 @@ const DBCTL_CREDENTIAL_FILE = `../../../cli/.run.db/${IDENTIFIER}/.credentials/a
 const CONFIG_RELATIVE_PATH = "upload/config.php";
 const ADMIN_CONFIG_RELATIVE_PATH = "upload/admin/config.php";
 
-function getCredential(environment) {
-  try {
-    execSync(`./helper.sh ${environment}`, { stdio: "inherit", shell: "/bin/bash", env: process.env });
-  } catch(error) {
-    console.log(error);
-  }
+const CACERT_FILE_PATH = "/usr/share/pki/certs/service/pios/pios-stg.ca.crt";
+const CERT_FILE_PATH = "/usr/share/pki/certs/service/pios/pios-stg.crt";
+const KEY_FILE_PATH = "/usr/share/pki/certs/service/pios/.private/pios-stg.key";
+
+const VAULT_BASE_URL = "https://vault.cermati.com:8443";
+
+function getToken(environment) {
+  const role = `${ORGANIZATION}-${TEAM}-${PRODUCT}-${environment}`;
+  const options = {
+    url: `${VAULT_BASE_URL}/v1/auth/cert/login`,
+    cert: fs.readFileSync(CERT_FILE_PATH),
+    key: fs.readFileSync(KEY_FILE_PATH),
+    ca: fs.readFileSync(CACERT_FILE_PATH),
+    form: {
+      "name": role
+    }
+  };
+  return request.post(options).then(response => {
+    console.log(await getToken(environment));
+    return response.data.auth.client_token;
+  });
 }
 
-function readCredential() {
-  getCredential(process.env.ENVIRONMENT);
+async function getCredential(environment) {
+  const token = await getToken(environment);
+  // try {
+  //   execSync(`./helper.sh ${environment}`, { stdio: "inherit", shell: "/bin/bash", env: process.env });
+  // } catch(error) {
+  //   console.log(error);
+  // }
+}
+
+async function readCredential() {
+  await getCredential(process.env.ENVIRONMENT);
   const credentials = yaml.safeLoad(
     fs.readFileSync(DBCTL_CREDENTIAL_FILE, "utf8")
   );
@@ -42,8 +67,8 @@ function writeCredentialToTemplate(username, password, inputPath, outputPath) {
   fs.writeSync(outputFd, result);
 }
 
-function refreshCredential(currentTimestamp) {
-  const credentials = readCredential();
+async function refreshCredential(currentTimestamp) {
+  const credentials = await readCredential();
   writeCredentialToTemplate(credentials.data.username, credentials.data.password, "config.njk", CONFIG_RELATIVE_PATH);
   writeCredentialToTemplate(credentials.data.username, credentials.data.password, "admin.config.njk", ADMIN_CONFIG_RELATIVE_PATH);
 
