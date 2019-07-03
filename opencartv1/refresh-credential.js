@@ -8,6 +8,7 @@ dotenv.config({
 });
 
 const HOST = process.env.HOST;
+const PORT = process.env.PORT || "80";
 
 const ORGANIZATION = process.env.ORGANIZATION;
 const TEAM = process.env.TEAM;
@@ -81,7 +82,8 @@ function writeCredentialToTemplate(username, password, inputPath, outputPath) {
   const result = nunjucks.render(inputPath, {
     db_username: username,
     db_password: password,
-    host: HOST
+    host: HOST,
+    port: PORT
   });
   const outputFd = fs.openSync(outputPath, "w");
   fs.writeSync(outputFd, result);

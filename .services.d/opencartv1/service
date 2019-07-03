@@ -13,6 +13,11 @@ run() {
   local ENVIRONMENT=$2
   local BUILD_DIRECTORY=$3
   local HOST=$4
+  local PORT=$5
+
+  if [[ ! -z $5 ]]; then
+    PORT="80"
+  fi
 
   local RED='\033[0;31m'
   local GREEN='\033[0;32m'
@@ -20,13 +25,15 @@ run() {
   local NC='\033[0m' # No Color
 
   echo -e "${GREEN}[RUN]${NC} Starting NGINX"
+  NODE=$(which node)
+  sudo HOST=${HOST} PORT=${PORT} ${NODE} geenrate-nginx-config.js
 
-  NPX_LOCATION=$(which npx)
+  NPX=$(which NPX)
   echo -e "${GREEN}[RUN]${NC} Running NodeJs worker..."
   sudo GITHUB_USERNAME=${GITHUB_USERNAME} \
     ENVIRONMENT=${ENVIRONMENT} \
     HOST=${HOST} \
-    ${NPX_LOCATION} forever -o logs/out.log -e logs/err.log -a start refresh-credential.js
+    ${NPX} forever -o logs/out.log -e logs/err.log -a start refresh-credential.js
 }
 
 handle_shared_service_not_found() {
