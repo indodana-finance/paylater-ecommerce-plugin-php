@@ -12,7 +12,9 @@ dotenv.config({
 const ORGANIZATION = process.env.ORGANIZATION;
 const TEAM = process.env.TEAM;
 const PRODUCT = process.env.PRODUCT;
-const IDENTIFIER = `hosted.mysql.${ORGANIZATION}.${TEAM}.${PRODUCT}.opencartv1.dev`;
+const ENVIORNMENT = process.env.ENVIORNMENT;
+
+const IDENTIFIER = `hosted.mysql.${ORGANIZATION}.${TEAM}.${PRODUCT}.opencartv1.${ENVIORNMENT}`;
 const DBCTL_CREDENTIAL_FILE = `../../../cli/.run.db/${IDENTIFIER}/.credentials/app.yaml`
 const CONFIG_RELATIVE_PATH = "upload/config.php";
 const ADMIN_CONFIG_RELATIVE_PATH = "upload/admin/config.php";
@@ -23,37 +25,44 @@ const KEY_FILE_PATH = "/usr/share/pki/certs/service/pios/.private/pios-stg.key";
 
 const VAULT_BASE_URL = "https://vault.cermati.com:8443";
 
-function getToken(environment) {
-  const role = `${ORGANIZATION}-${TEAM}-${PRODUCT}-${environment}`;
+async function getToken(name) {
   const options = {
     url: `${VAULT_BASE_URL}/v1/auth/cert/login`,
     cert: fs.readFileSync(CERT_FILE_PATH),
     key: fs.readFileSync(KEY_FILE_PATH),
     ca: fs.readFileSync(CACERT_FILE_PATH),
     form: {
-      "name": role
+      "name": name
     }
   };
-  return request.post(options).then(response => {
-    console.log(await getToken(environment));
-    return response.data.auth.client_token;
-  });
+  const response = await request.post(options);
+  return response.data.auth.client_token;
 }
 
-async function getCredential(environment) {
-  const token = await getToken(environment);
-  // try {
-  //   execSync(`./helper.sh ${environment}`, { stdio: "inherit", shell: "/bin/bash", env: process.env });
-  // } catch(error) {
-  //   console.log(error);
-  // }
+function getCredentialEndpoint(role) {
+  return `v1.1/${ORGANIZATION}/${TEAM}/db/hosted/mysql/${PRODUCT}/opencartv1/${ENVIORNMENT}/creds/${role}`;
+}
+
+async function getCredential(token, role) {
+  const endpoint = getCredentialEndpoint(role);
+  const options = {
+    url: `${VAULT_BASE_URL}/v1/${endpoint}`,
+    cert: fs.readFileSync(CERT_FILE_PATH),
+    key: fs.readFileSync(KEY_FILE_PATH),
+    ca: fs.readFileSync(CACERT_FILE_PATH),
+    headers: {
+      "X-Vault-Token": token
+    }
+  }
+  return request.get(options).then(response => response.data);
 }
 
 async function readCredential() {
-  await getCredential(process.env.ENVIRONMENT);
-  const credentials = yaml.safeLoad(
-    fs.readFileSync(DBCTL_CREDENTIAL_FILE, "utf8")
-  );
+  const name = `${ORGANIZATION}-${TEAM}-${PRODUCT}-${environment}`;
+  const role = "app";
+
+  const token = await getToken(role);
+  const credentials = await getCredential(token, role);
   return credentials;
 }
 
