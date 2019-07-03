@@ -28,7 +28,7 @@ run() {
   NODE=$(which node)
   sudo HOST=${HOST} PORT=${PORT} ${NODE} generate-nginx-config.js
 
-  NPX=$(which NPX)
+  NPX=$(which npx)
   echo -e "${GREEN}[RUN]${NC} Running NodeJs worker..."
   sudo GITHUB_USERNAME=${GITHUB_USERNAME} \
     ENVIRONMENT=${ENVIRONMENT} \
