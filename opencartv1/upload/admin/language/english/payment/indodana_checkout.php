@@ -22,6 +22,7 @@ $_['entry_country_code'] = 'Country Code';
 $_['entry_api_secret'] = 'API Secret';
 $_['entry_api_key'] = 'API Key';
 $_['entry_environment'] = 'Environment';
+$_['entry_sort_order'] = 'Sort Order';
 
 $_['environment_sandbox'] = 'SANDBOX';
 $_['environment_production'] = 'PRODUCTION';
