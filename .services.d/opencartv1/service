@@ -15,8 +15,9 @@ run() {
   local HOST=$4
   local PORT=$5
 
+  NGINX_PORT=$PORT
   if [[ -z $5 ]]; then
-    PORT="80"
+    NGINX_PORT="80"
   fi
 
   local RED='\033[0;31m'
@@ -26,13 +27,14 @@ run() {
 
   echo -e "${GREEN}[RUN]${NC} Starting NGINX"
   NODE=$(which node)
-  sudo HOST=${HOST} PORT=${PORT} ${NODE} generate-nginx-config.js
+  sudo HOST=${HOST} PORT=${NGINX_PORT} ${NODE} generate-nginx-config.js
 
   NPX=$(which npx)
   echo -e "${GREEN}[RUN]${NC} Running NodeJs worker..."
   sudo GITHUB_USERNAME=${GITHUB_USERNAME} \
     ENVIRONMENT=${ENVIRONMENT} \
     HOST=${HOST} \
+    PORT=${PORT}
     ${NPX} forever -o logs/out.log -e logs/err.log -a start refresh-credential.js
 }
 
