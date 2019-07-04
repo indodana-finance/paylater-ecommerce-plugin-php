@@ -128,6 +128,12 @@ class ControllerPaymentIndodanaCheckout extends Controller {
         } else {
             $this->data['indodana_checkout_status'] = $this->config->get('indodana_checkout_status');
         }
+
+        if (isset($this->request->post['indodana_checkout_sort_order'])) {
+            $this->data['indodana_checkout_sort_order'] = $this->request->post['indodana_checkout_sort_order'];
+        } else {
+            $this->data['indodana_checkout_sort_order'] = $this->config->get('indodana_checkout_sort_order');
+        }
     }
 
     private function initialize_aditional_data() {
@@ -155,6 +161,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
         $this->data['entry_api_secret'] = $this->language->get('entry_api_secret');
         $this->data['entry_api_key'] = $this->language->get('entry_api_key');
         $this->data['entry_environment'] = $this->language->get('entry_environment');
+        $this->data['entry_sort_order'] = $this->language->get('entry_sort_order');
 
         $this->data['country_codes'] = $this->language->get('country_codes');
         $this->data['environment_sandbox'] = $this->language->get('environment_sandbox');
@@ -220,6 +227,12 @@ class ControllerPaymentIndodanaCheckout extends Controller {
         } else {
             $this->data['error_environment_empty'] = '';
         }
+
+        if (isset($this->errors['sort_order'])) {
+            $this->data['error_sort_order_empty'] = $this->errors['sort_order'];
+        } else {
+            $this->data['error_sort_order_empty'] = '';
+        }
     }
 
     private function validate() {
@@ -261,6 +274,10 @@ class ControllerPaymentIndodanaCheckout extends Controller {
 
         if (empty($this->request->post['indodana_checkout_environment'])) {
             $this->errors['environment'] = $this->language->get('error_environment_empty');
+        }
+
+        if (empty($this->request->post['indodana_checkout_sort_order'])) {
+            $this->errors['sort_order'] = $this->language->get('error_sort_order_empty');
         }
 
         return empty($this->errors);

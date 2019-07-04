@@ -154,6 +154,15 @@
               <?php } ?>
             </select></td>
           </tr>
+          <tr>
+            <td><?=$entry_sort_order; ?></td>
+            <td>
+              <input type="text" name="indodana_checkout_sort_order" value="<?=$indodana_checkout_sort_order; ?>" size="30"/>
+              <?php if ($error_sort_order_empty) { ?>
+                <span class="error"><?=$error_sort_order_empty; ?></span>
+              <?php } ?>
+            </td>
+          </tr>
         </table>
       </form>
     </div>

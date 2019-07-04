@@ -1,8 +1,6 @@
 <?php
 class ModelPaymentIndodanaCheckout extends Model {
-    public function getMethod($address, $total) {
-        $this->load->language('payment/custom');
-      
+    public function getMethod($address, $total) {      
         $method_data = array(
           'code'     => 'indodana_checkout',
           'title'    => 'Indodana Paylater'

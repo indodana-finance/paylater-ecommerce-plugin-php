@@ -35,6 +35,7 @@ $_['error_country_code_empty'] = 'Country code must not be empty';
 $_['error_api_secret_empty'] = 'API Secret must not be empty';
 $_['error_api_key_empty'] = 'API Key must not be empty';
 $_['error_environment_empty'] = 'Please choose an environment';
+$_['error_sort_order_empty'] = 'Please define the plugin\'s sort order';
 
 $_['country_codes'] = array(
     "IDN",
