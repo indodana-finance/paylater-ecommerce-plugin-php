@@ -2,6 +2,7 @@ const nunjucks = require("nunjucks");
 const request = require("request-promise");
 const fs = require("fs");
 const dotenv = require("dotenv");
+const yaml = require("js-yaml");
 
 dotenv.config({
   path: "../../../cli/NAMESPACE"
@@ -18,16 +19,21 @@ const ENVIRONMENT = process.env.ENVIRONMENT;
 const CONFIG_RELATIVE_PATH = "upload/config.php";
 const ADMIN_CONFIG_RELATIVE_PATH = "upload/admin/config.php";
 
-const CACERT_FILE_PATH = "/usr/share/pki/certs/service/pios-stg/pios-stg.ca.crt";
-const CERT_FILE_PATH = "/usr/share/pki/certs/service/pios-stg/pios-stg.crt";
-const KEY_FILE_PATH = "/usr/share/pki/certs/service/pios-stg/.private/pios-stg.key";
+const CACERT_FILE_PATH = `/usr/share/pki/certs/service/pios-${ENVIRONMENT}/pios-${ENVIRONMENT}.ca.crt`;
+const CERT_FILE_PATH = `/usr/share/pki/certs/service/pios-${ENVIRONMENT}/pios-${ENVIRONMENT}.crt`;
+const KEY_FILE_PATH = `/usr/share/pki/certs/service/pios-${ENVIRONMENT}/.private/pios-${ENVIRONMENT}.key`;
 
-const VAULT_BASE_URL = "https://vault.cermati.com:8443";
+function getVaultBaseUrl() {
+  const dbctlConfigFilePath = `../../../cli/db/blueprint/mysql/opencartv1/${ENVIRONMENT}.yml`;
+  const dbctlConfig = yaml.safeLoad(fs.readFileSync(dbctlConfigFilePath, 'utf8'));
+
+  return dbctlConfig.secrets.vault.host;
+}
 
 async function getToken(name) {
-  console.log(name);
+  const vaultBaseUrl = getVaultBaseUrl();
   const options = {
-    url: `${VAULT_BASE_URL}/v1/auth/cert/login`,
+    url: `${vaultBaseUrl}/v1/auth/cert/login`,
     cert: fs.readFileSync(CERT_FILE_PATH),
     key: fs.readFileSync(KEY_FILE_PATH),
     ca: fs.readFileSync(CACERT_FILE_PATH),
@@ -44,9 +50,10 @@ function getCredentialEndpoint(role) {
 }
 
 async function getCredential(token, role) {
+  const vaultBaseUrl = getVaultBaseUrl();
   const endpoint = getCredentialEndpoint(role);
   const options = {
-    url: `${VAULT_BASE_URL}/v1/${endpoint}`,
+    url: `${vaultBaseUrl}/v1/${endpoint}`,
     cert: fs.readFileSync(CERT_FILE_PATH),
     key: fs.readFileSync(KEY_FILE_PATH),
     ca: fs.readFileSync(CACERT_FILE_PATH),
@@ -87,6 +94,7 @@ function writeCredentialToTemplate(username, password, inputPath, outputPath) {
   });
   const outputFd = fs.openSync(outputPath, "w");
   fs.writeSync(outputFd, result);
+  fs.closeSync(outputFd);
 }
 
 async function refreshCredential(currentTimestamp) {

@@ -1,12 +1,13 @@
 <?php
 // HTTP
-define('HTTP_SERVER', 'http://{{ '{{' }} host {{ '}}' }}{% if port %}:{{ '{{' }} port {{ '}}' }}{% endif %}/admin/');
-define('HTTP_CATALOG', 'http://{{ '{{' }} host {{ '}}' }}{% if port %}:{{ '{{' }} port {{ '}}' }}{% endif %}/');
+{% raw %}
+define('HTTP_SERVER', 'http://{{ host }}{% if port %}:{{ port }}{% endif %}/admin/');
+define('HTTP_CATALOG', 'http://{{ host }}{% if port %}:{{ port }}{% endif %}/');
 
 // HTTPS
-define('HTTPS_SERVER', 'https://{{ '{{' }} host {{ '}}' }}{% if port %}:{{ '{{' }} port {{ '}}' }}{% endif %}/admin/');
-define('HTTPS_CATALOG', 'https://{{ '{{' }} host {{ '}}' }}{% if port %}:{{ '{{' }} port {{ '}}' }}{% endif %}/');
-
+define('HTTPS_SERVER', 'https://{{ host }}{% if port %}:{{ port }}{% endif %}/admin/');
+define('HTTPS_CATALOG', 'https://{{ host }}{% if port %}:{{ port }}{% endif %}/');
+{% endraw %}
 // DIR
 define('DIR_APPLICATION', '{{ build_directory }}/upload/admin/');
 define('DIR_SYSTEM', '{{ build_directory }}/upload/system/');
@@ -21,10 +22,12 @@ define('DIR_LOGS', '{{ build_directory }}/upload/system/logs/');
 define('DIR_CATALOG', '{{ build_directory }}/upload/catalog/');
 
 // DB
+{% raw %}
 define('DB_DRIVER', 'mysqli');
 define('DB_HOSTNAME', 'localhost');
-define('DB_USERNAME', '{{ '{{' }} db_username {{ '}}' }}');
-define('DB_PASSWORD', '{{ '{{' }} db_password {{ '}}' }}');
+define('DB_USERNAME', '{{ db_username }}');
+define('DB_PASSWORD', '{{ db_password }}');
 define('DB_DATABASE', 'opencartv1');
 define('DB_PREFIX', 'oc_');
+{% endraw %}
 ?>

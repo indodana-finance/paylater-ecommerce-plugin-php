@@ -324,11 +324,11 @@ function db-deploy-execute {
     else
       if [[ "$DB_DEPLOYMENT_TYPE" == "hosted" ]]; then
         DB_HOST=$($yq r $BLUEPRINT_DATABASE_FILE 'db.hosted.db_host')
-        DB_USER=$($yq r $BLUEPRINT_DATABASE_FILE 'db.hosted.ssh_user')
+        SSH_USER=$($yq r $BLUEPRINT_DATABASE_FILE 'db.hosted.ssh_user')
       fi
 
-      if [[ "DB_USER" == "" ]]; then
-        DB_USER=$(whoami)
+      if [[ "SSH_USER" == "" ]]; then
+        SSH_USER=$(whoami)
       fi
 
       ansible-playbook db/playbooks/dbctl-db-deploy.yml \
@@ -348,8 +348,8 @@ function db-deploy-execute {
         -e "dbctl_vault_ca_cert_file=${DBCTL_VAULT_CA_CERT_FILE}" \
         -e "dbctl_vault_token=${DBCTL_VAULT_TOKEN}" \
         -e "ansible_sudo_pass='${YOUR_SUDO_PASS}'" \
-        -e "remote_user=$DB_USER" \
-        -e "remote_host=$DB_HOST"
+        -e "ssh_user=$SSH_USER" \
+        -e "db_host=$DB_HOST"
 
 
       if [[ "$DB_DEPLOYMENT_TYPE" == "rds" ]]; then

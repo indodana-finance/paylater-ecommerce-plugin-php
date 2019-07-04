@@ -1,12 +1,14 @@
 <?php
 // HTTP
-define('HTTP_SERVER', 'http://{{ '{{' }} host {{ '}}' }}{% if port %}:{{ '{{' }} port {{ '}}' }}{% endif %}/');
+{% raw %}
+define('HTTP_SERVER', 'http://{{ host }}{% if port %}:{{ port }}{% endif %}/');
 define('HTTP_IMAGE', 'image/');
 define('HTTP_ADMIN', 'admin/');
 
 // HTTPS
-define('HTTPS_SERVER', 'http://{{ '{{' }} host {{ '}}' }}{% if port %}:{{ '{{' }} port {{ '}}' }}{% endif %}/');
+define('HTTPS_SERVER', 'http://{{ host }}{% if port %}:{{ port }}{% endif %}/');
 define('HTTPS_IMAGE', 'image/');
+{% endraw %}
 
 // DIR
 define('DIR_APPLICATION', '{{ build_directory }}/upload/catalog/');
@@ -21,10 +23,12 @@ define('DIR_DOWNLOAD', '{{ build_directory }}/upload/download/');
 define('DIR_LOGS', '{{ build_directory }}/upload/system/logs/');
 
 // DB
+{% raw %}
 define('DB_DRIVER', 'mysqli');
 define('DB_HOSTNAME', 'localhost');
-define('DB_USERNAME', '{{ '{{' }} db_username {{ '}}' }}');
-define('DB_PASSWORD', '{{ '{{' }} db_password {{ '}}' }}');
+define('DB_USERNAME', '{{ db_username }}');
+define('DB_PASSWORD', '{{ db_password }}');
 define('DB_DATABASE', 'opencartv1');
 define('DB_PREFIX', 'oc_');
+{% endraw %}
 ?>

@@ -45,3 +45,4 @@ cert_auth_config:
       allowed_common_names:
         - '*@cermati.com'
         - '*@indodana.com'
+        - 'pios-dev'
