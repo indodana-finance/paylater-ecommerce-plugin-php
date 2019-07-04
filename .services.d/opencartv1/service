@@ -34,7 +34,7 @@ run() {
   sudo GITHUB_USERNAME=${GITHUB_USERNAME} \
     ENVIRONMENT=${ENVIRONMENT} \
     HOST=${HOST} \
-    PORT=${PORT}
+    PORT=${PORT} \
     ${NPX} forever -o logs/out.log -e logs/err.log -a start refresh-credential.js
 }
 
