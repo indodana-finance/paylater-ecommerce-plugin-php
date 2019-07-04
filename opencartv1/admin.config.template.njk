@@ -1,11 +1,11 @@
 <?php
 // HTTP
-define('HTTP_SERVER', 'http://{{ '{{' }} host {{ '}}' }}:{{ '{{' }} port {{ '}}' }}/admin/');
-define('HTTP_CATALOG', 'http://{{ '{{' }} host {{ '}}' }}:{{ '{{' }} port {{ '}}' }}/');
+define('HTTP_SERVER', 'http://{{ '{{' }} host {{ '}}' }}{% if port %}:{{ '{{' }} port {{ '}}' }}{% endif %}/admin/');
+define('HTTP_CATALOG', 'http://{{ '{{' }} host {{ '}}' }}{% if port %}:{{ '{{' }} port {{ '}}' }}{% endif %}/');
 
 // HTTPS
-define('HTTPS_SERVER', 'https://{{ '{{' }} host {{ '}}' }}:{{ '{{' }} port {{ '}}' }}/admin/');
-define('HTTPS_CATALOG', 'https://{{ '{{' }} host {{ '}}' }}:{{ '{{' }} port {{ '}}' }}/');
+define('HTTPS_SERVER', 'https://{{ '{{' }} host {{ '}}' }}{% if port %}:{{ '{{' }} port {{ '}}' }}{% endif %}/admin/');
+define('HTTPS_CATALOG', 'https://{{ '{{' }} host {{ '}}' }}{% if port %}:{{ '{{' }} port {{ '}}' }}{% endif %}/');
 
 // DIR
 define('DIR_APPLICATION', '{{ build_directory }}/upload/admin/');
