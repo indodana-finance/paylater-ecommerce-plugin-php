@@ -1,9 +1,9 @@
 <?php
-class Logger
+class IndodanaLogger
 {
-    public const ERROR = 1;
-    public const WARNING = 2;
-    public const INFO = 3;
+    const ERROR = 1;
+    const WARNING = 2;
+    const INFO = 3;
 
     private static function write($message, $filePath)
     {
@@ -49,7 +49,7 @@ class Logger
         }
 
         $date = date("Y-m-d H:i:s", $time);
-        $message = '[' . $date . ']' . '[' . $requestUri . ']' . $message . PHP_EOL;
+        $message = '[INDODANA][' . $date . ']' . '[' . $requestUri . ']' . $message . PHP_EOL;
 
         switch($logType) {
             case self::INFO:

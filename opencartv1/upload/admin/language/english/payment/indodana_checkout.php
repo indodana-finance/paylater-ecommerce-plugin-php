@@ -11,7 +11,9 @@ $_['text_button_cancel'] = 'Cancel';
 $_['text_environment_sandbox'] = 'SANDBOX';
 $_['text_environment_production'] = 'PRODUCTION'; 
 
-$_['entry_order_status'] = 'Default Order Status';
+$_['entry_order_success_status'] = 'Default Order Success Status';
+$_['entry_order_failed_status'] = 'Default Order Failed Status';
+$_['entry_order_pending_status'] = 'Default Order Pending Status';
 $_['entry_first_name'] = 'First Name';
 $_['entry_last_name'] = 'Last Name';
 $_['entry_address'] = 'Address';

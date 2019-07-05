@@ -2,6 +2,8 @@
   <h2><?=$textPaymentOptions ?></h2>
   <input type='hidden' value='<?=$orderData; ?>' id='orderData'/>
   <input type='hidden' value='<?=$authorization; ?>' id='authorization'/>
+  <input type='hidden' value='<?=$merchantConfirmPaymentUrl; ?>' id='merchantConfirmPaymentUrl' />
+  <input type='hidden' value='<?=$indodanaBaseUrl; ?>' id='indodanaBaseUrl' />
   <div class='checkout-product'>
     <table>
       <thead><tr>
@@ -32,21 +34,42 @@ $(document).ready(function() {
     var jsonData = $('#orderData').val();
     var data = JSON.parse(jsonData);
     var paymentOptionId = $("input[name='paymentSelection']:checked").val();
-    var checkoutUrl = getCheckoutUrl(paymentOptionId, data);
+    confirmPayment(data.transactionDetails.merchantOrderId, function() {
+      redirectToCheckoutUrl(paymentOptionId, data);
+    });
   })
 });
+
+function confirmPayment(orderId, success) {
+  var confirmPaymentUrl = $('#merchantConfirmPaymentUrl').val();
+  var data = {
+    orderId: orderId
+  }
+  $.ajax({
+    url: confirmPaymentUrl,
+    type: 'post',
+    data: JSON.stringify(data),
+    headers: {
+      'Content-type': 'application/json',
+      'Accept': 'application/json'
+    },
+    dataType: 'json',
+    success: success
+  });
+}
 
 function getAuthorizationHeader() {
   var authorization = $('#authorization').val();
   return authorization;
 }
 
-function getCheckoutUrl(paymentOptionId, paymentData) {
+function redirectToCheckoutUrl(paymentOptionId, paymentData) {
   var data = paymentData;
+  var baseUrl = $('#indodanaBaseUrl').val();
+  console.log(baseUrl);
   data.paymentType = paymentOptionId;
-  console.log(data);
   $.ajax({
-    url: 'https://stg-k-api.indodana.com/chermes/merchant/v1/checkout_url',
+    url: `${baseUrl}/merchant/v1/checkout_url`,
     type: 'post',
     data: JSON.stringify(data),
     headers: {
@@ -56,12 +79,8 @@ function getCheckoutUrl(paymentOptionId, paymentData) {
     },
     dataType: 'json',
     success: function(data) {
-      console.log(data);
       const redirectUrl = data.redirectUrl;
       window.location = redirectUrl;
-    },
-    error: function(error) {
-      console.log(error);
     }
   });
 }

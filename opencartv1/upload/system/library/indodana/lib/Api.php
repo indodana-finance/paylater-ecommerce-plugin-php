@@ -1,7 +1,7 @@
 <?php
 class IndodanaApi
 {
-  const SANDBOX_URL = 'https://stg-k-api.indodana.com';
+  const SANDBOX_URL = 'https://sandbox01-api.indodana.com/chermes';
   const PRODUCTION_URL = '';
 
   private $apiKey;
@@ -20,7 +20,7 @@ class IndodanaApi
   }
 
   public function getPaymentOptions($amount, $items) {
-    $url = $this->baseUrl . '/chermes/merchant/v1/payment_calculation';
+    $url = $this->baseUrl . '/merchant/v1/payment_calculation';
     $data = array(
       'amount'  => $amount,
       'items'   => $items
@@ -34,8 +34,13 @@ class IndodanaApi
     if ($response['status'] == "OK") {
       return $response['payments'];
     } else {
+      IndodanaLogger::log(Indodana::ERROR, json_encode($response));
       throw new Exception('Could not get installments data');
     }
+  }
+
+  public function getBaseUrl() {
+    return $this->baseUrl;
   }
 
   private static function createDefaultHeader($apiKey, $apiSecret)

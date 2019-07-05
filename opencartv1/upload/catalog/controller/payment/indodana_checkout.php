@@ -10,22 +10,80 @@ class ControllerPaymentIndodanaCheckout extends Controller
         $this->load->model('checkout/order');
 
         $postData = IndodanaHelper::getJsonPost();
-        $transactionStatus = $postData['status'];
         IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
-        // switch($transactionStatus) {
-        //     case 'SUCCESS':
-        //         $this->handlePaymentSuccess($postData['merchantOrderId']);
-        //     case 'WAITING_FOR_APPROVAL':
 
-        // }
+        $transactionStatus = $postData['transactionStatus'];
+        $orderId = $postData['merchantOrderId'];
+
+        switch($transactionStatus) {
+            case 'INITIATED':
+                $this->handlePaymentSuccess($orderId);
+                break;
+            case 'EXPIRED':
+                $this->handlePaymentExpired($orderId);
+                break;
+        }
+
+        $response = array(
+            'success'   => 'OK'
+        );
+
+        echo json_encode($response);
+    }
+
+    public function confirmOrder()
+    {
+        $this->load->model('checkout/order');
+
+        $postData = IndodanaHelper::getJsonPost();
+        IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
+
+        $orderId = $postData['orderId'];
+
+        $this->model_checkout_order->confirm(
+            $orderId,
+            $this->config->get('indodana_checkout_default_order_pending_status_id')
+        );
+
+        $response = array(
+            'success'   => 'OK'
+        );
+        
+        echo json_encode($response);
+    }
+
+    public function cancel()
+    {
+        $this->load->model('checkout/order');
+
+        $postData = IndodanaHelper::getJsonPost();
+        IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
+
+        $orderId = $postData['merchantOrderId'];
+
+        $this->model_checkout_order->update(
+            $orderId,
+            $this->config->get('indodana_checkout_default_order_failed_status_id')
+        );
+
+        $this->redirect($this->url->link(''));
     }
 
     private function handlePaymentSuccess($orderId)
     {
         $this->model_checkout_order->update(
             $orderId,
-            'SUCCESS',
-            'Payment Successful'
+            $this->config->get('indodana_checkout_default_order_success_status_id'),
+            'Indodana payment successful'
+        );
+    }
+
+    private function handlePaymentExpired($orderId)
+    {
+        $this->model_checkout_order->update(
+            $orderId,
+            $this->config->get('indodana_checkout_default_order_failed_status_id'),
+            'Indodana payment expired'
         );
     }
 
@@ -47,13 +105,14 @@ class ControllerPaymentIndodanaCheckout extends Controller
             $paymentOptions = array();
         } finally {
             $this->formatPaymentsToDefaultCurrency($paymentOptions);
-            $this->loadPaymentOptions($paymentOptions);
+            $this->initializePaymentOptions($paymentOptions);
         }
 
         $orderData = $this->generateOrderData($orderInfo, $items, $amount);
         $json = json_encode($orderData);
-        $this->loadOrderData($json);
-        $this->loadAuthorization(IndodanaApi::generateBearer($apiKey, $apiSecret));
+        $this->initializeOrderData($json);
+        $this->initializeAuthorization(IndodanaApi::generateBearer($apiKey, $apiSecret));
+        $this->initializeContextUrl();
 
         $this->template = $this->config->get('config_template') . '/template/payment/indodana_checkout_payment.tpl';
         $this->response->setOutput($this->render());    
@@ -74,45 +133,52 @@ class ControllerPaymentIndodanaCheckout extends Controller
         $this->data['textPaymentOptionsTotalAmount'] = $this->language->get('text_payment_options_total_amount');
     }
 
-    private function loadOrderData($orderData) {
+    private function initializeOrderData($orderData) {
         $this->data['orderData'] = $orderData;
     }
 
-    private function loadAuthorization($bearer) {
+    private function initializeAuthorization($bearer) {
         $this->data['authorization'] = 'Bearer ' . $bearer;
     }
 
-    public function loadPaymentOptions($paymentOptions) {
+    public function initializePaymentOptions($paymentOptions) {
         $this->data['paymentOptions'] = $paymentOptions;
+    }
+
+    public function initializeContextUrl() {
+        $this->data['indodanaBaseUrl'] = $this->indodanaApi->getBaseUrl();
+        $this->data['merchantConfirmPaymentUrl'] = $this->url->link('payment/indodana_checkout/confirmOrder');
     }
     
     private function getAllItemObjects($cart, $orderId) {
+        $defaultCurrency = $this->config->get('config_currency');
+
         $items = array();
-        $this->addProducts($items, $cart->getProducts());
-        $this->addShipping($items, $orderId);
-        $this->addTaxes($items, $orderId);
+        $this->addProducts($items, $cart->getProducts(), $defaultCurrency);
+        $this->addShipping($items, $orderId, $defaultCurrency);
+        $this->addTaxes($items, $orderId, $defaultCurrency);
         
         return $items;
     }
     
-    public function addShipping(&$items, $orderId) {
+    public function addShipping(&$items, $orderId, $currency) {
         $shipping = $this->model_payment_indodana_checkout->getShippingDetail($orderId);
         $shippingItemObject = array(
             'id' => 'shippingfee',
             'url' => '',
             'name' => $shipping['title'],
-            'price' => ceil($this->currency->convert((float) $shipping['value'], $this->currency->getCode(), "IDR")),
+            'price' => ceil($this->currency->convert((float) $shipping['value'], $currency, "IDR")),
             'type' => '',
             'quantity' => 1
         );
         array_push($items, $shippingItemObject);
     }
     
-    public function addTaxes(&$items, $orderId) {
+    public function addTaxes(&$items, $orderId, $currency) {
         $taxes = $this->model_payment_indodana_checkout->getTaxes($orderId);
         $totalTax = 0;
         foreach($taxes->rows as $tax) {
-            $totalTax += $this->currency->convert((float) $tax['value'], $this->currency->getCode(), 'IDR');
+            $totalTax += $this->currency->convert((float) $tax['value'], $currency, 'IDR');
         }
         $taxItemObject = array(
             'id' => 'taxfee',
@@ -125,13 +191,13 @@ class ControllerPaymentIndodanaCheckout extends Controller
         array_push($items, $taxItemObject);
     }
     
-    public function addProducts(&$items, $products) {
+    public function addProducts(&$items, $products, $currency) {
         foreach($products as $product) {
             $productItemObject = array(
                 'id' => $product['product_id'],
                 'url' => '',
                 'name' => $product['name'],
-                'price' => ceil($this->currency->convert($product['price'], $this->currency->getCode(), 'IDR')),
+                'price' => ceil($this->currency->convert($product['price'], $currency, 'IDR')),
                 'type' => '',
                 'quantity' => $product['quantity']
             );
@@ -149,12 +215,13 @@ class ControllerPaymentIndodanaCheckout extends Controller
     }
     
     public function formatPaymentsToDefaultCurrency(&$payments) {
+        $currency = $this->config->get('config_currency');
         foreach ($payments as &$payment) {
             $monthlyInstallment = $payment['monthlyInstallment'];
             $installmentAmount = $payment['installmentAmount'];
             
-            $monthlyInstallment = $this->currency->convert($monthlyInstallment, 'IDR', $this->currency->getCode());
-            $installmentAmount = $this->currency->convert($installmentAmount, 'IDR', $this->currency->getCode());
+            $monthlyInstallment = $this->currency->convert($monthlyInstallment, 'IDR', $currency);
+            $installmentAmount = $this->currency->convert($installmentAmount, 'IDR', $currency);
             
             $payment['monthlyInstallment'] = $this->currency->format($monthlyInstallment, $this->currency->getCode());
             $payment['installmentAmount'] = $this->currency->format($installmentAmount, $this->currency->getCode());
@@ -181,7 +248,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
             'billingAddress'            => $billingAddress,
             'shippingAddress'           => $shippingAddress,
             'customerDetails'           => $customerDetails,
-            'approvedNotificationUrl'   => 'https://webhook.site/bc11eee8-d445-4ac0-b405-2ea94fb1e856',
+            'approvedNotificationUrl'   => $approvedNotificationUrl,
             'cancellationRedirectUrl'   => $cancellationRedirectUrl,
             'backToStoreUrl'            => $backToStoreUrl
         );
@@ -265,16 +332,16 @@ class ControllerPaymentIndodanaCheckout extends Controller
     
     private function getBackToStoreUrl()
     {
-        return $this->url->link('payment/indodana/landing');   
+        return $this->url->link('checkout/success');   
     }
     
     private function getCancellationRedirectUrl()
     {
-        return $this->url->link('payment/indodana/cancel');
+        return $this->url->link('payment/indodana_checkout/cancel');
     }
     
     private function getNotificationUrl()
     {
-        return $this->url->link('payment/indodana/notify');
+        return $this->url->link('payment/indodana_checkout/notify');
     }
 }
