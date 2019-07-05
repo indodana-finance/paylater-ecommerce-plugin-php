@@ -9,7 +9,7 @@ dotenv.config({
 });
 
 const HOST = process.env.HOST;
-const PORT = process.env.PORT || "80";
+const PORT = process.env.PORT;
 
 const ORGANIZATION = process.env.ORGANIZATION;
 const TEAM = process.env.TEAM;
