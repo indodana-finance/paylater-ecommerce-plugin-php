@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+source sv/app/.helper/common
+
+echo ""
+echo "Configure containerization pipeline(s) in Jenkins for a service"
+echo ""
+echo "Example:"
+echo "  ./svctl jenkins configure-pipeline containerize a_service"
+echo ""
+
+svctl_run "jenkins.configure.containerize" --help

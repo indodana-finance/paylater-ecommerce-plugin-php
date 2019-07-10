@@ -1,9 +1,0 @@
-set -e
-
-export SERVICE_NAME="{{ service_name }}"
-export ENVIRONMENT="{{ environment }}"
-export BUILD_DIRECTORY="{{ build_directory }}"
-
-source "{{ service_definition_script }}"
-
-build "$SERVICE_NAME" "$ENVIRONMENT" "$BUILD_DIRECTORY"
