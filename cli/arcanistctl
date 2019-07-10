@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-source arcanist/framework/cli
-source arcanist/framework/complete
-source arcanist/framework/help
-source arcanist/framework/utils
-cli "$@"
