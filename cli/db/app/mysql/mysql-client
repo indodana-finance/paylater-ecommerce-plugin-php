@@ -8,7 +8,7 @@ source ./db/app/namespace
 yq=./.bin.db/yq
 CURRENT_DIRECTORY=$(pwd)
 
-function db-mysql-validate {
+function db-mysql-client-validate {
   local DB_NAME=$1
   local ENVIRONMENT=$2
   local ROLE_NAME=$3
@@ -45,7 +45,7 @@ function db-mysql-validate {
   fi
 }
 
-function db-mysql-execute {
+function db-mysql-client-execute {
   local DB_NAME=$1
   local ENVIRONMENT=$2
   local ROLE_NAME=$3
@@ -92,7 +92,7 @@ else
     if [[ -z "$1" ]] || [[ -z "$2" ]] || [[ -z "$3" ]]; then
         exit 3
     else
-        db-mysql-validate $1 $2 $3
-        db-mysql-execute $1 $2 $3
+        db-mysql-client-validate $1 $2 $3
+        db-mysql-client-execute $1 $2 $3
     fi
 fi
