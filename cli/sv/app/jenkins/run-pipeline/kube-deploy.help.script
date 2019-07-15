@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+source sv/app/.helper/common
+
+echo ""
+echo "Run the Kubernetes deployment pipeline in Jenkins"
+echo ""
+echo "Example:"
+echo "  ./svctl jenkins run-pipeline kube-deploy a_kube_cluster a_service an_environment image_version"
+echo ""
+
+svctl_run "jenkins.run.kube_deploy" --help

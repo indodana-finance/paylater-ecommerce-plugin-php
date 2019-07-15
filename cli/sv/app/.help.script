@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -e
+
+source sv/app/.helper/common
+
+echo ""
+echo "Utility for service-related tasks"
+echo ""
+
+svctl_run "" --global-options

@@ -55,7 +55,7 @@
   when: (db_host != "localhost" and db_host != "127.0.0.1")
 
 - name: Execute create-db script in remote server
-  shell: "mysql < ~/.pios.run.db/{{ run_db_identifier }}/sql/create-db.sql"
+  shell: "mysql -f < ~/.pios.run.db/{{ run_db_identifier }}/sql/create-db.sql"
   become: yes
   become_method: sudo
   become_user: root
@@ -65,7 +65,7 @@
     "{{ db_host }}"
 
 - name: Execute create-db script in localhost
-  shell: "mysql < {{ db_directory }}/sql/create-db.sql"
+  shell: "mysql -f < {{ db_directory }}/sql/create-db.sql"
   become: yes
   become_method: sudo
   become_user: root

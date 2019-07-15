@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+source sv/app/.helper/common
+
+svctl_run "jenkins.run.kube_deploy" "$@"

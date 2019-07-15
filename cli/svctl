@@ -6,9 +6,11 @@ source sv/app/.helper/common
 if [[ $(svctl_binary_check) = 'SOURCE' ]]; then
   # Setup Python 3.7
   if [[ ! -f /usr/bin/python3.7 ]]; then
+    logger_warn "Python v3.7 is not installed, will be installed now"
+
     sudo add-apt-repository ppa:deadsnakes/ppa -y
-    sudp apt-get update
-    sudo apt-get install -y python 3.7 python3.7-dev
+    sudo apt-get update
+    sudo apt-get install -y python3.7 python3.7-dev
   fi
 
   # Setup virtualenv

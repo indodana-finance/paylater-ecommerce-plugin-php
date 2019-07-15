@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+source sv/app/.helper/common
+
+echo ""
+echo "Run the containerization pipeline in Jenkins"
+echo ""
+echo "Example:"
+echo "  ./svctl jenkins run-pipeline containerize a_service an_environment --commit 6afe8db"
+echo ""
+
+svctl_run "jenkins.run.containerize" --help

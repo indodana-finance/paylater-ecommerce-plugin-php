@@ -31,6 +31,10 @@ if [[ -d "$HELP_FILE" ]]; then
         echo ""
     fi
 
+    if [[ -f "$HELP_FILE.help.script" ]]; then
+        bash "$HELP_FILE.help.script"
+    fi
+
     echo ""
     echo -e "${COLOR_MAGENTA}Commands${COLOR_NORMAL}"
     echo ""

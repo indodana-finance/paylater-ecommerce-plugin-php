@@ -1,8 +1,0 @@
-cermati-indodana-midas-dev:
-  host: "https://127.0.0.1:8200"
-  tls:
-    enabled: true
-    certs_bundle: pkictl-dev
-  auth:
-    method: tls
-    role_name: cermati-indodana-midas-dev

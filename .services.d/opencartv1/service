@@ -32,16 +32,25 @@ run() {
 
   echo -e "${GREEN}[RUN]${NC} Starting NGINX"
   NODE=$(which node)
+  
+  if [[ "$ENVIRONMENT" == "dev" ]]; then
+    NGINX_PORT=6101
+  fi
   sudo HOST=${HOST} PORT=${NGINX_PORT} ${NODE} generate-nginx-config.js
 
   NPX=$(which npx)
   echo -e "${GREEN}[RUN]${NC} Running on ${HOST}:${PORT}";
   echo -e "${GREEN}[RUN]${NC} Running NodeJs worker..."
+  
+  if [[ "$ENVIRONMENT" == "dev" ]]; then
+    PORT=6101
+  fi
   sudo GITHUB_USERNAME=${GITHUB_USERNAME} \
     ENVIRONMENT=${ENVIRONMENT} \
     HOST=${HOST} \
     PORT=${PORT} \
     ${NPX} forever -o logs/out.log -e logs/err.log -a start refresh-credential.js
+  sudo service nginx restart
 }
 
 handle_shared_service_not_found() {
