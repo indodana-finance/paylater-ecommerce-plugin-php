@@ -364,3 +364,4 @@ class ControllerPaymentIndodanaCheckout extends Controller
         return $this->url->link('payment/indodana_checkout/notify');
     }
 }
+

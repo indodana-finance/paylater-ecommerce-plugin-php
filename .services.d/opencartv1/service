@@ -50,7 +50,6 @@ run() {
     HOST=${HOST} \
     PORT=${PORT} \
     ${NPX} forever -o logs/out.log -e logs/err.log -a start refresh-credential.js
-  sudo service nginx restart
 }
 
 handle_shared_service_not_found() {
