@@ -15,13 +15,14 @@ run() {
   local HOST=$4
   local PORT=$5
 
-  NGINX_PORT=$PORT
-  if [[ -z $5 ]]; then
-    NGINX_PORT="80"
+  if [[ -z $4 ]] && [[ -z $5 ]]; then
+    HOST="localhost"
+    PORT="6106"
   fi
 
-  if [[ -z $4 ]]; then
-    HOST="localhost"
+  NGINX_PORT=$PORT
+  if [[ -z $PORT ]]; then
+    NGINX_PORT="80"
   fi
   
   local RED='\033[0;31m'
@@ -34,7 +35,7 @@ run() {
   sudo HOST=${HOST} PORT=${NGINX_PORT} ${NODE} generate-nginx-config.js
 
   NPX=$(which npx)
-  echo "$PORT";
+  echo -e "${GREEN}[RUN]${NC} Running on ${HOST}:${PORT}";
   echo -e "${GREEN}[RUN]${NC} Running NodeJs worker..."
   sudo GITHUB_USERNAME=${GITHUB_USERNAME} \
     ENVIRONMENT=${ENVIRONMENT} \
