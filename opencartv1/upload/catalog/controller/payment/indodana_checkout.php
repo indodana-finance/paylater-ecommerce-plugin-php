@@ -151,19 +151,29 @@ class ControllerPaymentIndodanaCheckout extends Controller
     }
     
     private function getAllItemObjects($cart, $orderId) {
+        $itemObjects = array();
         $defaultCurrency = $this->config->get('config_currency');
 
-        $items = array();
-        $this->addProducts($items, $cart->getProducts(), $defaultCurrency);
-        $this->addShipping($items, $orderId, $defaultCurrency);
-        $this->addTaxes($items, $orderId, $defaultCurrency);
-        
-        return $items;
+        $productObjects = $this->convertProductsToIDR($cart->getProducts(), $defaultCurrency);
+        $itemObjects = array_merge($itemObjects, $productObjects);
+
+        if ($this->cart->hasShipping()) {
+            $shippingObject = $this->getShippingInIDR($orderId, $defaultCurrency);
+            array_push($itemObjects, $shippingObject);
+        }
+
+        $taxObject = $this->getTaxInIDR($orderId, $defaultCurrency);
+        if ($taxObject != null) {
+            array_push($itemObjects, $taxObject);
+        }
+
+        return $itemObjects;
     }
     
-    public function addShipping(&$items, $orderId, $currency) {
+    public function getShippingInIDR($orderId, $currency) {
         $shipping = $this->model_payment_indodana_checkout->getShippingDetail($orderId);
-        $shippingItemObject = array(
+
+        $shippingObject = array(
             'id' => 'shippingfee',
             'url' => '',
             'name' => $shipping['title'],
@@ -171,16 +181,23 @@ class ControllerPaymentIndodanaCheckout extends Controller
             'type' => '',
             'quantity' => 1
         );
-        array_push($items, $shippingItemObject);
+
+        return $shippingObject;
     }
     
-    public function addTaxes(&$items, $orderId, $currency) {
+    public function getTaxInIDR($orderId, $currency) {
         $taxes = $this->model_payment_indodana_checkout->getTaxes($orderId);
+
         $totalTax = 0;
         foreach($taxes->rows as $tax) {
             $totalTax += $this->currency->convert((float) $tax['value'], $currency, 'IDR');
         }
-        $taxItemObject = array(
+
+        if ($totalTax == 0) {
+            return null;
+        }
+
+        $taxObject = array(
             'id' => 'taxfee',
             'url' => '',
             'name' => 'TAAAAAAAAAAAXXXXXXXXXXX',
@@ -188,12 +205,14 @@ class ControllerPaymentIndodanaCheckout extends Controller
             'type' => '',
             'quantity' => 1
         );
-        array_push($items, $taxItemObject);
+        
+        return $taxObject;
     }
     
-    public function addProducts(&$items, $products, $currency) {
+    public function convertProductsToIDR($products, $currency) {
+        $productObjects = array();
         foreach($products as $product) {
-            $productItemObject = array(
+            $productObject = array(
                 'id' => $product['product_id'],
                 'url' => '',
                 'name' => $product['name'],
@@ -201,9 +220,9 @@ class ControllerPaymentIndodanaCheckout extends Controller
                 'type' => '',
                 'quantity' => $product['quantity']
             );
-            array_push($items, $productItemObject);
+            array_push($productObjects, $productObject);
         }
-        return $items;
+        return $productObjects;
     }
 
     private static function calculateTotalPrice($items) {

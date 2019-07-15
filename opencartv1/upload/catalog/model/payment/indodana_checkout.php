@@ -3,7 +3,8 @@ class ModelPaymentIndodanaCheckout extends Model {
     public function getMethod($address, $total) {      
         $method_data = array(
           'code'     => 'indodana_checkout',
-          'title'    => 'Indodana Paylater'
+          'title'    => 'Indodana Paylater',
+          'sort_order' => $this->config->get('indodana_checkout_sort_order')
         );
       
         return $method_data;

@@ -28,13 +28,16 @@ class IndodanaApi
     $header = self::createDefaultHeader($this->apiKey, $this->apiSecret);
     
     $json = json_encode($data);
+    IndodanaLogger::log(IndodanaLogger::INFO, $json);
+    
     $responseJson = IndodanaRequest::post($url, $json, $header);
     $response = json_decode($responseJson, true);
 
     if ($response['status'] == "OK") {
+      IndodanaLogger::log(IndodanaLogger::INFO, json_encode($response));
       return $response['payments'];
     } else {
-      IndodanaLogger::log(Indodana::ERROR, json_encode($response));
+      IndodanaLogger::log(IndodanaLogger::ERROR, json_encode($response));
       throw new Exception('Could not get installments data');
     }
   }
