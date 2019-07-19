@@ -12,7 +12,7 @@
         <span class="checkbox checkbox-styled"></span>
         <p><?=$paymentOption['paymentType']; ?></p>
         <div class="filler"></div>
-        <p><?='Rp ' . $paymentOption['monthlyInstallment'] . '/bulan'; ?></p>
+        <p><?= Mage::helper('core')->currency($paymentOption['monthlyInstallment'], true, false) . '/bulan'; ?></p>
       </label>
     <?php } ?>
     <div class='right'>
