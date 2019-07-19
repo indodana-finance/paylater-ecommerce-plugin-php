@@ -8,6 +8,7 @@ class Indodana_Payment_Model_Standard extends Mage_Payment_Model_Method_Abstract
 
     public function getOrderPlaceRedirectUrl()
     {
-        return Mage::getUrl('indodanapayment/checkout/redirect', array('_secure' => true));
+        $quoteId = Mage::getSingleton('checkout/session')->getQuoteId(); 
+        return Mage::getUrl('indodanapayment/checkout/redirect?id=' . $quoteId, array('_secure' => true));
     }
 }

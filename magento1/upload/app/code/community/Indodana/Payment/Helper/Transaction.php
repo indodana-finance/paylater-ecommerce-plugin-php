@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract
 {
@@ -11,7 +11,10 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract
         $transactionObjects = array();
         $transactionObjects = array_merge($transactionObjects, $productObjects);
         $transactionObjects[] = $taxObject;
-        $transactionObjects[] = $shippingCostObject;
+
+        if ($shippingCostObject != null) {
+            $transactionObjects[] = $shippingCostObject;
+        }
 
         return $transactionObjects;
     }
@@ -52,12 +55,20 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract
 
     private function getShippingCostObject($cart)
     {
-        $shippingDescription = $cart->getShippingAddress()->getData('shipping_description');
+        if (is_bool($cart->getShippingAddress())) {
+            return null;
+        }
+
         $shippingAmount = $cart->getShippingAddress()->getShippingAmount();
+
+        if ($shippingAmount == null) {
+            return null;
+        }
+
         $shippingObject = array(
             'id'        => 'shippingfee',
             'url'       => '',
-            'name'      => $shippingDescription,
+            'name'      => 'Shipping Fee',
             'price'     => $shippingAmount,
             'type'      => '',
             'quantity'  => 1
