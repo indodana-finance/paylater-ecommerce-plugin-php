@@ -26,6 +26,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
             $this->handlePaymentExpired($orderId);
         }
 
+        $header('Content-type: application/json');
         $response = array(
             'success'   => 'OK'
         );
@@ -47,6 +48,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
             $this->config->get('indodana_checkout_default_order_pending_status_id')
         );
 
+        $header('Content-type: application/json');
         $response = array(
             'success'   => 'OK'
         );
