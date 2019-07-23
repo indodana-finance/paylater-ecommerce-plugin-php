@@ -42,6 +42,23 @@ class IndodanaApi
     }
   }
 
+  public function checkIfTransactionSuccessful($orderId) {
+    $url = $this->baseUrl . '/merchant/v1/transactions/check_status?';
+    $queryUrl = $url . 'merchantOrderId=' . $orderId;
+
+    $header = self::createDefaultHeader($this->apiKey, $this->apiSecret);
+
+    $responseJson = IndodanaRequest::post($url, $json, $header);
+    $response = json_decode($responseJson, true);
+
+    $isPaymentSuccessful = false;
+    if ($response['transactionStatus'] === 'PROCESSED' || $response['transactionStatus'] === 'COMPLETED') {
+      $isPaymentSuccessful = true;
+    }
+
+    return $isPaymentSuccessful;
+  }
+
   public function getBaseUrl() {
     return $this->baseUrl;
   }

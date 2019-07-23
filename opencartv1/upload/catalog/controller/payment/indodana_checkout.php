@@ -9,19 +9,21 @@ class ControllerPaymentIndodanaCheckout extends Controller
     {
         $this->load->model('checkout/order');
 
+        $apiKey = $this->config->get('indodana_checkout_api_key');
+        $apiSecret = $this->config->get('indodana_checkout_api_secret');
+        $this->indodanaApi = new IndodanaApi($apiKey, $apiSecret);
+
         $postData = IndodanaHelper::getJsonPost();
         IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
 
         $transactionStatus = $postData['transactionStatus'];
         $orderId = $postData['merchantOrderId'];
 
-        switch($transactionStatus) {
-            case 'INITIATED':
-                $this->handlePaymentSuccess($orderId);
-                break;
-            case 'EXPIRED':
-                $this->handlePaymentExpired($orderId);
-                break;
+        $transactionSuccessful = $this->indodanaApi->checkIfTransactionSuccessful($orderId);
+        if ($transactionSuccessful) {
+            $this->handlePaymentSuccess($orderId);
+        } else {
+            $this->handlePaymentExpired($orderId);
         }
 
         $response = array(
