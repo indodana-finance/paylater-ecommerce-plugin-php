@@ -17,6 +17,7 @@ product: chermes
 # and renaming the YAML files in the `config/` directory
 environments:
   - dev
+  - stg
 
 # (Optional) Information about Public Key Infrastructure utilization of this
 #  service
