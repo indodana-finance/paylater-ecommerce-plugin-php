@@ -1,6 +1,6 @@
 server {
-    listen 6105;
-    server_name localhost;
+    listen {{ port }};
+    server_name {{ host }};
     root {{ build_directory }};
 
     client_max_body_size 64M;
