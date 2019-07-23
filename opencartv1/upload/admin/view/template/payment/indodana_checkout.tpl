@@ -16,73 +16,6 @@
       <form action="<?=$form_action; ?>" method="post" enctype="multipart/form-data" id="form">
         <table class="form">
           <tr>
-            <td><h2>Merchant's Detail</h2></td>
-          </tr>
-          <tr>
-            <td><?=$entry_first_name; ?></td>
-            <td>
-              <input type="text" name="indodana_checkout_first_name" value="<?=$indodana_checkout_first_name; ?>" size="30"/>
-              <?php if ($error_first_name_empty) { ?>
-                <span class="error"><?=$error_first_name_empty; ?></span>
-              <?php } ?>
-            </td>
-          </tr>
-          <tr>
-            <td><?=$entry_last_name; ?></td>
-            <td><input type="text" name="indodana_checkout_last_name" value="<?=$indodana_checkout_last_name; ?>" size="30"/></td>
-          </tr>
-          <tr>
-            <td><?=$entry_address; ?></td>
-            <td>
-              <textarea name="indodana_checkout_address" rows="5" cols="30"><?=$indodana_checkout_address; ?></textarea>
-              <?php if ($error_address_empty) { ?>
-                <span class="error"><?=$error_address_empty; ?></span>
-              <?php } ?>
-            </td>
-          </tr>
-          <tr>
-            <td><?=$entry_city; ?></td>
-            <td>
-              <input type="text" name="indodana_checkout_city" value="<?=$indodana_checkout_city; ?>" size="30"/>
-              <?php if ($error_city_empty) { ?>
-                <span class="error"><?=$error_city_empty; ?></span>
-              <?php } ?>
-            </td>
-          </tr>
-          <tr>
-            <td><?=$entry_postal_code; ?></td>
-            <td>
-              <input type="text" name="indodana_checkout_postal_code" value="<?=$indodana_checkout_postal_code; ?>" size="10"/>
-              <?php if ($error_postal_code_empty) { ?>
-                <span class="error"><?=$error_postal_code_empty; ?></span>
-              <?php } ?>
-            </td>
-          </tr>
-          <tr>
-            <td><?=$entry_phone; ?></td>
-            <td>
-              <input type="text" name="indodana_checkout_phone" value="<?=$indodana_checkout_phone; ?>" size="15"/>
-              <?php if ($error_phone_empty) { ?>
-                <span class="error"><?=$error_phone_empty; ?></span>
-              <?php } ?>
-            </td>
-          </tr>
-          <tr>
-            <td><?=$entry_country_code; ?></td>
-            <td><select name="indodana_checkout_default_country_code">
-              <?php foreach ($country_codes as $country_code) { ?>
-                <?php if ($country_code == $indodana_checkout_default_country_code) { ?>
-                  <option value="<?=$country_code; ?>" selected="selected"><?=$country_code; ?></option>
-                <?php } else { ?>
-                  <option value="<?=$country_code; ?>"><?=$country_code; ?></option>
-                <?php } ?>
-              <?php } ?>
-              <?php if ($error_country_code_empty) { ?>
-                <span class="error"><?=$error_country_code_empty; ?></span>
-              <?php } ?>
-            </select></td>
-          </tr>
-          <tr>
             <td><h2>Indodana Paylater Configuration</h2></td>
           </tr>
           <tr>
@@ -186,6 +119,11 @@
           </tr>
         </table>
       </form>
+      <h2>Log</h2>
+      <textarea 
+        wrap="off" 
+        style="width: 98%; height: 300px; padding: 5px; border: 1px solid #CCCCCC; background: #FFFFFF; overflow: scroll;"
+      ><?= $log; ?></textarea>
     </div>
   </div>
 </div>

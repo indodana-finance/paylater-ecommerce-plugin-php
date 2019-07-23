@@ -6,18 +6,9 @@ class IndodanaLogger
     const INFO = 3;
     const LOG_FILE_PATH = INDODANA_LOG_DIR . 'indodana.log';
 
-    private static function write($message, $filePath, $severity)
+    private static function write($message)
     {
-        if (($time = $_SERVER['REQUEST_TIME']) == '') {
-            $time = time();
-        }
-
-        if (($requestUri = $_SERVER['REQUEST_URI']) == '') {
-            $requestUri = "REQUEST_URI_UNKNOWN";
-        }
-
-        $date = date("Y-m-d H:i:s", $time);
-        $message = '[' . $severity . ']' . '[' . $date . ']' . '[' . $requestUri . ']' . $message . PHP_EOL;
+        $filePath = self::LOG_FILE_PATH;
 
         $fd = @fopen($filePath, 'a');
         if (!is_writable($filePath)) {
@@ -32,33 +23,58 @@ class IndodanaLogger
         fclose($fd);
     }
 
-    private static function writeInfoLog($message)
+    public static function read()
     {
-        self::write($message, self::LOG_FILE_PATH, 'INFO');
+        $filePath = self::LOG_FILE_PATH;
+        return file_get_contents($filePath);
     }
 
-    private static function writeWarningLog($message) 
-    {
-        self::write($message, self::LOG_FILE_PATH, 'WARNING');
+    public static function generateLogMessage($message, $severity) {
+        if (($time = $_SERVER['REQUEST_TIME']) == '') {
+            $time = time();
+        }
+
+        if (($requestUri = $_SERVER['REQUEST_URI']) == '') {
+            $requestUri = "REQUEST_URI_UNKNOWN";
+        }
+
+        $date = date("Y-m-d H:i:s", $time);
+        $message = '[' . $severity . ']' . '[' . $date . ']' . '[' . $requestUri . ']' . $message . PHP_EOL;
+
+        return $message;
     }
 
-    private static function writeErrorLog($message)
+    private static function generateInfoLog($message)
     {
-        self::write($message, self::LOG_FILE_PATH, 'ERROR');
+        return self::generateLogMessage($message, 'INFO');
+    }
+
+    private static function generateWarningLog($message) 
+    {
+        return self::generateLogMessage($message, 'WARNING');
+    }
+
+    private static function generateErrorLog($message)
+    {
+        return self::generateLogMessage($message, 'ERROR');
     }
 
     public static function log($logType, $message)
     {
+        $logContent = '';
+
         switch($logType) {
             case self::INFO:
-                self::writeInfoLog($message);
+                $logContent = self::generateInfoLog($message);
                 break;
             case self::WARNING:
-                self::writeWarningLog($message);
+                $logContent = self::generateWarningLog($message);
                 break;
             case self::ERROR:
-                self::writeErrorLog($message);
+                $logContent = self::generateErrorLog($message);
                 break;
         }
+
+        self::write($logContent);
     }
 }

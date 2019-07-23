@@ -1,4 +1,6 @@
 <?php
+require_once DIR_SYSTEM . 'library/indodana/autoload.php';
+
 class ControllerPaymentIndodanaCheckout extends Controller {
     private $errors = array();
 
@@ -20,6 +22,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
         $this->initializeLanguageData();
         $this->initializeFormAction();
         $this->initializeErrors();
+        $this->initializeLog();
 
         $this->loadErrors();
         $this->applyDefaultValue();
@@ -61,6 +64,11 @@ class ControllerPaymentIndodanaCheckout extends Controller {
 		);
     }
 
+    private function initializeLog()
+    {
+        $this->data['log'] = IndodanaLogger::read();
+    }
+
     /*
         When user press EDIT or ADD, we need to show the previous data to the user
         This function will get all the form's data that might have been saved before, and show it
@@ -68,13 +76,6 @@ class ControllerPaymentIndodanaCheckout extends Controller {
     private function applyDefaultValue() 
     {
         $valueKeys = [
-            'indodana_checkout_first_name',
-            'indodana_checkout_last_name',
-            'indodana_checkout_address',
-            'indodana_checkout_city',
-            'indodana_checkout_postal_code',
-            'indodana_checkout_phone',
-            'indodana_checkout_default_country_code',
             'indodana_checkout_api_secret',
             'indodana_checkout_api_key',
             'indodana_checkout_environment',
@@ -110,13 +111,6 @@ class ControllerPaymentIndodanaCheckout extends Controller {
             'entry_order_success_status',
             'entry_order_failed_status',
             'entry_order_pending_status',
-            'entry_first_name',
-            'entry_last_name',
-            'entry_address',
-            'entry_city',
-            'entry_postal_code',
-            'entry_phone',
-            'entry_country_code',
             'entry_api_secret',
             'entry_api_key',
             'entry_environment',
@@ -145,12 +139,6 @@ class ControllerPaymentIndodanaCheckout extends Controller {
     private function loadErrors() 
     {
         $errorKeys = [
-            'error_first_name_empty',
-            'error_address_empty',
-            'error_city_empty',
-            'error_postal_code_empty',
-            'error_phone_empty',
-            'error_country_code_empty',
             'error_api_secret_empty',
             'error_api_key_empty',
             'error_sort_order_empty'
@@ -169,30 +157,6 @@ class ControllerPaymentIndodanaCheckout extends Controller {
     {
 		if (!$this->user->hasPermission('modify', 'payment/indodana_checkout')) {
 			$this->errors['error_permission'] = $this->language->get('error_permission');
-        }
-
-        if (empty($this->request->post['indodana_checkout_first_name'])) {
-            $this->errors['error_first_name_empty'] = $this->language->get('error_first_name_empty');
-        }
-
-        if (empty($this->request->post['indodana_checkout_address'])) {
-            $this->errors['error_address_empty'] = $this->language->get('error_address_empty');
-        }
-
-        if (empty($this->request->post['indodana_checkout_city'])) {
-            $this->errors['error_city_empty'] = $this->language->get('error_city_empty');
-        }
-
-        if (empty($this->request->post['indodana_checkout_postal_code'])) {
-            $this->errors['error_postal_code_empty'] = $this->language->get('error_postal_code_empty');
-        }
-
-        if (empty($this->request->post['indodana_checkout_phone'])) {
-            $this->errors['error_phone_empty'] = $this->language->get('error_phone_empty');
-        }
-
-        if (empty($this->request->post['indodana_checkout_default_country_code'])) {
-            $this->errors['error_country_code_empty'] = $this->language->get('error_country_code_empty');
         }
 
         if (empty($this->request->post['indodana_checkout_api_secret'])) {
