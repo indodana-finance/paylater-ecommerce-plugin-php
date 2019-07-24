@@ -315,7 +315,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
                 $order->update_status('on-hold');
         }
 
-        $header('Content-type: application/json');
+        header('Content-type: application/json');
         $response = array(
             'success'   => 'OK'
         );
