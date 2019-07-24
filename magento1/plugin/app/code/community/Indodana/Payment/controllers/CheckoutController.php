@@ -21,12 +21,36 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
         $postData = IndodanaHelper::getJsonPost();
         IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
 
+        $orderId = $postData['merchantOrderId'];
+        $this->handleApprovedTransaction($orderId);
+
         $response = array(
-            'success'   => 'OK'
+            'status'    => 'OK',
+            'message'   => 'Payment status updated'
         );
 
         header('Content-Type: application/json');
         echo json_encode($response);
+    }
+
+    private function handleApprovedTransaction($orderId) {
+        $order = Mage::getModel('sales/order');
+        $order->loadByIncrementId($orderId);
+
+        $invoice = $order->prepareInvoice()
+            ->setTransactionId($order->getId())
+            ->addComment('Payment successfully processed by Indodana.')
+            ->register()
+            ->pay();
+
+        $transaction = Mage::getModel('core/resource_transaction')
+            ->addObject($invoice)
+            ->addObject($invoice->getOrder());
+
+        $transaction->save();
+
+        $order->setStatus(Mage::helper('indodanapayment')->getSuccessfulTransactionStatus());
+        $order->save();
     }
 
     public function confirmOrderAction()
@@ -47,22 +71,33 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
         echo json_encode($response);
     }
 
+    public function successAction()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+
+            $this->_log($_GET);
+            Mage::getSingleton('checkout/session')->unsQuoteId();
+            Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/success', array('_secure' => false));
+
+        } else {
+            Mage_Core_Controller_Varien_Action::_redirect('');
+        }
+    }
+
     public function cancelAction()
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->norouteAction();
-            return;
+        if (Mage::getSingleton('checkout/session')->getLastRealOrderId()) {
+            $order = Mage::getModel('sales/order')->loadByIncrementId(Mage::getSingleton('checkout/session')->getLastRealOrderId());
+            if ($order->getId()) {
+                $order->cancel()->setState(
+                    Mage::helper('indodanapayment')->getFailedTransactionStatus(), 
+                    true, 
+                    'Indodana has declined the payment.'
+                )->save();
+            }
         }
 
-        $postData = IndodanaHelper::getJsonPost();
-        IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
-
-        $response = array(
-            'success'   => 'OK'
-        );
-
-        header('Content-Type: application/json');
-        echo json_encode($response);
+        Mage_Core_Controller_Varien_Action::_redirect('');
     }
 
     public function redirectAction()
@@ -73,8 +108,8 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
 
         $orderId = Mage::getSingleton('checkout/session')->getLastRealOrderId();
         $order = Mage::getModel('sales/order')->loadByIncrementId($orderId);
-
         $itemObjects = $this->getItemObjects($order);
+
         $totalPrice = $this->calculateTotalPrice($itemObjects);
 
         $paymentOptions = $this->indodanaApi->getPaymentOptions($totalPrice, $itemObjects);

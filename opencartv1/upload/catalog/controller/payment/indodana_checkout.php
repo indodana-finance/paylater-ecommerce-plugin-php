@@ -19,16 +19,18 @@ class ControllerPaymentIndodanaCheckout extends Controller
         $transactionStatus = $postData['transactionStatus'];
         $orderId = $postData['merchantOrderId'];
 
-        $transactionSuccessful = $this->indodanaApi->checkIfTransactionSuccessful($orderId);
-        if ($transactionSuccessful) {
-            $this->handlePaymentSuccess($orderId);
-        } else {
-            $this->handlePaymentExpired($orderId);
+        switch ($transactionStatus) {
+            case 'INITIATED':
+                $this->handlePaymentSuccess($orderId);
+                break;
+            default:
+                break;
         }
 
-        $header('Content-type: application/json');
+        header('Content-type: application/json');
         $response = array(
-            'success'   => 'OK'
+            'status'    => 'OK',
+            'message'   => 'Payment status updated'
         );
 
         echo json_encode($response);

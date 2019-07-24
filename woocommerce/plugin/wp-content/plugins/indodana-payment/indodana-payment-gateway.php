@@ -317,7 +317,8 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
 
         header('Content-type: application/json');
         $response = array(
-            'success'   => 'OK'
+            'status'    => 'OK',
+            'message'   => 'Payment status updated'
         );
 
         echo json_encode($response);
