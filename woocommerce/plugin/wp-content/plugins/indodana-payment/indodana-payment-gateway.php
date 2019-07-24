@@ -29,6 +29,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
 
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ));
         add_action('wp_enqueue_scripts', array( $this, 'payment_scripts' ));
+        add_action('woocommerce_api_wc_indodana_gateway', array(&$this, 'indodanaCallback'));
     }
 
     public function init_form_fields()
@@ -177,9 +178,19 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
         $billingObject = $this->getBillingObject($order);
         $shippingObject = $this->getShippingObject($order);
 
-        $approvedNotificationUrl = 'http://webhook.site/4c73e517-8130-4e50-ab01-079df203ce89';
-        $cancellationRedirectUrl = 'http://webhook.site/4c73e517-8130-4e50-ab01-079df203ce89';
-        $backToStoreUrl = 'http://webhook.site/4c73e517-8130-4e50-ab01-079df203ce89';
+        $approvedNotificationUrl = add_query_arg(array(
+            'wc-api'    => 'WC_Indodana_Gateway',
+        ), home_url('/'));
+        $cancellationRedirectUrl = add_query_arg(array(
+            'wc-api'    => 'WC_Indodana_Gateway',
+            'method'    => 'cancel',
+            'order_id'  => $orderId
+        ), home_url('/'));
+        $backToStoreUrl = add_query_arg(array(
+            'wc-api'    => 'WC_Indodana_Gateway',
+            'method'    => 'complete',
+            'order_id'  => $orderId
+        ), home_url('/'));
 
         $orderData = array(
             'transactionDetails'        => $transactionObject,
@@ -263,8 +274,62 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
         );
     }
 
-    public function webhook()
+    public function indodanaCallback()
     {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            if (!isset($_GET['method'])) {
+                return;
+            }
+
+            $method = $_GET['method'];
+            $orderId = $_GET['order_id'];
+            switch ($method) {
+                case 'cancel':
+                    $this->handleRedirectDueToCancellation($orderId);
+                    break;
+                case 'complete':
+                    $this->handleRedirectDueToCompletion($orderId);
+                    break;
+                default:
+                    return;
+            }
+        }
+    }
+
+    private function handleTransactionApproved() {
+        $postData = IndodanaHelper::getJsonPost();
+        IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
+
+        $orderId = $postData['merchantOrderId'];
+        $order = new WC_Order($orderId);
+
+        $transactionStatus = $postData['transactionStatus'];
+        switch($transactionStatus) {
+            case 'INITIATED':
+                $order->payment_complete();
+                break;
+            default:
+                $order->update_status('on-hold');
+        }
+
+        $header('Content-type: application/json');
+        $response = array(
+            'success'   => 'OK'
+        );
+        
+        echo json_encode($response);
+    }
+
+    private function handleRedirectDueToCancellation($orderId) {
+        $order = new WC_Order($orderId);
+        wp_redirect($order->get_checkout_payment_url(false));
+    }
+
+    private function handleRedirectDueToCompletion($orderId) {
+        $order = new WC_Order($orderId);
+        wp_redirect($order->get_checkout_order_received_url());
     }
 
     public function convertCountryCode($country_code)
