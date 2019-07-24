@@ -277,7 +277,8 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
     public function indodanaCallback()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
+            $this->handleTransactionApproved();
+            return;
         } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if (!isset($_GET['method'])) {
                 return;
@@ -318,7 +319,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
         $response = array(
             'success'   => 'OK'
         );
-        
+
         echo json_encode($response);
     }
 
