@@ -278,7 +278,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->handleTransactionApproved();
-            return;
+            exit();
         } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if (!isset($_GET['method'])) {
                 return;
