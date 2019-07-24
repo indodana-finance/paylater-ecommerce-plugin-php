@@ -82,8 +82,8 @@ async function readCredential() {
 }
 
 function generateBaseUrl(host, port) {
-  if (port === undefined) {
-    return host;
+  if (port === undefined || port === '') {
+    return `http://${host}`;
   } else {
     return `http://${host}:${port}/`;
   }
