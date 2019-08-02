@@ -50,7 +50,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
             $this->config->get('indodana_checkout_default_order_pending_status_id')
         );
 
-        $header('Content-type: application/json');
+        header('Content-type: application/json');
         $response = array(
             'success'   => 'OK'
         );
