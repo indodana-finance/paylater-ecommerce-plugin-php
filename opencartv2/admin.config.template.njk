@@ -1,0 +1,35 @@
+<?php
+// HTTP
+{% raw %}
+define('HTTP_SERVER', 'http://{{ host }}{% if port %}:{{ port }}{% endif %}/admin/');
+define('HTTP_CATALOG', 'http://{{ host }}{% if port %}:{{ port }}{% endif %}/');
+
+// HTTPS
+define('HTTPS_SERVER', 'http://{{ host }}{% if port %}:{{ port }}{% endif %}/admin/');
+define('HTTPS_CATALOG', 'http://{{ host }}{% if port %}:{{ port }}{% endif %}/');
+{% endraw %}
+
+// DIR
+define('DIR_APPLICATION', '{{ build_directory }}/upload/admin/');
+define('DIR_SYSTEM', '{{ build_directory }}/upload/system/');
+define('DIR_IMAGE', '{{ build_directory }}/upload/image/');
+define('DIR_LANGUAGE', '{{ build_directory }}/upload/admin/language/');
+define('DIR_TEMPLATE', '{{ build_directory }}/upload/admin/view/template/');
+define('DIR_CONFIG', '{{ build_directory }}/upload/system/config/');
+define('DIR_CACHE', '{{ build_directory }}/upload/system/storage/cache/');
+define('DIR_DOWNLOAD', '{{ build_directory }}/upload/system/storage/download/');
+define('DIR_LOGS', '{{ build_directory }}/upload/system/storage/logs/');
+define('DIR_MODIFICATION', '{{ build_directory }}/upload/system/storage/modification/');
+define('DIR_UPLOAD', '{{ build_directory }}/upload/system/storage/upload/');
+define('DIR_CATALOG', '{{ build_directory }}/upload/catalog/');
+
+// DB
+{% raw %}
+define('DB_DRIVER', 'mysqli');
+define('DB_HOSTNAME', 'localhost');
+define('DB_USERNAME', '{{ db_username }}');
+define('DB_PASSWORD', '{{ db_password }}');
+define('DB_DATABASE', 'opencartv2');
+define('DB_PORT', '3306');
+define('DB_PREFIX', 'oc_');
+{% endraw %}
