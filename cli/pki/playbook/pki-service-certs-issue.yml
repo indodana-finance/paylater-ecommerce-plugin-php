@@ -1,4 +1,0 @@
-- hosts: "{{ cluster }}-ca"
-  
-  roles:
-    - "service/certs/issue"

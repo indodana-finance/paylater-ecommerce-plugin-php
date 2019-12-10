@@ -1,5 +1,0 @@
-- hosts: "{{ ca_server }}"
-  become: true
-
-  roles:
-    - pki/toolkit

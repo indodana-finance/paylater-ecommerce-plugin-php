@@ -1,7 +1,0 @@
-- name: Include vars value file
-  include_vars: vars/secrets.yml
-
-- name: Generate .certrc
-  template:
-    src: templates/certrc.j2
-    dest: "{{ certrc_file }}"

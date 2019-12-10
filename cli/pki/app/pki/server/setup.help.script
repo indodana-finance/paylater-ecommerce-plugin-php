@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-function pki-server-setup-help {
-    echo -e ""
-    echo -e "Install Node.js runtime on the tools directory to run the CA HTTP Server"
-    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} pki server setup"
-}
-
-pki-server-setup-help

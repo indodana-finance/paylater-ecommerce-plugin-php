@@ -1,4 +1,0 @@
-installer:
-  version: "v3.3.12"
-  arch: "amd64"
-  os: "linux"

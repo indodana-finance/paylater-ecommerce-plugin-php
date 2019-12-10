@@ -1,8 +1,0 @@
-- hosts: "{{ blueprint }}"
-  
-  vars_files: 
-  - "{{ blueprint_file }}"  
-  
-  roles:
-    - etcd/common
-    - etcd/deploy

@@ -1,9 +1,0 @@
-#!/bin/bash
-function vault-context-configure-help {
-    echo -e ""
-    echo -e "Get the current Vault context configuration"
-    echo -e "It will read the ~/.pkictl/.login/.current file"
-    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} vault context current"
-}
-
-vault-context-configure-help

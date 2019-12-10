@@ -1,8 +1,0 @@
-#!/bin/bash
-export SAN="{{ ','.join(csr.SAN) }}"
-mkdir -p .private
-openssl req -new \
-    -config csr.conf \
-    -out {{ blueprint }}.csr \
-    -keyout .private/{{ blueprint }}.key
-chmod 0644 .private/{{ blueprint }}.key

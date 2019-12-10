@@ -1,7 +1,0 @@
-- hosts: "{{ blueprint }}"
-
-  vars_files: 
-    - "{{ blueprint_file }}"
-
-  roles:
-    - vault/secrets/kv

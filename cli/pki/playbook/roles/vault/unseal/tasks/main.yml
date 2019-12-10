@@ -1,4 +1,0 @@
-- name: Unseal Vault
-  shell:
-    cmd: |
-      "{{ vault_scripts_directory }}/vault.unseal"

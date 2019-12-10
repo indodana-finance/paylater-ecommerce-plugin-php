@@ -1,4 +1,6 @@
 cermati-indodana-pios-prod:
+  environment: prod
+  vault_name: prod-vault
   host: "https://vault.cermati.com:8443"
   tls:
     enabled: true

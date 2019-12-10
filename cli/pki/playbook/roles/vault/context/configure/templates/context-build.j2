@@ -1,9 +1,0 @@
-#!/bin/bash
-rm context.yml
-echo -n "" > ./context.yml
-echo "contexts:" >> ./context.yml
-for f in ./.context.d/*.yml;
-do
-    (sed -e 's/^/  /' "${f}") >> ./context.yml
-    echo "" >> ./context.yml
-done

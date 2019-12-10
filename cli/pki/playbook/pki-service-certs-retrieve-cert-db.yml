@@ -1,4 +1,0 @@
-- hosts: "{{ ca_server }}"
-
-  roles:
-    - "service/certs/retrieve-db"
