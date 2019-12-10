@@ -1,0 +1,20 @@
+---
+
+# Path to the root project directory relative from the directory where this file
+# (and the `pkictl` script) is located.
+# If you're installing pkictl with BCL (as you're supposed to), by default BCL
+# will put the `pkictl` script in the `cli/` directory, and the value for this
+# field should be '../'.
+# default: '../'
+project_directory: '../'
+
+# Directory where all kinds of blueprints are stored
+# Path relative to project directory
+# default: 'blueprint/pkictl'
+blueprint_directory: 'blueprint/pkictl'
+
+# Vault Hostname
+# Will be used during Context blueprint generation 
+vault_host:
+  local: 'https://127.0.0.1:8200'
+  prod: 'https://vault.cermati.com:8443'
