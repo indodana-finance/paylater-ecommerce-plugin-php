@@ -1,8 +1,0 @@
-#!/bin/bash
-function certs-member-request-help {
-    echo -e ""
-    echo -e "Create a Certificate Signing Request (CSR) for a member"
-    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} member certs request"
-}
-
-certs-member-request-help

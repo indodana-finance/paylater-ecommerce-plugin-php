@@ -1,8 +1,0 @@
-#!/bin/bash
-function vault-context-login-root-local-help {
-    echo -e ""
-    echo -e "Login to local Vault cluster using root Token"
-    echo -e "${YELLOW}Format:${NC} ${GREEN}./pkictl${NC} vault context login root-local"
-}
-
-vault-context-login-root-local-help

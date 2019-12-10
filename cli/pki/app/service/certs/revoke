@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-set -e
-trap "exit" INT
-
-source pki/app/.helper/common
-
-pkictl_run "service.certs.revoke" "$@"
