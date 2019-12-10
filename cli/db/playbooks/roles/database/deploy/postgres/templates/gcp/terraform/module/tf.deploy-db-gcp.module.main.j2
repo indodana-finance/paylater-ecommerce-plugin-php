@@ -1,0 +1,85 @@
+# Self Link format :
+# https://www.googleapis.com/compute/v1/projects/<project-id>/global/networks/<vpc-name>
+data "google_compute_network" "gcp_db_network" {
+  name = "${var.gcp_db_vpc}"
+}
+
+# Self Link format :
+# https://www.googleapis.com/compute/v1/projects/<project-id>/regions/<region-id>/subnetworks/<subnet-name>
+data "google_compute_subnetwork" "gcp_db_subnetwork" {
+  self_link = "https://www.googleapis.com/compute/v1/projects/${var.gcp_db_project_id}/regions/${var.gcp_db_region}/subnetworks/${var.gcp_db_vpc_subnet}"
+}
+
+{% if db.gcp.db_provider_option.authorized_networks is defined %}
+data "null_data_source" "gcp_db_authorized_networks" {
+  count = "${length(var.gcp_db_authorized_network_address)}"
+
+  inputs = {
+      name  = "${element(var.gcp_db_authorized_network_name, count.index)}"
+      value  = "${element(var.gcp_db_authorized_network_address, count.index)}"
+  }
+}
+{% endif %}
+
+# Reference : https://github.com/terraform-providers/terraform-provider-google/issues/3294
+resource "google_service_networking_connection" "gcp_db_internal_connection" {
+  network       = "${data.google_compute_network.gcp_db_network.self_link}"
+  service       = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = ["google-managed-services-${var.gcp_db_vpc}"]
+}
+
+resource "google_sql_database_instance" "gcp_db_instance" {
+  name = "db-${var.db_product}-${var.gcp_db_database_name}-${var.db_environment}"
+  region = "${var.gcp_db_region}"
+  database_version = "${var.gcp_db_database_version}"
+  
+  depends_on = [
+    "google_service_networking_connection.gcp_db_internal_connection"
+  ]
+
+  settings {
+    activation_policy = "ALWAYS"
+    tier = "${var.gcp_db_instance_tier}"
+    disk_type = "PD_SSD"
+    disk_size = "${var.gcp_db_instance_storage_size}"
+{% if db.gcp.db_provider_option.multi_zone.enabled %}
+    availability_type = "REGIONAL"
+{% else %}
+    availability_type = "ZONAL"
+{% endif %}
+    ip_configuration {
+{% if db.gcp.db_provider_option.public_connection.enabled %}
+      ipv4_enabled = true
+{% else %}
+      ipv4_enabled = false
+{% endif %}
+      private_network = "${data.google_compute_network.gcp_db_network.self_link}"
+{% if db.gcp.db_provider_option.authorized_networks is defined %}
+      authorized_networks = [
+        "${data.null_data_source.gcp_db_authorized_networks.*.outputs}"
+      ]
+{% endif %}
+    }
+    backup_configuration {
+      enabled = true
+    }
+    user_labels {
+        name = "${var.gcp_db_database_name}"
+        resource-type = "gcp-gcloudsql-postgres"
+        organization = "${var.db_organization}"
+        team = "${var.db_team}"
+        product = "${var.db_product}"
+        environment = "${var.db_environment}"
+    }
+  }
+}
+
+resource "google_sql_user" "gcp_db_user" {
+  name = "${var.gcp_db_username}"
+  instance = "${google_sql_database_instance.gcp_db_instance.name}"
+  password = "${var.gcp_db_password}"
+
+  depends_on = [
+    "google_sql_database_instance.gcp_db_instance"
+  ]
+}

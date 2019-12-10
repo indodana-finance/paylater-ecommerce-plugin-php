@@ -10,4 +10,4 @@ secrets:
     host: "https://localhost:8200"
     tls: 
       enabled: true
-      certs_bundle: dbctl-dev
+      certs_bundle: pkictl-dev

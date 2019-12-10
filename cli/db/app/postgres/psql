@@ -2,9 +2,6 @@
 set -e
 trap "exit" INT
 
-source ./db/app/meta
-source ./db/app/namespace
-
 yq=./.bin.db/yq
 CURRENT_DIRECTORY=$(pwd)
 
@@ -17,17 +14,18 @@ function db-psql-validate {
   local BLUEPRINT_DATABASE_FILE=${BLUEPRINT_DIRECTORY}/postgres/${DB_NAME}/${ENVIRONMENT}.yml
   local BLUEPRINT_ROLES_DIRECTORY=${BLUEPRINT_DIRECTORY}/postgres/${DB_NAME}/__roles__/${ENVIRONMENT}/${ROLE_NAME}
   local BLUEPRINT_ROLES_CREATION_FILE=${BLUEPRINT_DIRECTORY}/postgres/${DB_NAME}/__roles__/${ENVIRONMENT}/${ROLE_NAME}/creation.sql
-  
+
   if [[ ! -f "${BLUEPRINT_DATABASE_FILE}" ]]; then
       echo -e "${RED}ERROR:${NC} No database specification file found for ${YELLOW}${DB_NAME}/${ENVIRONMENT}.yml${NC}. [${YELLOW}${BLUEPRINT_DATABASE_FILE}${NC}]"
       exit 1
   fi
 
   DB_DEPLOYMENT_TYPE=$($yq r $BLUEPRINT_DATABASE_FILE 'db.deployment')
-  if [[ "$DB_DEPLOYMENT_TYPE" != "hosted" && "$DB_DEPLOYMENT_TYPE" != "rds" && "$DB_DEPLOYMENT_TYPE" != "apsara" ]]; then
+  if [[ "$DB_DEPLOYMENT_TYPE" != "hosted" && "$DB_DEPLOYMENT_TYPE" != "rds" && $DB_DEPLOYMENT_TYPE != "apsara" && "$DB_DEPLOYMENT_TYPE" != "gcp"  ]]; then
       echo -e "${RED}ERROR:${NC} Deployment type is not supported for ${YELLOW}${DB_NAME}/${ENVIRONMENT}.yml${NC}. [Deployment-Type: ${YELLOW}${DEPLOYMENT_TYPE}${NC} - supported: ${YELLOW}hosted, rds${NC}]"
       exit 1
   fi
+
 
   if [[ -z "$GITHUB_USERNAME" ]]; then
     echo -e "${RED}[ERROR]${NC} No GITHUB_USERNAME specified. Please export it to your environment variable."
@@ -37,7 +35,7 @@ function db-psql-validate {
   if [[ ! -d "${BLUEPRINT_ROLES_DIRECTORY}" ]]; then
     echo -e "${RED}ERROR:${NC} No ROLES specification directory found for ${YELLOW}${DB_NAME}/${ENVIRONMENT}/${ROLE_NAME}${NC}. [${YELLOW}${BLUEPRINT_ROLES_DIRECTORY}${NC}]"
     exit 1
-  fi  
+  fi
 
   if [[ ! -f "${BLUEPRINT_ROLES_CREATION_FILE}" ]]; then
     echo -e "${RED}ERROR:${NC} No ROLES creation.sql file found for ${YELLOW}${DB_NAME}/${ENVIRONMENT}/${ROLE_NAME}${NC}. [${YELLOW}${BLUEPRINT_ROLES_CREATION_FILE}${NC}]"
@@ -49,36 +47,96 @@ function db-psql-execute {
   local DB_NAME=$1
   local ENVIRONMENT=$2
   local ROLE_NAME=$3
-  
+
   local BLUEPRINT_DIRECTORY=$(pwd)/db/blueprint
   local BLUEPRINT_DATABASE_FILE=${BLUEPRINT_DIRECTORY}/postgres/${DB_NAME}/${ENVIRONMENT}.yml
   local BLUEPRINT_ROLES_DIRECTORY=${BLUEPRINT_DIRECTORY}/postgres/${DB_NAME}/__roles__/${ENVIRONMENT}/${ROLE_NAME}
   local BLUEPRINT_ROLES_CREATION_FILE=${BLUEPRINT_DIRECTORY}/postgres/${DB_NAME}/__roles__/${ENVIRONMENT}/${ROLE_NAME}/creation.sql
-  
-  DB_DEPLOYMENT_TYPE=$($yq r $BLUEPRINT_DATABASE_FILE 'db.deployment')
-  DB_HOST=$($yq r $BLUEPRINT_DATABASE_FILE "db.$DB_DEPLOYMENT_TYPE.db_host")
+
   export IDENTIFIER=${DB_DEPLOYMENT_TYPE}.postgres.${ORGANIZATION}.${TEAM}.${PRODUCT}.${DB_NAME}.${ENVIRONMENT}
   export DB_DIRECTORY=$CURRENT_DIRECTORY/.run.db/${IDENTIFIER}
   mkdir -p ${DB_DIRECTORY}
   ./dbctl postgres role get-credential $DB_NAME $ENVIRONMENT $ROLE_NAME
   $(./dbctl postgres role use-credential $DB_NAME $ENVIRONMENT $ROLE_NAME)
+  echo -e "${YELLOW}==========================================================================================${NC}"
+  echo -e "${GREEN}[DBCTL]${NC} PSQL Client for - ${YELLOW}${DB_HOST}/${DB_NAME}/${ROLE_NAME}${NC} - "
+  echo -e "${YELLOW}==========================================================================================${NC}"
 
-  local SSH_ENABLED=$($yq r $BLUEPRINT_DATABASE_FILE "db.${DB_DEPLOYMENT_TYPE}.db_provider_option.ssh_tunnel.enabled")
-  if [[ ${SSH_ENABLED} == "true" ]]; then
-    local SSH_PORT=$($yq r $BLUEPRINT_DATABASE_FILE "db.${DB_DEPLOYMENT_TYPE}.db_provider_option.ssh_tunnel.tunnel_port")
-    echo -e "${YELLOW}==========================================================================================${NC}"
-    echo -e "${GREEN}[DBCTL]${NC} PSQL Client for - ${YELLOW}127.0.0.1:${SSH_PORT}/${DB_NAME}/${ROLE_NAME}${NC} - "
-    echo -e "${YELLOW}==========================================================================================${NC}"
-    ./dbctl tunnel create ${DB_NAME} postgres ${ENVIRONMENT}
-    PGPASSWORD=$DBCTL_PASSWORD psql -U $DBCTL_USERNAME -d $DB_NAME --host=127.0.0.1 --port=${SSH_PORT}
-    ./dbctl tunnel destroy ${DB_NAME} postgres ${ENVIRONMENT}
-  else
-    # TODO
-    # this currently only works on hosted as DB_HOST value will be null if it's not hosted
-    echo -e "${YELLOW}==========================================================================================${NC}"
-    echo -e "${GREEN}[DBCTL]${NC} PSQL Client for - ${YELLOW}${DB_HOST}/${DB_NAME}/${ROLE_NAME}${NC} - "
-    echo -e "${YELLOW}==========================================================================================${NC}"
-    PGPASSWORD=$DBCTL_PASSWORD psql -U $DBCTL_USERNAME -d $DB_NAME -h $DB_HOST
+  DB_DEPLOYMENT_TYPE=$($yq r $BLUEPRINT_DATABASE_FILE 'db.deployment')
+
+  if [[ "$DB_DEPLOYMENT_TYPE" == "hosted" ]]; then
+    DB_HOST=$($yq r $BLUEPRINT_DATABASE_FILE "db.$DB_DEPLOYMENT_TYPE.db_host")
+    DB_PORT=$($yq r $BLUEPRINT_DATABASE_FILE "db.$DB_DEPLOYMENT_TYPE.db_port")
+    if [[ "$DB_PORT" == "null" ]]; then
+      DB_PORT=5432
+    fi
+    PGPASSWORD=${DBCTL_PASSWORD} psql -U ${DBCTL_USERNAME} -d ${DB_NAME} -h ${DB_HOST} -p ${DB_PORT}
+  elif [[ "$DB_DEPLOYMENT_TYPE" == "apsara" ]]; then
+    SSH_TUNNEL_ENABLED=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.enabled')
+
+    if [[ "$SSH_TUNNEL_ENABLED" == "true" ]]; then
+      DB_SSH_TUNNEL_IDENTIFIER="$DB_NAME.$ENVIRONMENT"
+      DB_SSH_TUNNEL_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_port')
+      DB_SSH_TUNNEL_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_host')
+      DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_instance.host')
+      DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_instance.port')
+      if [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
+          DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml 'db.apsara.deployed.db.host')
+          DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml 'db.apsara.deployed.db.port')
+          if [[ "$DB_TARGET_HOST" == "" ]] || [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
+            echo -e "${RED}ERROR:${NC} Invalid ${ENVIRONMENT}-deployed.yml found in ${YELLOW}${DB_DIRECTORY}.${NC} Please re-run ${YELLOW}./dbctl postgres deploy $DB_NAME $ENVIRONMENT${NC} first."
+            exit 1;
+          fi
+      fi
+      ./dbctl util ssh-tunnel $DB_SSH_TUNNEL_IDENTIFIER $DB_SSH_TUNNEL_HOST $DB_SSH_TUNNEL_PORT $DB_TARGET_HOST $DB_TARGET_PORT
+
+      PGPASSWORD=${DBCTL_PASSWORD} psql -U ${DBCTL_USERNAME} -d ${DB_NAME} -h localhost -p ${DB_SSH_TUNNEL_PORT}
+    else
+      DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_instance.host')
+      DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_instance.port')
+      if [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
+          DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml 'db.apsara.deployed.db.host')
+          DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml 'db.apsara.deployed.db.port')
+          if [[ "$DB_TARGET_HOST" == "" ]] || [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
+            echo -e "${RED}ERROR:${NC} Invalid ${ENVIRONMENT}-deployed.yml found in ${YELLOW}${DB_DIRECTORY}.${NC} Please re-run ${YELLOW}./dbctl postgres deploy $DB_NAME $ENVIRONMENT${NC} first."
+            exit 1;
+          fi
+      fi
+      PGPASSWORD=${DBCTL_PASSWORD} psql -U ${DBCTL_USERNAME} -d ${DB_NAME} -h ${DB_TARGET_HOST} -p ${DB_TARGET_PORT}
+    fi
+  elif [[ "$DB_DEPLOYMENT_TYPE" == "gcp" ]]; then
+    SSH_TUNNEL_ENABLED=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_option.ssh_tunnel.enabled')
+
+    if [[ "$SSH_TUNNEL_ENABLED" == "true" ]]; then
+      DB_SSH_TUNNEL_IDENTIFIER="$DB_NAME.$ENVIRONMENT"
+      DB_SSH_TUNNEL_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_option.ssh_tunnel.tunnel_port')
+      DB_SSH_TUNNEL_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_option.ssh_tunnel.tunnel_host')
+      DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_instance.host')
+      DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_instance.port')
+      if [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
+          DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml 'db.gcp.deployed.db.host')
+          DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml 'db.gcp.deployed.db.port')
+          if [[ "$DB_TARGET_HOST" == "" ]] || [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
+            echo -e "${RED}ERROR:${NC} Invalid ${ENVIRONMENT}-deployed.yml found in ${YELLOW}${DB_DIRECTORY}.${NC} Please re-run ${YELLOW}./dbctl postgres deploy $DB_NAME $ENVIRONMENT${NC} first."
+            exit 1;
+          fi
+      fi
+      ./dbctl util ssh-tunnel $DB_SSH_TUNNEL_IDENTIFIER $DB_SSH_TUNNEL_HOST $DB_SSH_TUNNEL_PORT $DB_TARGET_HOST $DB_TARGET_PORT
+
+      PGPASSWORD=${DBCTL_PASSWORD} psql -U ${DBCTL_USERNAME} -d ${DB_NAME} -h localhost -p ${DB_SSH_TUNNEL_PORT}
+    else
+      DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_instance.host')
+      DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_instance.port')
+      if [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
+          DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml 'db.gcp.deployed.db.host')
+          DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml 'db.gcp.deployed.db.port')
+          if [[ "$DB_TARGET_HOST" == "" ]] || [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
+            echo -e "${RED}ERROR:${NC} Invalid ${ENVIRONMENT}-deployed.yml found in ${YELLOW}${DB_DIRECTORY}.${NC} Please re-run ${YELLOW}./dbctl postgres deploy $DB_NAME $ENVIRONMENT${NC} first."
+            exit 1;
+          fi
+      fi
+      PGPASSWORD=${DBCTL_PASSWORD} psql -U ${DBCTL_USERNAME} -d ${DB_NAME} -h ${DB_TARGET_HOST} -p ${DB_TARGET_PORT}
+    fi
   fi
 }
 
@@ -92,6 +150,8 @@ else
     if [[ -z "$1" ]] || [[ -z "$2" ]] || [[ -z "$3" ]]; then
         exit 3
     else
+        source ./db/app/meta
+        source ./db/app/namespace
         db-psql-validate $1 $2 $3
         db-psql-execute $1 $2 $3
     fi

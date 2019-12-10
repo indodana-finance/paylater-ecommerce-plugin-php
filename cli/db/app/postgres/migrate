@@ -2,9 +2,6 @@
 set -e
 trap "exit" INT
 
-source ./db/app/meta
-source ./db/app/namespace
-
 yq=./.bin.db/yq
 CURRENT_DIRECTORY=$(pwd)
 
@@ -27,7 +24,7 @@ function db-migrate-validate {
   fi
 
   DB_DEPLOYMENT_TYPE=$($yq r $BLUEPRINT_DATABASE_FILE 'db.deployment')
-  if [[ "$DB_DEPLOYMENT_TYPE" != "hosted" && "$DB_DEPLOYMENT_TYPE" != "rds" && "$DB_DEPLOYMENT_TYPE" != "apsara" ]]; then
+  if [[ "$DB_DEPLOYMENT_TYPE" != "hosted" && "$DB_DEPLOYMENT_TYPE" != "rds" && $DB_DEPLOYMENT_TYPE != "apsara" && "$DB_DEPLOYMENT_TYPE" != "gcp"  ]]; then
       echo -e "${RED}ERROR:${NC} Deployment type is not supported for ${YELLOW}${DB_NAME}/${ENVIRONMENT}.yml${NC}. [Deployment-Type: ${YELLOW}${DEPLOYMENT_TYPE}${NC} - supported: ${YELLOW}hosted, rds${NC}]"
       exit 1
   fi
@@ -59,63 +56,111 @@ function db-migrate-execute {
   export IDENTIFIER=${DB_DEPLOYMENT_TYPE}.postgres.${ORGANIZATION}.${TEAM}.${PRODUCT}.${DB_NAME}.${ENVIRONMENT}
   export DB_DIRECTORY=$CURRENT_DIRECTORY/.run.db/${IDENTIFIER}
 
+  mkdir -p ${DB_DIRECTORY}
+  export DB_MIGRATIONS_DIRECTORY=$DB_DIRECTORY/migrations
+  mkdir -p $DB_MIGRATIONS_DIRECTORY/$DB_SCHEMA
+  rm -rf $DB_MIGRATIONS_DIRECTORY/$DB_SCHEMA/*
+  cp -r $BLUEPRINT_MIGRATIONS_DIRECTORY/* $DB_MIGRATIONS_DIRECTORY/$DB_SCHEMA/
+  ./dbctl postgres role get-credential $DB_NAME $ENVIRONMENT $DB_MIGRATION_ROLE_NAME
+  $(./dbctl postgres role use-credential $DB_NAME $ENVIRONMENT $DB_MIGRATION_ROLE_NAME)
+
+  DB_MIGRATION_USERNAME="${DB_NAME}_migrations"
+  DB_MIGRATION_PASSWORD=$DBCTL_PASSWORD
+
   DB_HOST=""
   if [[ "$DB_DEPLOYMENT_TYPE" == "hosted" ]]; then
     DB_HOST=$($yq r $BLUEPRINT_DATABASE_FILE "db.$DB_DEPLOYMENT_TYPE.db_host")
+    DB_PORT=$($yq r $BLUEPRINT_DATABASE_FILE "db.$DB_DEPLOYMENT_TYPE.db_port")
+    if [[ "$DB_PORT" == "null" ]]; then
+      echo -e "${GREEN}[DBCTL]${NC} Using default ${YELLOW}DB_PORT=5432${NC}"
+      DB_PORT=5432
+    fi
+    DB_HOST="$DB_HOST:$DB_PORT"
   elif [[ "$DB_DEPLOYMENT_TYPE" == "apsara" ]]; then
-    SSH_TUNNEL_ENABLED=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.enabled')
-    DB_DEPLOYMENT_GENERATED_FILE="${ENVIRONMENT}-deployed.yml"
-    if [[ ! -f $DB_DIRECTORY/$DB_DEPLOYMENT_GENERATED_FILE ]]; then
-      echo -e "${RED}ERROR:${NC} No generated ${ENVIRONMENT}-deployed.yml found in ${YELLOW}${DB_DIRECTORY}.${NC} Please run ${YELLOW}./dbctl postgres deploy $DB_NAME $ENVIRONMENT${NC} first."
-      exit 1;
-    else
-      if [[ "$SSH_TUNNEL_ENABLED" == "true" ]]; then
-        DB_SSH_TUNNEL_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_port')
-        DB_SSH_TUNNEL_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_host')
-        DB_HOST="127.0.0.1:$DB_SSH_TUNNEL_PORT"
+    # Get DB_TARGET_HOST and DB_TARGET_PORT
+
+    # If we are using DB-DEPLOY-IMPORTED
+    DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_instance.host')
+    DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_instance.port')
+
+    if [[ "$DB_TARGET_HOST" == "null" ]]; then
+      DB_DEPLOYMENT_GENERATED_FILE="${ENVIRONMENT}-deployed.yml"
+      if [[ ! -f $DB_DIRECTORY/$DB_DEPLOYMENT_GENERATED_FILE ]]; then
+        echo -e "${RED}ERROR:${NC} No generated ${ENVIRONMENT}-deployed.yml found in ${YELLOW}${DB_DIRECTORY}.${NC} Please run ${YELLOW}./dbctl postgres deploy $DB_NAME $ENVIRONMENT${NC} first."
+        exit 1;
+      else
         DB_TARGET_HOST=$($yq r $DB_DIRECTORY/$DB_DEPLOYMENT_GENERATED_FILE "db.$DB_DEPLOYMENT_TYPE.deployed.db.host")
         DB_TARGET_PORT=$($yq r $DB_DIRECTORY/$DB_DEPLOYMENT_GENERATED_FILE "db.$DB_DEPLOYMENT_TYPE.deployed.db.port")
         if [[ "$DB_TARGET_HOST" == "" ]] || [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
           echo -e "${RED}ERROR:${NC} Invalid ${ENVIRONMENT}-deployed.yml found in ${YELLOW}${DB_DIRECTORY}.${NC} Please re-run ${YELLOW}./dbctl postgres deploy $DB_NAME $ENVIRONMENT${NC} first."
           exit 1;
         fi
+      fi
+    else
+      DB_PROVIDER_USER_PREFIX=$($yq r $BLUEPRINT_DATABASE_FILE db.apsara.db_provider_root_credential.username)
+      DB_MIGRATION_USERNAME="${DB_PROVIDER_USER_PREFIX}_migrations"
+    fi
+
+    if [[ "$DB_TARGET_PORT" == "null" ]]; then
+      echo -e "${GREEN}[DBCTL]${NC} Using default ${YELLOW}DB_TARGET_PORT=5432${NC}"
+      DB_TARGET_PORT=5432
+    fi
+
+    SSH_TUNNEL_ENABLED=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.enabled')
+    if [[ "$SSH_TUNNEL_ENABLED" == "true" ]]; then
+      DB_SSH_TUNNEL_IDENTIFIER="$DB_NAME.$ENVIRONMENT"
+      DB_SSH_TUNNEL_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_port')
+      DB_SSH_TUNNEL_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_host')
+      ./dbctl util ssh-tunnel $DB_SSH_TUNNEL_IDENTIFIER $DB_SSH_TUNNEL_HOST $DB_SSH_TUNNEL_PORT $DB_TARGET_HOST $DB_TARGET_PORT
+      DB_HOST="localhost:$DB_SSH_TUNNEL_PORT"
+    else
+      DB_HOST="$DB_TARGET_HOST:$DB_TARGET_PORT"
+    fi
+  elif [[ "$DB_DEPLOYMENT_TYPE" == "gcp" ]]; then
+    # Get DB_TARGET_HOST and DB_TARGET_PORT
+
+    # If we are using DB-DEPLOY-IMPORTED
+    DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_instance.host')
+    DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_instance.port')
+
+    if [[ "$DB_TARGET_HOST" == "null" ]]; then
+      DB_DEPLOYMENT_GENERATED_FILE="${ENVIRONMENT}-deployed.yml"
+      if [[ ! -f $DB_DIRECTORY/$DB_DEPLOYMENT_GENERATED_FILE ]]; then
+        echo -e "${RED}ERROR:${NC} No generated ${ENVIRONMENT}-deployed.yml found in ${YELLOW}${DB_DIRECTORY}.${NC} Please run ${YELLOW}./dbctl postgres deploy $DB_NAME $ENVIRONMENT${NC} first."
+        exit 1;
       else
-        DB_HOST=$($yq r $DB_DIRECTORY/$DB_DEPLOYMENT_GENERATED_FILE "db.$DB_DEPLOYMENT_TYPE.deployed.db.host")
-        DB_PORT=$($yq r $DB_DIRECTORY/$DB_DEPLOYMENT_GENERATED_FILE "db.$DB_DEPLOYMENT_TYPE.deployed.db.port")
-        if [[ "$DB_HOST" == "" ]] || [[ "$DB_HOST" == "null" ]] || [[ "$DB_PORT" == "" ]] || [[ "$DB_PORT" == "null" ]]; then
+        DB_TARGET_HOST=$($yq r $DB_DIRECTORY/$DB_DEPLOYMENT_GENERATED_FILE "db.$DB_DEPLOYMENT_TYPE.deployed.db.host")
+        DB_TARGET_PORT=$($yq r $DB_DIRECTORY/$DB_DEPLOYMENT_GENERATED_FILE "db.$DB_DEPLOYMENT_TYPE.deployed.db.port")
+        if [[ "$DB_TARGET_HOST" == "" ]] || [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
           echo -e "${RED}ERROR:${NC} Invalid ${ENVIRONMENT}-deployed.yml found in ${YELLOW}${DB_DIRECTORY}.${NC} Please re-run ${YELLOW}./dbctl postgres deploy $DB_NAME $ENVIRONMENT${NC} first."
           exit 1;
         fi
       fi
+    else
+      DB_PROVIDER_USER_PREFIX=$($yq r $BLUEPRINT_DATABASE_FILE db.gcp.db_provider_root_credential.username)
+      DB_MIGRATION_USERNAME="${DB_PROVIDER_USER_PREFIX}_migrations"
+    fi
+
+    if [[ "$DB_TARGET_PORT" == "null" ]]; then
+      echo -e "${GREEN}[DBCTL]${NC} Using default ${YELLOW}DB_TARGET_PORT=5432${NC}"
+      DB_TARGET_PORT=5432
+    fi
+
+    SSH_TUNNEL_ENABLED=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_option.ssh_tunnel.enabled')
+    if [[ "$SSH_TUNNEL_ENABLED" == "true" ]]; then
+      DB_SSH_TUNNEL_IDENTIFIER="$DB_NAME.$ENVIRONMENT"
+      DB_SSH_TUNNEL_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_option.ssh_tunnel.tunnel_port')
+      DB_SSH_TUNNEL_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_option.ssh_tunnel.tunnel_host')
+      ./dbctl util ssh-tunnel $DB_SSH_TUNNEL_IDENTIFIER $DB_SSH_TUNNEL_HOST $DB_SSH_TUNNEL_PORT $DB_TARGET_HOST $DB_TARGET_PORT
+      DB_HOST="localhost:$DB_SSH_TUNNEL_PORT"
+    else
+      DB_HOST="$DB_TARGET_HOST:$DB_TARGET_PORT"
     fi
   fi
 
   if [[ -z "$DB_HOST" ]] || [[ "$DB_HOST" == "null" ]] || [[ "$DB_HOST" == "" ]]; then
     echo -e "${RED}ERROR:${NC} No DB_HOST is retrieved for migrations. Script will abort."
     exit 1;
-  fi
-
-  mkdir -p ${DB_DIRECTORY}
-  export DB_MIGRATIONS_DIRECTORY=$DB_DIRECTORY/migrations
-  mkdir -p $DB_MIGRATIONS_DIRECTORY/$DB_SCHEMA
-  cp -r $BLUEPRINT_MIGRATIONS_DIRECTORY/* $DB_MIGRATIONS_DIRECTORY/$DB_SCHEMA/
-  ./dbctl postgres role get-credential $DB_NAME $ENVIRONMENT $DB_MIGRATION_ROLE_NAME
-  $(./dbctl postgres role use-credential $DB_NAME $ENVIRONMENT $DB_MIGRATION_ROLE_NAME)
-
-  local DB_PROVIDER_INSTANCE_ID=""
-  local DB_PROVIDER_INSTANCE_HOST=""
-
-  # Currently instance mode only enabled in Apsara
-  if [[ "$DB_DEPLOYMENT_TYPE" == "apsara" ]]; then
-    DB_PROVIDER_INSTANCE_ID=$($yq r $BLUEPRINT_DATABASE_FILE db.apsara.db_provider_instance.id)
-    DB_PROVIDER_INSTANCE_HOST=$($yq r $BLUEPRINT_DATABASE_FILE db.apsara.db_provider_instance.host)
-  fi
-
-  DB_MIGRATION_USERNAME="${DB_NAME}_migrations"
-  DB_MIGRATION_PASSWORD=$DBCTL_PASSWORD
-  if [[ "$DB_PROVIDER_INSTANCE_ID" != "" ]] && [[ "$DB_PROVIDER_INSTANCE_ID" != "null" ]] && [[ "$DB_PROVIDER_INSTANCE_HOST" != "" ]] && [[ "$DB_PROVIDER_INSTANCE_HOST" != "null" ]]; then
-    DB_PROVIDER_USER_PREFIX=$($yq r $BLUEPRINT_DATABASE_FILE db.apsara.db_provider_root_credential.username)
-    DB_MIGRATION_USERNAME="${DB_PROVIDER_USER_PREFIX}_migrations"
   fi
 
   ansible-playbook db/playbooks/dbctl-db-migrate.yml \
@@ -130,39 +175,11 @@ function db-migrate-execute {
     -e "db_migration_username=${DB_MIGRATION_USERNAME}" \
     -e "db_migration_password=${DB_MIGRATION_PASSWORD}" > /dev/null
 
-  if [[ "${DB_DEPLOYMENT_TYPE}" == "apsara" ]]; then
-    SSH_TUNNEL_ENABLED=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.enabled')
-
-    if [[ "$SSH_TUNNEL_ENABLED" == "true" ]]; then
-      echo -e "${GREEN}[DBCTL]${NC} Will migrate Apsara DB Database via SSH tunnel"
-      DB_SSH_TUNNEL_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_port')
-      DB_SSH_TUNNEL_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_host')
-      echo -e "${GREEN}[DBCTL]${NC} ${YELLOW}[TUNNEL]${NC} --> ssh -M -S apsara-tunnel-migrate-${DB_SSH_TUNNEL_PORT} -fnNT -L ${DB_SSH_TUNNEL_PORT}:${DB_HOST}:${DB_PORT} ${DB_SSH_TUNNEL_HOST}"
-      echo -e "${GREEN}[DBCTL]${NC} ${YELLOW}[TUNNEL-EXIT(For Troubleshooting)]${NC} --> ssh -S apsara-tunnel-migrate-${DB_SSH_TUNNEL_PORT} -O exit ${DB_SSH_TUNNEL_HOST}"
-
-      ./dbctl tunnel create ${DB_NAME} postgres ${ENVIRONMENT}
-      pushd $DB_MIGRATIONS_DIRECTORY
-        echo '' > settings.gradle
-        gradle -i flywayBaseline
-        gradle -i flywayMigrate
-      popd
-      ./dbctl tunnel destroy ${DB_NAME} postgres ${ENVIRONMENT}
-    else
-      echo -e "${GREEN}[DBCTL]${NC} Will migrate Apsara DB Database"
-      pushd $DB_MIGRATIONS_DIRECTORY
-        echo '' > settings.gradle
-        gradle -i flywayBaseline
-        gradle -i flywayMigrate
-      popd
-    fi
-  elif [[ "${DB_DEPLOYMENT_TYPE}" == "hosted" ]]; then
-    echo -e "${GREEN}[DBCTL]${NC} Will migrate Postgres Database"
-    pushd $DB_MIGRATIONS_DIRECTORY
-      echo '' > settings.gradle
-      gradle -i flywayBaseline
-      gradle -i flywayMigrate
-    popd
-  fi
+  pushd $DB_MIGRATIONS_DIRECTORY
+    echo '' > settings.gradle
+    gradle -i flywayBaseline
+    gradle -i flywayMigrate
+  popd
 }
 
 
@@ -176,6 +193,8 @@ else
     if [[ -z "$1" ]] || [[ -z "$2" ]] || [[ -z "$3" ]]; then
         exit 3
     else
+        source ./db/app/meta
+        source ./db/app/namespace
         db-migrate-validate $1 $2 $3
         db-migrate-execute $1 $2 $3
     fi

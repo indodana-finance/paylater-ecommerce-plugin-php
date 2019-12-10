@@ -21,11 +21,21 @@ echo "[DBCTL] Generating role configuration script for {{ role_name }} using DB 
 
 # v11 write - for Vault > 1.1.0
 # echo "==> v11 write - for Vault > 1.1.0"
-$VAULT_EXEC write {{ v11_db_identifier_path }}/roles/{{ db_role_name }} \
-  db_name=root \
-  creation_statements=@"{{ db_role_creation_file }}" \
-    default_ttl="1h" \
-    max_ttl="24h"
+if [[ -f "{{ db_role_revocation_file }}" ]]; then
+    $VAULT_EXEC write {{ db_identifier_path }}/roles/{{ db_role_name }} \
+      db_name=root \
+      creation_statements=@"{{ db_role_creation_file }}" \
+      revocation_statements=@"{{ db_role_revocation_file }}" \
+        default_ttl="1h" \
+        max_ttl="24h"
+else
+    $VAULT_EXEC write {{ db_identifier_path }}/roles/{{ db_role_name }} \
+      db_name=root \
+      creation_statements=@"{{ db_role_creation_file }}" \
+        default_ttl="1h" \
+        max_ttl="24h"
+fi
+
 
 # v10 write - for Vault < 1.1.0
 # echo "==> v10 write - for Vault < 1.1.0"

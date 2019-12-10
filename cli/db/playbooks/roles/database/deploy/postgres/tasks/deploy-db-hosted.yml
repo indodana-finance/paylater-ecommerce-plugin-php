@@ -50,8 +50,15 @@
     dest: "{{ db_directory }}/.creds-upload-vault"
     mode: 0755
 
+## OS Specific part
 - name: Execute create-db script
   shell: "psql -f {{ db_directory }}/sql/create-db.sql"
   become: yes
   become_method: sudo
   become_user: postgres
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Execute create-db script
+  shell: "psql -f {{ db_directory }}/sql/create-db.sql -d postgres"
+  when: ansible_distribution == 'MacOSX'
+

@@ -1,0 +1,33 @@
+#!/bin/bash
+mkdir -p .bin.db/
+set -e
+if [[ ! -f "./.bin.db/terraform_0.11.11_darwin_amd64.zip" ]]; then
+    wget -P ./.bin.db/ https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_darwin_amd64.zip
+fi
+unzip -o ./.bin.db/terraform_0.11.11_darwin_amd64.zip -d ./.bin.db/
+chmod 755 ./.bin.db/terraform
+if [[ ! -f "./.bin.db/vault_1.1.0_darwin_amd64.zip" ]]; then
+    wget -P ./.bin.db/ https://releases.hashicorp.com/vault/1.1.0/vault_1.1.0_darwin_amd64.zip
+fi
+unzip -o ./.bin.db/vault_1.1.0_darwin_amd64.zip -d ./.bin.db/
+chmod 755 ./.bin.db/vault
+
+if [[ ! -f "./.bin.db/jq" ]]; then
+    wget -O ./.bin.db/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-amd64
+    chmod 755 ./.bin.db/jq
+fi
+
+if [[ ! -f "./.bin.db/yq" ]]; then
+    wget -O ./.bin.db/yq https://github.com/mikefarah/yq/releases/download/2.2.0/yq_darwin_amd64
+    chmod 755 ./.bin.db/yq
+fi
+
+brew install expect
+brew install pwgen
+
+if [[ ! -f "$HOME/.software/gradle-5.2.1.zip" ]]; then
+    mkdir -p ~/.software
+    wget -O ~/.software/gradle-5.2.1.zip https://services.gradle.org/distributions/gradle-5.2.1-bin.zip
+fi
+unzip -o ~/.software/gradle-5.2.1.zip -d ~/.software/
+sudo ln -sf $HOME/.software/gradle-5.2.1/bin/gradle /usr/local/bin/gradle

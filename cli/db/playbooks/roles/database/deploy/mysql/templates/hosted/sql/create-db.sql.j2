@@ -1,13 +1,33 @@
+-- Create against all host (this may not be secure, but for now it should be okay) - using %
 CREATE DATABASE IF NOT EXISTS {{ db_name }};
 USE {{ db_name }}
-CREATE USER {{ db_generated_user }};
-ALTER USER {{ db_generated_user }} IDENTIFIED BY '{{ db_generated_password }}';
-GRANT ALL ON {{ db_name }}.* TO {{ db_generated_user }};
-GRANT ALL PRIVILEGES ON {{ db_name }}.* TO {{ db_generated_user }};
-GRANT INSERT, UPDATE ON mysql.* TO {{ db_generated_user }};
-GRANT GRANT OPTION ON {{ db_name }}.* TO {{ db_generated_user }};
+CREATE USER '{{ db_generated_user }}'@'%';
+ALTER USER '{{ db_generated_user }}'@'%' IDENTIFIED BY '{{ db_generated_password }}';
+GRANT ALL ON {{ db_name }}.* TO '{{ db_generated_user }}'@'%';
+GRANT ALL PRIVILEGES ON {{ db_name }}.* TO '{{ db_generated_user }}'@'%';
+GRANT INSERT, UPDATE ON mysql.* TO '{{ db_generated_user }}'@'%';
+GRANT GRANT OPTION ON {{ db_name }}.* TO '{{ db_generated_user }}'@'%';
 
 -- Provision Migration User
-CREATE USER {{ db_generated_migration_user }};
-GRANT ALL ON {{ db_name }}.* TO {{ db_generated_migration_user }};
-GRANT ALL PRIVILEGES ON {{ db_name }}.* TO {{ db_generated_migration_user }};
+CREATE USER '{{ db_generated_migration_user }}'@'%';
+GRANT ALL ON {{ db_name }}.* TO '{{ db_generated_migration_user }}'@'%';
+GRANT ALL PRIVILEGES ON {{ db_name }}.* TO '{{ db_generated_migration_user }}'@'%';
+
+FLUSH PRIVILEGES;
+
+-- Create using localhost --> to handle Unix socket
+CREATE DATABASE IF NOT EXISTS {{ db_name }};
+USE {{ db_name }}
+CREATE USER '{{ db_generated_user }}'@'localhost';
+ALTER USER '{{ db_generated_user }}'@'localhost' IDENTIFIED BY '{{ db_generated_password }}';
+GRANT ALL ON {{ db_name }}.* TO '{{ db_generated_user }}'@'localhost';
+GRANT ALL PRIVILEGES ON {{ db_name }}.* TO '{{ db_generated_user }}'@'localhost';
+GRANT INSERT, UPDATE ON mysql.* TO '{{ db_generated_user }}'@'localhost';
+GRANT GRANT OPTION ON {{ db_name }}.* TO '{{ db_generated_user }}'@'localhost';
+
+-- Provision Migration User
+CREATE USER '{{ db_generated_migration_user }}'@'localhost';
+GRANT ALL ON {{ db_name }}.* TO '{{ db_generated_migration_user }}'@'localhost';
+GRANT ALL PRIVILEGES ON {{ db_name }}.* TO '{{ db_generated_migration_user }}'@'localhost';
+
+FLUSH PRIVILEGES;

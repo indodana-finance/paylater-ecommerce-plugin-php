@@ -1,23 +1,30 @@
 #!/bin/bash
-sudo apt-get install mysql-server-5.6 mysql-client-5.6
-sudo apt-get -y install expect
+if [[ "$OS" == "Mac" ]]; then
+    brew install mysql@5.6
+    brew install mysql@5.7
+    brew install mysql-client
+    echo 'export PATH="/usr/local/opt/mysql-client/bin:$PATH"' >> ~/.bash_profile
+else
+    sudo apt-get install mysql-server-5.6 mysql-client-5.6
+    sudo apt-get -y install expect
 
-SECURE_MYSQL=$(expect -c "
-set timeout 10
-spawn mysql_secure_installation
-expect \"Enter current password for root (enter for none):\"
-send \"\r\"
-expect \"Change the root password?\"
-send \"n\r\"
-expect \"Remove anonymous users?\"
-send \"y\r\"
-expect \"Disallow root login remotely?\"
-send \"y\r\"
-expect \"Remove test database and access to it?\"
-send \"y\r\"
-expect \"Reload privilege tables now?\"
-send \"y\r\"
-expect eof
-")
+    SECURE_MYSQL=$(expect -c "
+    set timeout 10
+    spawn mysql_secure_installation
+    expect \"Enter current password for root (enter for none):\"
+    send \"\r\"
+    expect \"Change the root password?\"
+    send \"n\r\"
+    expect \"Remove anonymous users?\"
+    send \"y\r\"
+    expect \"Disallow root login remotely?\"
+    send \"y\r\"
+    expect \"Remove test database and access to it?\"
+    send \"y\r\"
+    expect \"Reload privilege tables now?\"
+    send \"y\r\"
+    expect eof
+    ")
 
-echo "$SECURE_MYSQL"
+    echo "$SECURE_MYSQL"
+fi

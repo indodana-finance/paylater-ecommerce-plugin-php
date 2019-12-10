@@ -51,11 +51,11 @@
     mode: 0755
 
 - name: Transfer database creation file to remote server
-  command: "rsync -r {{ db_directory }} {{ ssh_user }}@{{ db_host }}:~/.pios.run.db"
+  command: "rsync -r {{ db_directory }} {{ ssh_user }}@{{ db_host }}:~/.run.db"
   when: (db_host != "localhost" and db_host != "127.0.0.1")
 
 - name: Execute create-db script in remote server
-  shell: "mysql -f < ~/.pios.run.db/{{ run_db_identifier }}/sql/create-db.sql"
+  shell: "mysql -f < ~/.run.db/{{ run_db_identifier }}/sql/create-db.sql"
   become: yes
   become_method: sudo
   become_user: root
@@ -69,4 +69,11 @@
   become: yes
   become_method: sudo
   become_user: root
-  when: (db_host == "localhost" or db_host == "127.0.0.1")
+  when: (db_host == "localhost" or db_host == "127.0.0.1") and (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
+
+- name: Execute create-db script in localhost
+  shell: "mysql -u root -f < {{ db_directory }}/sql/create-db.sql"
+  become: yes
+  become_method: sudo
+  become_user: root
+  when: (db_host == "localhost" or db_host == "127.0.0.1") and (ansible_distribution == 'MacOSX')

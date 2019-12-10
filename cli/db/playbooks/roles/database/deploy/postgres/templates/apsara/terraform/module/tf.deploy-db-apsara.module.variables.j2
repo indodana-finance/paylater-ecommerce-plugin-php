@@ -7,6 +7,10 @@ variable "db_environment" {}
 
 variable "apsara_db_vpc" {}
 variable "apsara_db_vpc_vswitch" {}
+{% if db.apsara.db_provider_vpc.cidr_block %}
+variable "apsara_db_vpc_cidr_block" {}
+{% endif %}
+
 variable "apsara_db_instance_class" {}
 variable "apsara_db_instance_database_name" {}
 variable "apsara_db_instance_engine" {}

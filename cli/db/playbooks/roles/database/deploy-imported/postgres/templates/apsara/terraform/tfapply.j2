@@ -14,6 +14,14 @@ $TERRAFORM_EXEC import \
     -var "secret_key=$ALICLOUD_SECRET_ACCESS_KEY" \
     "module.{{ db_identifier }}.alicloud_db_account.apsara_db_account" "{{ db.apsara.db_provider_instance.id }}:{{ db_generated_user }}"
 
+{% if db.apsara.db_provider_option.public_connection %}
+$TERRAFORM_EXEC state rm "module.{{ db_identifier }}.alicloud_db_connection.apsara_db_connection"
+$TERRAFORM_EXEC import \
+    -var "access_key=$ALICLOUD_ACCESS_KEY_ID" \
+    -var "secret_key=$ALICLOUD_SECRET_ACCESS_KEY" \
+    "module.{{ db_identifier }}.alicloud_db_connection.apsara_db_connection" "{{ db.apsara.db_provider_instance.id }}:{{ db.apsara.db_provider_option.public_connection_prefix }}"
+{% endif %}
+
 $TERRAFORM_EXEC apply \
     -var "access_key=$ALICLOUD_ACCESS_KEY_ID" \
     -var "secret_key=$ALICLOUD_SECRET_ACCESS_KEY" \

@@ -1,0 +1,57 @@
+#!/bin/bash
+
+set -e
+trap "exit" INT
+
+yq=./.bin.db/yq
+CURRENT_DIRECTORY=$(pwd)
+RUNTIME_DIRECTORY=$HOME/.ssh-tunnel.d
+mkdir -p $RUNTIME_DIRECTORY
+
+function db-util-ssh-tunnel-validate {
+   IDENTIFIER=$1
+   TUNNEL_HOST=$2
+   TUNNEL_PORT=$3
+   SOURCE_HOST=$4
+   SOURCE_PORT=$5
+}
+
+function db-util-ssh-tunnel-execute {
+   IDENTIFIER=$1
+   TUNNEL_HOST=$2
+   TUNNEL_PORT=$3
+   SOURCE_HOST=$4
+   SOURCE_PORT=$5
+
+   echo -e "${GREEN}[DBCTL]${NC} Will build SSH-tunnel [${YELLOW}TUNNEL: ${TUNNEL_HOST}-${TUNNEL_PORT}${NC} ---> ${YELLOW}TARGET: $SOURCE_HOST:$SOURCE_PORT${NC}]"
+
+   echo -e "${GREEN}[DBCTL]${NC} SSH-tunnel creation command"
+   CREATE_COMMAND="ssh -M -S $RUNTIME_DIRECTORY/.ssh-tunnel.socket.$IDENTIFIER -fnNT -L $TUNNEL_PORT:${SOURCE_HOST}:${SOURCE_PORT} ${TUNNEL_HOST}"
+   echo -e "${GREEN}[DBCTL] [TUNNEL-CREATE]${NC} ${CREATE_COMMAND}${YELLOW}${NC}"
+   EXIT_COMMAND="ssh -S $RUNTIME_DIRECTORY/.ssh-tunnel.socket.$IDENTIFIER -O exit ${TUNNEL_HOST}"
+   echo -e "${GREEN}[DBCTL] [TUNNEL-TERMINATE]${NC} ${EXIT_COMMAND}${YELLOW}${NC}"
+
+   if [[ -S "$RUNTIME_DIRECTORY/.ssh-tunnel.socket.${IDENTIFIER}" ]]; then
+     echo -e "${GREEN}[DBCTL] [TUNNEL-EXIST]${NC} Will exit first.${NC}"
+     eval $EXIT_COMMAND
+   fi
+   echo -e "${GREEN}[DBCTL]${NC} Invoking SSH-TUNNEL-CREATION [${YELLOW}TUNNEL: ${TUNNEL_HOST}-${TUNNEL_PORT}${NC} ---> ${YELLOW}TARGET: $SOURCE_HOST:$SOURCE_PORT${NC}]"
+   eval $CREATE_COMMAND
+   echo -e "${GREEN}[DBCTL]${NC} Success SSH-TUNNEL-CREATION [${YELLOW}TUNNEL: ${TUNNEL_HOST}-${TUNNEL_PORT}${NC} ---> ${YELLOW}TARGET: $SOURCE_HOST:$SOURCE_PORT${NC}]"
+}
+
+
+if [ $# == 0 ]; then
+    exit 3
+fi
+
+if [[ " ${1} " == *"help"* ]] || [[ " ${1} " == *"--help"* ]];then
+    exit 3
+else
+    if [[ -z "$1" ]] || [[ -z "$2" ]] || [[ -z "$3" ]] || [[ -z "$4" ]] || [[ -z "$5" ]]; then
+        exit 3
+    else
+        db-util-ssh-tunnel-validate $1 $2 $3 $4 $5
+        db-util-ssh-tunnel-execute $1 $2 $3 $4 $5
+    fi
+fi

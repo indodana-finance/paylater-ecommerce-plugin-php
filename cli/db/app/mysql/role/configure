@@ -29,6 +29,7 @@ function db-mysql-role-configure-validate {
   local BLUEPRINT_DATABASE_FILE=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/${ENVIRONMENT}.yml
   local BLUEPRINT_ROLES_DIRECTORY=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/__roles__/${ENVIRONMENT}/${ROLE_NAME}
   local BLUEPRINT_ROLES_CREATION_FILE=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/__roles__/${ENVIRONMENT}/${ROLE_NAME}/creation.sql
+  local BLUEPRINT_ROLES_REVOCATION_FILE=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/__roles__/${ENVIRONMENT}/${ROLE_NAME}/revocation.sql
 
   if [[ ! -f "${BLUEPRINT_DATABASE_FILE}" ]]; then
     echo -e "${RED}ERROR:${NC} No database specification file found for ${YELLOW}${DB_NAME}/${ENVIRONMENT}.yml${NC}. [${YELLOW}${BLUEPRINT_DATABASE_FILE}${NC}]"
@@ -44,6 +45,11 @@ function db-mysql-role-configure-validate {
     echo -e "${RED}ERROR:${NC} No ROLES creation.sql file found for ${YELLOW}${DB_NAME}/${ENVIRONMENT}/${ROLE_NAME}${NC}. [${YELLOW}${BLUEPRINT_ROLES_CREATION_FILE}${NC}]"
     exit 1
   fi
+
+  if [[ ! -f "${BLUEPRINT_ROLES_REVOCATION_FILE}" ]]; then
+    echo -e "${RED}ERROR:${NC} No ROLES revocation.sql file found for ${YELLOW}${DB_NAME}/${ENVIRONMENT}/${ROLE_NAME}${NC}. [${YELLOW}${BLUEPRINT_ROLES_REVOCATION_FILE}${NC}]"
+    exit 1
+  fi
 }
 
 function db-mysql-role-configure-execute {
@@ -55,6 +61,7 @@ function db-mysql-role-configure-execute {
   local BLUEPRINT_DATABASE_FILE=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/${ENVIRONMENT}.yml
   local BLUEPRINT_ROLES_DIRECTORY=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/__roles__/${ENVIRONMENT}/${ROLE_NAME}
   local BLUEPRINT_ROLES_CREATION_FILE=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/__roles__/${ENVIRONMENT}/${ROLE_NAME}/creation.sql
+  local BLUEPRINT_ROLES_REVOCATION_FILE=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/__roles__/${ENVIRONMENT}/${ROLE_NAME}/revocation.sql
 
   DB_DEPLOYMENT_TYPE=$($yq r $BLUEPRINT_DATABASE_FILE 'db.deployment')
   export IDENTIFIER=${DB_DEPLOYMENT_TYPE}.mysql.${ORGANIZATION}.${TEAM}.${PRODUCT}.${DB_NAME}.${ENVIRONMENT}
@@ -105,6 +112,7 @@ function db-mysql-role-configure-execute {
       -e "db_directory=${DB_DIRECTORY}" \
       -e "db_role_name=${ROLE_NAME}" \
       -e "db_role_creation_file=${BLUEPRINT_ROLES_CREATION_FILE}" \
+      -e "db_role_revocation_file=${BLUEPRINT_ROLES_REVOCATION_FILE}" \
       -e "organization=${ORGANIZATION}" \
       -e "team=${TEAM}" \
       -e "product=${PRODUCT}" \

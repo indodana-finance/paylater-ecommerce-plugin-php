@@ -13,3 +13,11 @@ resource "alicloud_db_account" "apsara_db_account" {
   password = "${var.apsara_db_instance_password}"
   type = "Super"
 }
+
+{% if db.apsara.db_provider_option.public_connection %}
+resource "alicloud_db_connection" "apsara_db_connection" {
+  instance_id = "${var.apsara_db_instance_id}"
+  port = "${var.apsara_db_instance_port}"
+  connection_prefix = "{{ db.apsara.db_provider_option.public_connection_prefix }}"
+}
+{% endif %}

@@ -49,6 +49,9 @@ module "{{ db_identifier }}" {
 
     apsara_db_vpc = "{{ db.apsara.db_provider_vpc.name }}"
     apsara_db_vpc_vswitch = "{{ db.apsara.db_provider_vpc.vswitch_name }}"
+    {% if db.apsara.db_provider_vpc.cidr_block %}
+    apsara_db_vpc_cidr_block = "{{ db.apsara.db_provider_vpc.cidr_block }}"
+    {% endif %}
 
     apsara_db_instance_class = "{{ db.apsara.db_provider_instance.class }}"
     apsara_db_instance_engine = "{{ db.apsara.db_provider_engine }}"

@@ -49,36 +49,63 @@ function db-mysql-client-execute {
   local DB_NAME=$1
   local ENVIRONMENT=$2
   local ROLE_NAME=$3
-  
+
   local BLUEPRINT_DIRECTORY=$(pwd)/db/blueprint
   local BLUEPRINT_DATABASE_FILE=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/${ENVIRONMENT}.yml
   local BLUEPRINT_ROLES_DIRECTORY=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/__roles__/${ENVIRONMENT}/${ROLE_NAME}
   local BLUEPRINT_ROLES_CREATION_FILE=${BLUEPRINT_DIRECTORY}/mysql/${DB_NAME}/__roles__/${ENVIRONMENT}/${ROLE_NAME}/creation.sql
-  
-  DB_DEPLOYMENT_TYPE=$($yq r $BLUEPRINT_DATABASE_FILE 'db.deployment')
-  DB_HOST=$($yq r $BLUEPRINT_DATABASE_FILE "db.$DB_DEPLOYMENT_TYPE.db_host")
+
   export IDENTIFIER=${DB_DEPLOYMENT_TYPE}.mysql.${ORGANIZATION}.${TEAM}.${PRODUCT}.${DB_NAME}.${ENVIRONMENT}
   export DB_DIRECTORY=$CURRENT_DIRECTORY/.run.db/${IDENTIFIER}
   mkdir -p ${DB_DIRECTORY}
   ./dbctl mysql role get-credential $DB_NAME $ENVIRONMENT $ROLE_NAME
   $(./dbctl mysql role use-credential $DB_NAME $ENVIRONMENT $ROLE_NAME)
+  echo -e "${YELLOW}==========================================================================================${NC}"
+  echo -e "${GREEN}[DBCTL]${NC} PSQL Client for - ${YELLOW}${DB_HOST}/${DB_NAME}/${ROLE_NAME}${NC} - "
+  echo -e "${YELLOW}==========================================================================================${NC}"
 
-  local SSH_ENABLED=$($yq r $BLUEPRINT_DATABASE_FILE "db.${DB_DEPLOYMENT_TYPE}.db_provider_option.ssh_tunnel.enabled")
-  if [[ ${SSH_ENABLED} == "true" ]]; then
-    local SSH_PORT=$($yq r $BLUEPRINT_DATABASE_FILE "db.${DB_DEPLOYMENT_TYPE}.db_provider_option.ssh_tunnel.tunnel_port")
-    echo -e "${YELLOW}==========================================================================================${NC}"
-    echo -e "${GREEN}[DBCTL]${NC} MYSQL Client for - ${YELLOW}127.0.0.1:${SSH_PORT}/${DB_NAME}/${ROLE_NAME}${NC} - "
-    echo -e "${YELLOW}==========================================================================================${NC}"
-    ./dbctl tunnel create ${DB_NAME} mysql ${ENVIRONMENT}
-    mysql -u $DBCTL_USERNAME -D $DB_NAME -h 127.0.0.1 -p"$DBCTL_PASSWORD" --port=${SSH_PORT}
-    ./dbctl tunnel destroy ${DB_NAME} mysql ${ENVIRONMENT}
-  else
-    # TODO
-    # this currently only works on hosted as DB_HOST value will be null if it's not hosted
-    echo -e "${YELLOW}==========================================================================================${NC}"
-    echo -e "${GREEN}[DBCTL]${NC} MYSQL Client for - ${YELLOW}${DB_HOST}/${DB_NAME}/${ROLE_NAME}${NC} - "
-    echo -e "${YELLOW}==========================================================================================${NC}"
-    mysql -u $DBCTL_USERNAME -D $DB_NAME -h ${DB_HOST} -p"$DBCTL_PASSWORD"
+  DB_DEPLOYMENT_TYPE=$($yq r $BLUEPRINT_DATABASE_FILE 'db.deployment')
+
+  if [[ "$DB_DEPLOYMENT_TYPE" == "hosted" ]]; then
+    DB_HOST=$($yq r $BLUEPRINT_DATABASE_FILE "db.$DB_DEPLOYMENT_TYPE.db_host")
+    DB_PORT=$($yq r $BLUEPRINT_DATABASE_FILE "db.$DB_DEPLOYMENT_TYPE.db_port")
+    if [[ "$DB_PORT" == "null" ]]; then
+      DB_PORT=3306
+    fi
+    mysql -u ${DBCTL_USERNAME} -h ${DB_HOST} --password=${DBCTL_PASSWORD} --port ${DB_PORT} --protocol tcp ${DB_NAME}
+  elif [[ "$DB_DEPLOYMENT_TYPE" == "apsara" ]]; then
+    SSH_TUNNEL_ENABLED=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.enabled')
+
+    if [[ "$SSH_TUNNEL_ENABLED" == "true" ]]; then
+      DB_SSH_TUNNEL_IDENTIFIER="$DB_NAME.$ENVIRONMENT"
+      DB_SSH_TUNNEL_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_port')
+      DB_SSH_TUNNEL_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_host')
+      DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_instance.host')
+      DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_instance.port')
+      if [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
+          DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml 'db.apsara.deployed.db.host')
+          DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml 'db.apsara.deployed.db.port')
+          if [[ "$DB_TARGET_HOST" == "" ]] || [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
+            echo -e "${RED}ERROR:${NC} Invalid ${ENVIRONMENT}-deployed.yml found in ${YELLOW}${DB_DIRECTORY}.${NC} Please re-run ${YELLOW}./dbctl postgres deploy $DB_NAME $ENVIRONMENT${NC} first."
+            exit 1;
+          fi
+      fi
+      ./dbctl util ssh-tunnel $DB_SSH_TUNNEL_IDENTIFIER $DB_SSH_TUNNEL_HOST $DB_SSH_TUNNEL_PORT $DB_TARGET_HOST $DB_TARGET_PORT
+
+      mysql -u ${DBCTL_USERNAME} -h 127.0.0.1 --password=${DBCTL_PASSWORD} --port=${DB_SSH_TUNNEL_PORT} ${DB_NAME}
+    else
+      DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_instance.host')
+      DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_instance.port')
+      if [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
+          DB_TARGET_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml 'db.apsara.deployed.db.host')
+          DB_TARGET_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml 'db.apsara.deployed.db.port')
+          if [[ "$DB_TARGET_HOST" == "" ]] || [[ "$DB_TARGET_HOST" == "null" ]] || [[ "$DB_TARGET_PORT" == "" ]] || [[ "$DB_TARGET_PORT" == "null" ]]; then
+            echo -e "${RED}ERROR:${NC} Invalid ${ENVIRONMENT}-deployed.yml found in ${YELLOW}${DB_DIRECTORY}.${NC} Please re-run ${YELLOW}./dbctl postgres deploy $DB_NAME $ENVIRONMENT${NC} first."
+            exit 1;
+          fi
+      fi
+      mysql -u ${DBCTL_USERNAME} -h ${DB_TARGET_HOST} --password=${DBCTL_PASSWORD} --port=${DB_TARGET_PORT} ${DB_NAME}
+    fi
   fi
 }
 

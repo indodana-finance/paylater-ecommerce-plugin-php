@@ -29,3 +29,17 @@ function bcli_show_header() {
     echo -e "${COLOR_CYAN}Version  ${COLOR_NORMAL}$(bcli_trim_whitespace "$(cat "$1/.version")")"
     echo -e "${COLOR_CYAN}Author   ${COLOR_NORMAL}$(bcli_trim_whitespace "$(cat "$1/.author")")"
 }
+
+function check-os {
+    unameOut="$(uname -s)"
+    case "${unameOut}" in
+        Linux*)     M=Linux;;
+        Darwin*)    M=Mac;;
+        CYGWIN*)    M=Cygwin;;
+        MINGW*)     M=MinGw;;
+        *)          M="UNKNOWN:${unameOut}"
+    esac
+    echo ${M}
+
+}
+export OS=$(check-os)

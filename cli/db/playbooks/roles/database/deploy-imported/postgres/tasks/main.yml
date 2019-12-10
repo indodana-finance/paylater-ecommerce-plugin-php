@@ -13,3 +13,7 @@
 - name: Bootstrap Apsara
   include: "bootstrap-db-apsara-tf.yml"
   when: "db_deployment_type == 'apsara'"
+
+- name: Bootstrap GCP
+  include: "bootstrap-db-gcp-tf.yml"
+  when: "db_deployment_type == 'gcp'"

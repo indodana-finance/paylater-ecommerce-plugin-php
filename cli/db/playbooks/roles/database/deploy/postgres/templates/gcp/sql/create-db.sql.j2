@@ -1,0 +1,40 @@
+CREATE DATABASE {{ db_name }};
+\connect {{ db_name }}
+CREATE USER {{ db_generated_user }};
+
+SELECT 'Altering user with password  <generated-password>' AS "INFO";
+ALTER USER {{ db_generated_user }} WITH PASSWORD '{{ db_generated_password }}' CREATEROLE;
+SELECT '[FINISH] Altering user with password <generated-password>' AS "INFO";
+
+SELECT 'Altering DATABASE {{ db_name }}  owner to {{ db_generated_user }}' AS "INFO";
+ALTER DATABASE {{ db_name }} OWNER TO {{ db_generated_user }};
+SELECT '[FINISH] Altering DATABASE {{ db_name }}  owner to {{ db_generated_user }}' AS "INFO";
+
+-- Provision Migration User
+CREATE USER {{ db_generated_migration_user }};
+CREATE ROLE {{ db_generated_migration_user }};
+GRANT ALL ON DATABASE {{ db_name }} TO {{ db_generated_migration_user }};
+GRANT ALL PRIVILEGES ON DATABASE {{ db_name }} TO {{ db_generated_migration_user }};
+
+-- Provision Role DBCTL - ReadWrite --
+CREATE ROLE dbctlreadwrite;
+GRANT ALL ON DATABASE {{ db_name }} TO dbctlreadwrite;
+GRANT ALL PRIVILEGES ON DATABASE {{ db_name }} TO dbctlreadwrite;
+
+-- Install Extension
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS  fuzzystrmatch;
+CREATE EXTENSION IF NOT EXISTS  postgis_tiger_geocoder;
+CREATE EXTENSION IF NOT EXISTS  postgis_topology;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+ALTER SCHEMA tiger OWNER TO {{ db_generated_user }};
+ALTER SCHEMA topology OWNER TO {{ db_generated_user }};
+
+-- CREATE FUNCTION exec(text) returns text language plpgsql volatile AS $f$ BEGIN EXECUTE $1; RETURN $1; END; $f$;
+--SELECT exec('ALTER TABLE ' || quote_ident(s.nspname) || '.' || quote_ident(s.relname) || ' OWNER TO rds_superusers;')
+--  FROM (
+--    SELECT nspname, relname
+--    FROM pg_class c JOIN pg_namespace n ON (c.relnamespace = n.oid)
+--    WHERE nspname in ('tiger','topology') AND
+--    relkind IN ('r','S','v') ORDER BY relkind = 'S')
+--s;

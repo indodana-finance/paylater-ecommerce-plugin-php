@@ -141,15 +141,17 @@ function execute-db-deploy-apsara-tfapply {
       SSH_TUNNEL_ENABLED=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.enabled')
       if [[ "$SSH_TUNNEL_ENABLED" == "true" ]]; then
         echo -e "${GREEN}[DBCTL]${NC} Will bootstrap Apsara DB Database via SSH tunnel"
+        DB_SSH_TUNNEL_IDENTIFIER="$DB_NAME.$ENVIRONMENT"
         DB_SSH_TUNNEL_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_port')
         DB_SSH_TUNNEL_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_host')
         
-        ./dbctl tunnel create ${DB_NAME} mysql ${ENVIRONMENT}
+        DB_TARGET_HOST=$DB_HOST
+        DB_TARGET_PORT=$DB_PORT
+        ./dbctl util ssh-tunnel $DB_SSH_TUNNEL_IDENTIFIER $DB_SSH_TUNNEL_HOST $DB_SSH_TUNNEL_PORT $DB_TARGET_HOST $DB_TARGET_PORT
         pushd ${DB_DIRECTORY}
-          mysql < sql/create-db.sql -h 127.0.0.1 --port=${DB_SSH_TUNNEL_PORT} -u $DB_USER --password=$DB_PASSWORD
+          mysql -f < sql/create-db.sql -h 127.0.0.1 --port=${DB_SSH_TUNNEL_PORT} -u $DB_USER --password=$DB_PASSWORD
         popd
-        ./dbctl tunnel destroy ${DB_NAME} mysql ${ENVIRONMENT}
-
+        
         echo -e "db.apsara.deployed.tunnel.host: ${DB_SSH_TUNNEL_HOST}" > $DB_DIRECTORY/deployed_db_details.yml
         echo -e "db.apsara.deployed.tunnel.port: ${DB_SSH_TUNNEL_PORT}" > $DB_DIRECTORY/deployed_db_details.yml
         echo -e "db.apsara.deployed.db.host: ${DB_HOST}" >> $DB_DIRECTORY/deployed_db_details.yml
@@ -159,7 +161,14 @@ function execute-db-deploy-apsara-tfapply {
         rm -f $DB_DIRECTORY/deployed_db_details.yml
       else
         echo -e "${GREEN}[DBCTL]${NC} Will bootstrap Apsara DB Database"
-        mysql < sql/create-db.sql -h ${DB_HOST} --port=${DB_PORT} -u $DB_USER --password=$DB_PASSWORD    
+        pushd $DB_DIRECTORY
+          if [[ "$PUBLIC_CONNECTION" == "true" ]]; then
+            DB_HOST=$(cat apsara_db.json | $jq -r .apsara_db_public_host.value)
+            DB_PORT=$(cat apsara_db.json | $jq -r .apsara_db_public_port.value)
+          fi
+          echo -e "${GREEN}[DBCTL]${NC} Will bootstrap Apsara DB Database"
+          mysql -f < sql/create-db.sql -h ${DB_HOST} --port=${DB_PORT} -u $DB_USER --password=$DB_PASSWORD    
+        popd
       fi
     fi
 }
@@ -285,6 +294,7 @@ function db-deploy-execute {
     if [[ "$DB_PROVIDER_INSTANCE_ID" != "" ]] && [[ "$DB_PROVIDER_INSTANCE_ID" != "null" ]] && [[ "$DB_PROVIDER_INSTANCE_HOST" != "" ]] && [[ "$DB_PROVIDER_INSTANCE_HOST" != "null" ]]; then
       echo -e "\n${GREEN}[DBCTL]${NC} DBCTL deploy instance mode. Will populate and bootstrap DB instance: ${YELLOW}<$DB_PROVIDER_INSTANCE_ID>${NC}"
       ansible-playbook db/playbooks/dbctl-db-deploy-imported.yml \
+        -vvv \
         -e "db_engine=mysql" \
         -e "db_deployment_type=$DB_DEPLOYMENT_TYPE" \
         -e "db_name=${DB_NAME}" \

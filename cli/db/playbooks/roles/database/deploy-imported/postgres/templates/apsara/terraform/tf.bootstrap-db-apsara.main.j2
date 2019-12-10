@@ -67,6 +67,17 @@ output "apsara_db_host" {
     value = "${module.{{ db_identifier }}.apsara_db_host}"
 }
 
+{% if db.apsara.db_provider_option.public_connection %}
+output "apsara_db_public_host" {
+    value = "${module.{{ db_identifier }}.apsara_db_public_host}"
+}
+
+output "apsara_db_public_port" {
+    value = "${module.{{ db_identifier }}.apsara_db_public_port}"
+}
+{% endif %}
+
+
 output "apsara_db_database_name" {
     value = "${module.{{ db_identifier }}.apsara_db_database_name}"
 }

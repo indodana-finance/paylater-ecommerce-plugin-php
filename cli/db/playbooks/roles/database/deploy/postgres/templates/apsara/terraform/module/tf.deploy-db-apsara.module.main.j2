@@ -1,14 +1,50 @@
-data "alicloud_zones" "apsara_zone" {}
-
+{% if db.apsara.db_provider_vpc.cidr_block %}
+data "alicloud_vpcs" "apsara_vpc" {
+  name_regex = "${var.apsara_db_vpc}"
+  cidr_block = "${var.apsara_db_vpc_cidr_block}"
+}
+{% else %}
 data "alicloud_vpcs" "apsara_vpc" {
   name_regex = "${var.apsara_db_vpc}"
 }
+{% endif %}
 
 data "alicloud_vswitches" "apsara_vswitch" {
   name_regex = "${var.apsara_db_vpc_vswitch}"
   vpc_id = "${data.alicloud_vpcs.apsara_vpc.vpcs.0.id}"
 }
- 
+
+{% if db.apsara.db_provider_option.multi_zone %}
+resource "alicloud_db_instance" "apsara_db_instance" {
+  engine = "${var.apsara_db_instance_engine}"
+  engine_version = "${var.apsara_db_instance_engine_version}"
+  instance_type = "${var.apsara_db_instance_class}"
+  instance_storage = "${var.apsara_db_instance_storage_size}"
+  instance_name = "${var.db_product}-${var.apsara_db_instance_database_name}-${var.db_environment}"
+  instance_charge_type = "Postpaid"
+  vswitch_id = "${data.alicloud_vswitches.apsara_vswitch.vswitches.0.id}"
+  security_ips = "${var.apsara_db_instance_security_ips}"
+  zone_id = "{{ db.apsara.db_provider_option.multi_zone_id }}"
+  tags {
+    Name = "${var.apsara_db_instance_database_name}"
+    ResourceType = "ApsaraDB-${var.apsara_db_instance_engine}-${var.apsara_db_instance_engine_version}"
+    Organization = "${var.db_organization}"
+    Team = "${var.db_team}"
+    Product = "${var.db_product}"
+    Environment = "${var.db_environment}"
+  }
+}
+resource "alicloud_db_account" "apsara_db_account" {
+  instance_id = "${alicloud_db_instance.apsara_db_instance.id}"
+  name = "${var.apsara_db_instance_username}"
+  password = "${var.apsara_db_instance_password}"
+  type = "Normal"
+
+  depends_on = [
+    "alicloud_db_instance.apsara_db_instance"
+  ]
+}
+{% else %}
 resource "alicloud_db_instance" "apsara_db_instance" {
   engine = "${var.apsara_db_instance_engine}"
   engine_version = "${var.apsara_db_instance_engine_version}"
@@ -27,20 +63,6 @@ resource "alicloud_db_instance" "apsara_db_instance" {
     Environment = "${var.db_environment}"
   }
 }
-
-resource "alicloud_db_backup_policy" "apsara_db_backup_policy" {
-  instance_id = "${alicloud_db_instance.apsara_db_instance.id}"
-  backup_period = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-  backup_time = "16:00Z-17:00Z"
-  retention_period = 7
-  log_backup = true
-  log_retention_period = 7
-  
-  depends_on = [
-    "alicloud_db_instance.apsara_db_instance"
-  ]  
-}
-
 resource "alicloud_db_account" "apsara_db_account" {
   instance_id = "${alicloud_db_instance.apsara_db_instance.id}"
   name = "${var.apsara_db_instance_username}"
@@ -49,7 +71,21 @@ resource "alicloud_db_account" "apsara_db_account" {
 
   depends_on = [
     "alicloud_db_instance.apsara_db_instance"
-  ]  
+  ]
+}
+{% endif %}
+
+resource "alicloud_db_backup_policy" "apsara_db_backup_policy" {
+  instance_id = "${alicloud_db_instance.apsara_db_instance.id}"
+  backup_period = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+  backup_time = "16:00Z-17:00Z"
+  retention_period = 7
+  log_backup = true
+  log_retention_period = 7
+
+  depends_on = [
+    "alicloud_db_instance.apsara_db_instance"
+  ]
 }
 
 {% if db.apsara.db_provider_option.public_connection %}

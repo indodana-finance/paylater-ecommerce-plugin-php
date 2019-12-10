@@ -19,5 +19,5 @@ flyway.locations = ['filesystem:{{ db_schema }}']
 flyway.target = '2030.12.31.9999'    //Fix flyway target to given schema version. Change this to migrate further.
 flyway.baselineOnMigrate = true
 flyway.user = '{{ db_migration_username }}'
-flyway.url = 'jdbc:mysql://{{ db_host }}/{{ db_name }}?serverTimezone=UTC'
+flyway.url = 'jdbc:mysql://{{ db_host }}/{{ db_name }}?serverTimezone=UTC&useSSL=false'
 flyway.password = '{{ db_migration_password }}'

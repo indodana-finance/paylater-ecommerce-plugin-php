@@ -1,1 +1,2 @@
-ALTER USER {{ db_generated_migration_user }} IDENTIFIED BY '{{ '{{' }}password{{ '}}' }}'
+ALTER USER '{{ db_generated_migration_user }}'@'%' IDENTIFIED BY '{{ '{{' }}password{{ '}}' }}';
+ALTER USER '{{ db_generated_migration_user }}'@'localhost' IDENTIFIED BY '{{ '{{' }}password{{ '}}' }}'

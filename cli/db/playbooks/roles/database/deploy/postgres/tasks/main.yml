@@ -9,6 +9,10 @@
   include: "deploy-db-apsara-tf.yml"
   when: "db_deployment_type == 'apsara'"
 
+- name: Deploy GCP
+  include: "deploy-db-gcp-tf.yml"
+  when: "db_deployment_type == 'gcp'"
+
 - name: Deploy Hosted
   include: "deploy-db-hosted.yml"
   when: "db_deployment_type == 'hosted'"

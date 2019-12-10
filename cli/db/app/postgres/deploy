@@ -2,9 +2,6 @@
 set -e
 trap "exit" INT
 
-source ./db/app/meta
-source ./db/app/namespace
-
 yq=./.bin.db/yq
 jq=./.bin.db/jq
 CURRENT_DIRECTORY=$(pwd)
@@ -81,6 +78,24 @@ function execute-db-deploy-apsara-confirmation {
     fi
 }
 
+function execute-db-deploy-gcp-confirmation {
+    DB_DIRECTORY=$1
+    rm -f $DB_DIRECTORY/gcp_db.json
+    rm -f $DB_DIRECTORY/TFAPPLYOUTPUT
+    rm -f $DB_DIRECTORY/VAULTUPLOADOUTPUT
+    
+    echo -e "${YELLOW} NOTE: After the procedure We will need to synchronize the DB Credential to Secrets Management - Vault.${NC}"
+    echo -e "${YELLOW} Are you sure you have configured the GITHUB_USERNAME & CERTIFICATE correctly and have verified that you have the required permission to do this?${NC}"
+    echo -e "${RED}DANGER: Failure to do this may require you to need to re-execute the script again to operate correctly.${NC}."
+    echo -n '(type yes to proceed): '
+    read VAULTVALID
+    if [[ "$VAULTVALID" == "yes" ]]; then
+      echo -e "${YELLOW} NOTE: We will perform DB Deployment Procedure. Please confirm all the details correctly before proceeding.${NC}"
+    else 
+      exit 1
+    fi
+}
+
 function execute-db-deploy-rds-tfapply {
     DB_DIRECTORY=$1
     echo -e "${RED}DANGER:${NC} ${YELLOW}PLEASE WAIT PATIENTLY UNTIL ALL PROCEDURE COMPLETED PROPERLY. IF THERE IS TROUBLE PLEASE CALL ASSISTANCE TO INFRA-TEAM IMMEDIATELY${NC}"
@@ -95,7 +110,8 @@ function execute-db-deploy-rds-tfapply {
 
 function execute-db-deploy-apsara-tfapply {
     DB_DIRECTORY=$1
-    ENVIRONMENT=$2
+    DB_NAME=$2
+    ENVIRONMENT=$3
     echo -e "${RED}DANGER:${NC} ${YELLOW}PLEASE WAIT PATIENTLY UNTIL ALL PROCEDURE COMPLETED PROPERLY. IF THERE IS TROUBLE PLEASE CALL ASSISTANCE TO INFRA-TEAM IMMEDIATELY${NC}"
     echo -e "${YELLOW}WILL INVOKE TERRAFORM APPLY. Please type exactly 'yes' if you are prompted by Terraform.${NC}" 
     sleep "5"
@@ -110,31 +126,34 @@ function execute-db-deploy-apsara-tfapply {
     popd
 
     if [ "$TFAPPLY" == "SUCCESS" ]; then
+      PUBLIC_CONNECTION=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.public_connection')
+      SSH_TUNNEL_ENABLED=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.enabled')
+    
       pushd $DB_DIRECTORY
-          DB_HOST=$(cat apsara_db.json | $jq -r .apsara_db_host.value)
           DB_USER=$(cat apsara_db.json | $jq -r .apsara_db_user.value)
-          DB_PORT=$(cat apsara_db.json | $jq -r .apsara_db_port.value)
           DB_PASSWORD=$(cat PGPASSWORD)
       popd
 
       echo -e "${GREEN}[DBCTL]${NC} Waiting for Terraform changes successfully propagated (15 seconds sleep pause)"
       sleep 15
-
-      # echo -e "${GREEN}[DBCTL]${NC} Will bootstrap Apsara DB."
-      # echo "PGPASSWORD=$DB_PASSWORD psql -f sql/create-db.sql -h $DB_PUBLIC_HOST -p $DB_PORT -d postgres -U $DB_USER"
-      SSH_TUNNEL_ENABLED=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.enabled')
-
+      
       if [[ "$SSH_TUNNEL_ENABLED" == "true" ]]; then
-        echo -e "${GREEN}[DBCTL]${NC} Will bootstrap Apsara DB Database via SSH tunnel"
+        pushd $DB_DIRECTORY
+            DB_HOST=$(cat apsara_db.json | $jq -r .apsara_db_host.value)
+            DB_USER=$(cat apsara_db.json | $jq -r .apsara_db_user.value)
+            DB_PORT=$(cat apsara_db.json | $jq -r .apsara_db_port.value)
+            DB_PASSWORD=$(cat PGPASSWORD)
+        popd
+      
+        DB_SSH_TUNNEL_IDENTIFIER="$DB_NAME.$ENVIRONMENT"
         DB_SSH_TUNNEL_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_port')
         DB_SSH_TUNNEL_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.apsara.db_provider_option.ssh_tunnel.tunnel_host')
-
-        ./dbctl tunnel create ${DB_NAME} postgres ${ENVIRONMENT}
+        DB_TARGET_HOST=$DB_HOST
+        DB_TARGET_PORT=$DB_PORT
+        ./dbctl util ssh-tunnel $DB_SSH_TUNNEL_IDENTIFIER $DB_SSH_TUNNEL_HOST $DB_SSH_TUNNEL_PORT $DB_TARGET_HOST $DB_TARGET_PORT
         pushd $DB_DIRECTORY
             PGPASSWORD=$DB_PASSWORD psql -f sql/create-db.sql -h 127.0.0.1 -p ${DB_SSH_TUNNEL_PORT} -d postgres -U $DB_USER
         popd
-        ./dbctl tunnel destroy ${DB_NAME} postgres ${ENVIRONMENT}
-
         echo -e "db.apsara.deployed.tunnel.host: ${DB_SSH_TUNNEL_HOST}" > $DB_DIRECTORY/deployed_db_details.yml
         echo -e "db.apsara.deployed.tunnel.port: ${DB_SSH_TUNNEL_PORT}" > $DB_DIRECTORY/deployed_db_details.yml
         echo -e "db.apsara.deployed.db.host: ${DB_HOST}" >> $DB_DIRECTORY/deployed_db_details.yml
@@ -142,8 +161,79 @@ function execute-db-deploy-apsara-tfapply {
         $yq w -s $DB_DIRECTORY/deployed_db_details.yml $DB_DIRECTORY/${ENVIRONMENT}.yml > $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml
         rm -f $DB_DIRECTORY/deployed_db_details.yml
       else
-        echo -e "${GREEN}[DBCTL]${NC} Will bootstrap Apsara DB Database"
-        PGPASSWORD=$DB_PASSWORD psql -f sql/create-db.sql -h ${DB_HOST} -p ${DB_PORT} -d postgres -U ${DB_USER}
+        pushd $DB_DIRECTORY
+          if [[ "$PUBLIC_CONNECTION" == "true" ]]; then
+            DB_HOST=$(cat apsara_db.json | $jq -r .apsara_db_public_host.value)
+            DB_PORT=$(cat apsara_db.json | $jq -r .apsara_db_public_port.value)
+          fi
+          echo -e "${GREEN}[DBCTL]${NC} Will bootstrap Apsara DB Database"
+          PGPASSWORD=$DB_PASSWORD psql -f sql/create-db.sql -h ${DB_HOST} -p ${DB_PORT} -d postgres -U ${DB_USER}
+        popd
+      fi
+    fi
+}
+
+function execute-db-deploy-gcp-tfapply {
+    DB_DIRECTORY=$1
+    DB_NAME=$2
+    ENVIRONMENT=$3
+    echo -e "${RED}DANGER:${NC} ${YELLOW}PLEASE WAIT PATIENTLY UNTIL ALL PROCEDURE COMPLETED PROPERLY. IF THERE IS TROUBLE PLEASE CALL ASSISTANCE TO INFRA-TEAM IMMEDIATELY${NC}"
+    echo -e "${YELLOW}WILL INVOKE TERRAFORM APPLY. Please type exactly 'yes' if you are prompted by Terraform.${NC}" 
+    sleep "5"
+    mkdir -p $DB_DIRECTORY/.bin.db
+    cp ./.bin.db/terraform $DB_DIRECTORY/.bin.db/terraform
+    cp ./.bin.db/jq $DB_DIRECTORY/.bin.db/jq
+    cp ./.bin.db/yq $DB_DIRECTORY/.bin.db/yq
+
+    pushd $DB_DIRECTORY
+    ./tfapply
+    TFAPPLY=$(cat TFAPPLYOUTPUT)
+    popd
+
+    if [ "$TFAPPLY" == "SUCCESS" ]; then
+      PUBLIC_CONNECTION=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_option.public_connection.enabled')
+      SSH_TUNNEL_ENABLED=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_option.ssh_tunnel.enabled')
+    
+      pushd $DB_DIRECTORY
+          DB_USER=$(cat gcp_db.json | $jq -r .gcp_db_user.value)
+          DB_PASSWORD=$(cat PGPASSWORD)
+      popd
+
+      echo -e "${GREEN}[DBCTL]${NC} Waiting for Terraform changes successfully propagated (15 seconds sleep pause)"
+      sleep 15
+      
+      if [[ "$SSH_TUNNEL_ENABLED" == "true" ]]; then
+        pushd $DB_DIRECTORY
+            DB_HOST=$(cat gcp_db.json | $jq -r .gcp_db_private_ip.value)
+            DB_USER=$(cat gcp_db.json | $jq -r .gcp_db_user.value)
+            DB_PORT=$(cat gcp_db.json | $jq -r .gcp_db_private_port.value)
+            DB_PASSWORD=$(cat PGPASSWORD)
+        popd
+      
+        DB_SSH_TUNNEL_IDENTIFIER="$DB_NAME.$ENVIRONMENT"
+        DB_SSH_TUNNEL_PORT=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_option.ssh_tunnel.tunnel_port')
+        DB_SSH_TUNNEL_HOST=$($yq r $DB_DIRECTORY/${ENVIRONMENT}.yml 'db.gcp.db_provider_option.ssh_tunnel.tunnel_host')
+        DB_TARGET_HOST=$DB_HOST
+        DB_TARGET_PORT=$DB_PORT
+        ./dbctl util ssh-tunnel $DB_SSH_TUNNEL_IDENTIFIER $DB_SSH_TUNNEL_HOST $DB_SSH_TUNNEL_PORT $DB_TARGET_HOST $DB_TARGET_PORT
+        pushd $DB_DIRECTORY
+            PGPASSWORD=$DB_PASSWORD psql -f sql/create-db.sql -h 127.0.0.1 -p ${DB_SSH_TUNNEL_PORT} -d postgres -U $DB_USER
+        popd
+        echo -e "db.gcp.deployed.tunnel.host: ${DB_SSH_TUNNEL_HOST}" > $DB_DIRECTORY/deployed_db_details.yml
+        echo -e "db.gcp.deployed.tunnel.port: ${DB_SSH_TUNNEL_PORT}" > $DB_DIRECTORY/deployed_db_details.yml
+        echo -e "db.gcp.deployed.db.host: ${DB_HOST}" >> $DB_DIRECTORY/deployed_db_details.yml
+        echo -e "db.gcp.deployed.db.port: ${DB_PORT}" >> $DB_DIRECTORY/deployed_db_details.yml
+        $yq w -s $DB_DIRECTORY/deployed_db_details.yml $DB_DIRECTORY/${ENVIRONMENT}.yml > $DB_DIRECTORY/${ENVIRONMENT}-deployed.yml
+        rm -f $DB_DIRECTORY/deployed_db_details.yml
+      else
+        pushd $DB_DIRECTORY
+          if [[ "$PUBLIC_CONNECTION" == "true" ]]; then
+            DB_HOST=$(cat gcp_db.json | $jq -r .gcp_db_public_ip.value)
+            DB_PORT=$(cat gcp_db.json | $jq -r .gcp_db_public_port.value)
+          fi
+          echo -e "${GREEN}[DBCTL]${NC} Will bootstrap GCP DB Database"
+          PGPASSWORD=$DB_PASSWORD psql -f sql/create-db.sql -h ${DB_HOST} -p ${DB_PORT} -d postgres -U ${DB_USER}
+        popd
       fi
     fi
 }
@@ -160,7 +250,7 @@ function db-deploy-validate {
     fi
 
     DB_DEPLOYMENT_TYPE=$($yq r $BLUEPRINT_DATABASE_FILE 'db.deployment')
-    if [[ "$DB_DEPLOYMENT_TYPE" != "hosted" && "$DB_DEPLOYMENT_TYPE" != "rds" && $DB_DEPLOYMENT_TYPE != "apsara" ]]; then
+    if [[ "$DB_DEPLOYMENT_TYPE" != "hosted" && "$DB_DEPLOYMENT_TYPE" != "rds" && $DB_DEPLOYMENT_TYPE != "apsara" && "$DB_DEPLOYMENT_TYPE" != "gcp"  ]]; then
         echo -e "${RED}ERROR:${NC} Deployment type is not supported for ${YELLOW}${DB_NAME}/${ENVIRONMENT}.yml${NC}. [Deployment-Type: ${YELLOW}${DEPLOYMENT_TYPE}${NC} - supported: ${YELLOW}hosted, rds${NC}]"
         exit 1
     fi
@@ -188,6 +278,13 @@ function db-deploy-validate {
       fi
       if [[ -z "$ALICLOUD_SECRET_ACCESS_KEY" ]]; then
         echo -e "${RED}[ERROR]${NC} No ALICLOUD_SECRET_ACCESS_KEY specified. Please export it to your environment variable."
+        exit 1
+      fi
+    fi
+
+    if [[ "$DB_DEPLOYMENT_TYPE" == "gcp" ]]; then
+      if [[ -z "$GOOGLE_CREDENTIALS_FILE" ]]; then
+        echo -e "${RED}[ERROR]${NC} No GOOGLE_CREDENTIALS_FILE specified. Please export it to your environment variable."
         exit 1
       fi
     fi
@@ -264,6 +361,9 @@ function db-deploy-execute {
     if [[ "$DB_DEPLOYMENT_TYPE" == "apsara" ]]; then
       DB_PROVIDER_INSTANCE_ID=$($yq r $BLUEPRINT_DATABASE_FILE db.apsara.db_provider_instance.id)
       DB_PROVIDER_INSTANCE_HOST=$($yq r $BLUEPRINT_DATABASE_FILE db.apsara.db_provider_instance.host)
+    elif [[ "$DB_DEPLOYMENT_TYPE" == "gcp" ]]; then
+      DB_PROVIDER_INSTANCE_ID=$($yq r $BLUEPRINT_DATABASE_FILE db.gcp.db_provider_instance.name)
+      DB_PROVIDER_INSTANCE_HOST="-"
     fi
 
     if [[ "$DB_PROVIDER_INSTANCE_ID" != "" ]] && [[ "$DB_PROVIDER_INSTANCE_ID" != "null" ]] && [[ "$DB_PROVIDER_INSTANCE_HOST" != "" ]] && [[ "$DB_PROVIDER_INSTANCE_HOST" != "null" ]]; then
@@ -289,7 +389,24 @@ function db-deploy-execute {
       
       if [[ "$DB_DEPLOYMENT_TYPE" == "apsara" ]]; then
         execute-db-deploy-apsara-confirmation $DB_DIRECTORY
-        execute-db-deploy-apsara-tfapply $DB_DIRECTORY $ENVIRONMENT
+        execute-db-deploy-apsara-tfapply $DB_DIRECTORY $DB_NAME $ENVIRONMENT
+        TFAPPLY=$(cat $DB_DIRECTORY/TFAPPLYOUTPUT)
+        if [ "$TFAPPLY" == "SUCCESS" ]; then
+          configure-secrets-to-vault $DB_DIRECTORY
+          VAULTUPLOAD=$(cat $DB_DIRECTORY/VAULTUPLOADOUTPUT)
+          if [ "$VAULTUPLOAD" == "SUCCESS" ]; then
+            echo -e "${GREEN} [SUCCESS] ${NC} Successfully synchronize DB Credential to Secrets Management - Vault"
+          else
+            echo -e "${RED}ERROR: Upload DB Credentials to Vault IS NOT COMPLETED properly. Please do re-deploy.${NC}"
+            exit 1
+          fi
+        else
+          echo -e "${RED}ERROR: TERRAFORM APPLY IS NOT INVOKED. DB Deploy procedure will not continue. Please do re-deploy.${NC}"
+          exit 1
+        fi
+      elif [[ "$DB_DEPLOYMENT_TYPE" == "gcp" ]]; then
+        execute-db-deploy-gcp-confirmation $DB_DIRECTORY
+        execute-db-deploy-gcp-tfapply $DB_DIRECTORY $DB_NAME $ENVIRONMENT
         TFAPPLY=$(cat $DB_DIRECTORY/TFAPPLYOUTPUT)
         if [ "$TFAPPLY" == "SUCCESS" ]; then
           configure-secrets-to-vault $DB_DIRECTORY
@@ -351,7 +468,7 @@ function db-deploy-execute {
         fi
       elif [[ "$DB_DEPLOYMENT_TYPE" == "apsara" ]]; then
         execute-db-deploy-apsara-confirmation $DB_DIRECTORY
-        execute-db-deploy-apsara-tfapply $DB_DIRECTORY $ENVIRONMENT
+        execute-db-deploy-apsara-tfapply $DB_DIRECTORY $DB_NAME $ENVIRONMENT
         TFAPPLY=$(cat $DB_DIRECTORY/TFAPPLYOUTPUT)
         if [ "$TFAPPLY" == "SUCCESS" ]; then
           configure-secrets-to-vault $DB_DIRECTORY
@@ -375,6 +492,23 @@ function db-deploy-execute {
           echo -e "${RED}ERROR: Upload DB Credentials to Vault IS NOT COMPLETED properly. Please do re-deploy.${NC}"
           exit 1
         fi
+      elif [[ "$DB_DEPLOYMENT_TYPE" == "gcp" ]]; then
+        execute-db-deploy-gcp-confirmation $DB_DIRECTORY
+        execute-db-deploy-gcp-tfapply $DB_DIRECTORY $DB_NAME $ENVIRONMENT
+        TFAPPLY=$(cat $DB_DIRECTORY/TFAPPLYOUTPUT)
+        if [ "$TFAPPLY" == "SUCCESS" ]; then
+          configure-secrets-to-vault $DB_DIRECTORY
+          VAULTUPLOAD=$(cat $DB_DIRECTORY/VAULTUPLOADOUTPUT)
+          if [ "$VAULTUPLOAD" == "SUCCESS" ]; then
+            echo -e "${GREEN} [SUCCESS] ${NC} Successfully synchronize DB Credential to Secrets Management - Vault"
+          else
+            echo -e "${RED}ERROR: Upload DB Credentials to Vault IS NOT COMPLETED properly. Please do re-deploy.${NC}"
+            exit 1
+          fi
+        else
+          echo -e "${RED}ERROR: TERRAFORM APPLY IS NOT INVOKED. DB Deploy procedure will not continue. Please do re-deploy.${NC}"
+          exit 1
+        fi
       fi
     fi
 }
@@ -389,6 +523,8 @@ else
     if [[ -z "$1" ]] || [[ -z "$2" ]]; then
         exit 3
     else
+        source ./db/app/meta
+        source ./db/app/namespace
         db-deploy-validate $1 $2
         db-deploy-execute $1 $2
     fi
