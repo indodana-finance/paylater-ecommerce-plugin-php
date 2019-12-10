@@ -2,3 +2,23 @@
 /.build
 /.svctl_docker_mount
 /.env.db
+
+/cli/svctl
+/cli/sv
+
+/cli/pkictl
+/cli/pki
+
+./cli/.run.*/
+./cli/.env.*/
+./cli/.build.*/
+
+# SVCTL
+/.build
+/.svctl_docker_mount
+/cli/sv/
+/cli/svctl
+
+# PKICTL
+/cli/pki/
+/cli/pkictl

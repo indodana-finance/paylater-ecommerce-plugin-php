@@ -1,0 +1,20 @@
+csr:
+  key_size: 4096
+  extensions:
+    key_usage:
+      value:
+        - digital_signature
+        - key_encipherment
+      is_critical: True
+    extended_key_usage:
+      value:
+        - EMAIL_PROTECTION
+        - CLIENT_AUTH
+      is_critical: False
+    subject_key_identifier:
+      is_critical: False
+    subject_alternative_name:
+      value:
+        - IP:127.0.0.1
+        - DNS:localhost
+      is_critical: False

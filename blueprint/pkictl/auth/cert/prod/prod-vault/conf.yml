@@ -1,0 +1,44 @@
+cert_auth_config:
+  path: cert/
+  roles:
+    - name: cermati-indodana-pios-prod
+      ttl: 86400
+      policies:
+        - cermati-indodana-pios-prod
+      allowed_common_names:
+        - antony@indodana.com
+        - tpratama@cermati.com
+        - syang@indodana.com
+        - albertstevelino@cermati.com
+        - sendy@cermati.com
+        - ganjasmara@cermati.com
+        - rharyanto@cermati.com
+        - mroeha@cermati.com
+        - oby@cermati.com
+        - oni@cermati.com
+        - oni@indodana.com
+        - gwahyu@indodana.com
+        - 'pios*-prod'
+        - 'service::pios*-prod'
+        - jenkins
+
+    - name: cermati-indodana-pios-stg
+      ttl: 86400
+      policies:
+        - cermati-indodana-pios-stg
+      allowed_common_names:
+        - antony@indodana.com
+        - tpratama@cermati.com
+        - syang@indodana.com
+        - albertstevelino@cermati.com
+        - sendy@cermati.com
+        - ganjasmara@cermati.com
+        - rharyanto@cermati.com
+        - mroeha@cermati.com
+        - oby@cermati.com
+        - oni@cermati.com
+        - oni@indodana.com
+        - gwahyu@indodana.com
+        - 'pios*-stg'
+        - 'service::pios*-stg'
+        - jenkins

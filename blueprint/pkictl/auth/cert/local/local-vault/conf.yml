@@ -1,0 +1,26 @@
+cert_auth_config:
+  path: cert/
+  roles:
+    - name: vault-admin
+      ttl: 86400
+      policies:
+        - vault-admin
+      allowed_common_names:
+        - '*@cermati.com'
+        - '*@indodana.com'
+
+    - name: cermati-team-product-dev
+      ttl: 86400
+      policies:
+        - cermati-team-product-dev
+      allowed_common_names:
+        - '*@cermati.com'
+        - '*@indodana.com'
+
+    - name: cermati-indodana-pios-dev
+      ttl: 86400
+      policies:
+        - cermati-indodana-pios-dev
+      allowed_common_names:
+        - '*@cermati.com'
+        - '*@indodana.com'
