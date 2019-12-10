@@ -1,2 +1,0 @@
-sv-v2.1.0-release
-git@github.com:cermati/devops-toolkit-release.git
