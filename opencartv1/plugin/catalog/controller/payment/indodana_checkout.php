@@ -29,7 +29,8 @@ class ControllerPaymentIndodanaCheckout extends Controller
         header('Content-type: application/json');
 
         $response = array(
-            'success'   => 'OK'
+            'status'   => 'OK',
+            'message' => 'OK'
         );
 
         echo json_encode($response);
@@ -52,7 +53,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
         header('Content-type: application/json');
 
         $response = array(
-            'success'   => 'OK'
+            'success' => 'OK'
         );
 
         echo json_encode($response);
