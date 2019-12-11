@@ -1,11 +1,11 @@
 <?php
 require_once DIR_SYSTEM . 'library/indodana/autoload.php';
 
-class ControllerPaymentIndodanaCheckout extends Controller 
+class ControllerPaymentIndodanaCheckout extends Controller
 {
     private $indodanaApi;
 
-    public function notify() 
+    public function notify()
     {
         $this->load->model('checkout/order');
 
@@ -26,7 +26,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
         } else {
         }
 
-        $header('Content-type: application/json');
+        header('Content-type: application/json');
         $response = array(
             'success'   => 'OK'
         );
@@ -48,11 +48,11 @@ class ControllerPaymentIndodanaCheckout extends Controller
             $this->config->get('indodana_checkout_default_order_pending_status_id')
         );
 
-        $header('Content-type: application/json');
+        header('Content-type: application/json');
         $response = array(
             'success'   => 'OK'
         );
-        
+
         echo json_encode($response);
     }
 
@@ -91,7 +91,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
         );
     }
 
-    public function index() 
+    public function index()
     {
         $this->loadModel();
         $this->loadLanguageData();
@@ -119,7 +119,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
         $this->initializeContextUrl();
 
         $this->template = $this->config->get('config_template') . '/template/payment/indodana_checkout_payment.tpl';
-        $this->response->setOutput($this->render());    
+        $this->response->setOutput($this->render());
     }
 
     public function loadModel() {
@@ -153,7 +153,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
         $this->data['indodanaBaseUrl'] = $this->indodanaApi->getBaseUrl();
         $this->data['merchantConfirmPaymentUrl'] = $this->url->link('payment/indodana_checkout/confirmOrder');
     }
-    
+
     private function getAllItemObjects($cart, $orderId) {
         $itemObjects = array();
         $defaultCurrency = $this->config->get('config_currency');
@@ -173,7 +173,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
 
         return $itemObjects;
     }
-    
+
     public function getShippingInIDR($orderId, $currency) {
         $shipping = $this->model_payment_indodana_checkout->getShippingDetail($orderId);
 
@@ -188,7 +188,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
 
         return $shippingObject;
     }
-    
+
     public function getTaxInIDR($orderId, $currency) {
         $taxes = $this->model_payment_indodana_checkout->getTaxes($orderId);
 
@@ -209,10 +209,10 @@ class ControllerPaymentIndodanaCheckout extends Controller
             'type' => '',
             'quantity' => 1
         );
-        
+
         return $taxObject;
     }
-    
+
     public function convertProductsToIDR($products, $currency) {
         $productObjects = array();
         foreach($products as $product) {
@@ -236,16 +236,16 @@ class ControllerPaymentIndodanaCheckout extends Controller
         }
         return $total;
     }
-    
+
     public function formatPaymentsToDefaultCurrency(&$payments) {
         $currency = $this->config->get('config_currency');
         foreach ($payments as &$payment) {
             $monthlyInstallment = $payment['monthlyInstallment'];
             $installmentAmount = $payment['installmentAmount'];
-            
+
             $monthlyInstallment = $this->currency->convert($monthlyInstallment, 'IDR', $currency);
             $installmentAmount = $this->currency->convert($installmentAmount, 'IDR', $currency);
-            
+
             $payment['monthlyInstallment'] = $this->currency->format($monthlyInstallment, $this->currency->getCode());
             $payment['installmentAmount'] = $this->currency->format($installmentAmount, $this->currency->getCode());
         }
@@ -301,10 +301,10 @@ class ControllerPaymentIndodanaCheckout extends Controller
             'email'     => $email,
             'phone'     => $phone
         );
-        
+
         return $customerDetails;
     }
-    
+
     private static function getBillingAddress($orderInfo)
     {
         $firstName = self::decode($orderInfo['payment_firstname']);
@@ -323,11 +323,11 @@ class ControllerPaymentIndodanaCheckout extends Controller
             'phone'         => $phone,
             'countryCode'   => $countryCode
         );
-        
+
         return $billingAddress;
     }
-    
-    private static function getShippingAddress($orderInfo) 
+
+    private static function getShippingAddress($orderInfo)
     {
         $firstName = self::decode($orderInfo['shipping_firstname']);
         $lastName = self::decode($orderInfo['shipping_lastname']);
@@ -345,24 +345,24 @@ class ControllerPaymentIndodanaCheckout extends Controller
             'phone'         => $phone,
             'countryCode'   => $countryCode
         );
-        
+
         return $shippingAddress;
     }
-    
+
     private static function decode($html_entity) {
         return html_entity_decode($html_entity, ENT_QUOTES, 'UTF-8');
     }
-    
+
     private function getBackToStoreUrl()
     {
-        return $this->url->link('checkout/success');   
+        return $this->url->link('checkout/success');
     }
-    
+
     private function getCancellationRedirectUrl()
     {
         return $this->url->link('payment/indodana_checkout/cancel');
     }
-    
+
     private function getNotificationUrl()
     {
         return $this->url->link('payment/indodana_checkout/notify');
