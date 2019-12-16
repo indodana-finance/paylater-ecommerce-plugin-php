@@ -7,16 +7,27 @@ class IndodanaApi
   private $apiKey;
   private $apiSecret;
   private $isProduction;
-  
+
   private $baseUrl;
 
-  public function IndodanaApi($apiKey, $apiSecret, $isProduction = false)
+  public function IndodanaApi($apiKey, $apiSecret, $environment)
   {
     $this->apiKey = $apiKey;
     $this->apiSecret = $apiSecret;
     $this->isProduction = $isProduction;
 
-    $this->baseUrl = $this->isProduction ? self::PRODUCTION_URL : self::SANDBOX_URL;
+    $environment = strtolower($environment);
+
+    if ($environment === 'sandbox') {
+        $this->baseUrl = self::SANDBOX_URL;
+    } else if ($environment === 'production') {
+        $this->baseUrl = self::PRODUCTION_URL;
+    } else {
+        $errorMessage = "Indodana environment is invalid: {$environment}";
+
+        IndodanaLogger::log(IndodanaLogger::ERROR, $errorMessage);
+        throw new Exception($errorMessage);
+    }
   }
 
   public function getPaymentOptions($amount, $items) {
@@ -26,10 +37,10 @@ class IndodanaApi
       'items'   => $items
     );
     $header = self::createDefaultHeader($this->apiKey, $this->apiSecret);
-    
+
     $json = json_encode($data);
     IndodanaLogger::log(IndodanaLogger::INFO, $json);
-    
+
     $responseJson = IndodanaRequest::post($url, $json, $header);
     $response = json_decode($responseJson, true);
 

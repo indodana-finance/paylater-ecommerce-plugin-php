@@ -11,7 +11,8 @@ class ControllerPaymentIndodanaCheckout extends Controller
 
         $apiKey = $this->config->get('indodana_checkout_api_key');
         $apiSecret = $this->config->get('indodana_checkout_api_secret');
-        $this->indodanaApi = new IndodanaApi($apiKey, $apiSecret);
+        $environment = $this->config->get('indodana_checkout_environment');
+        $this->indodanaApi = new IndodanaApi($apiKey, $apiSecret, $environment);
 
         $postData = IndodanaHelper::getJsonPost();
         IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
@@ -101,7 +102,8 @@ class ControllerPaymentIndodanaCheckout extends Controller
 
         $apiKey = $this->config->get('indodana_checkout_api_key');
         $apiSecret = $this->config->get('indodana_checkout_api_secret');
-        $this->indodanaApi = new IndodanaApi($apiKey, $apiSecret);
+        $environment = $this->config->get('indodana_checkout_environment');
+        $this->indodanaApi = new IndodanaApi($apiKey, $apiSecret, $environment);
 
         $orderInfo = $this->model_checkout_order->getOrder($this->session->data['order_id']);
         $items = $this->getAllItemObjects($this->cart, $orderInfo['order_id']);
