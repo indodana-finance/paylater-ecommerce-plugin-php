@@ -22,9 +22,4 @@ popd
 pushd ${BUILD_DIRECTORY}
   echo -e "${GREEN}[BUILD]${NC} Changing ownership to NGINX user (www-data) ${YELLOW}(need sudo)${NC}"
   sudo chown -R www-data upload
-  # echo -e "${GREEN}[BUILD]${NC} Generating configuration file for NGINX ${YELLOW}(need sudo)${NC}"
-  # sudo node generate-nginx-config.js
-  echo -e "${GREEN}[BUILD]${NC} Generating configuration template"
-  node generate-config-template.js
-  rm config.template.njk
 popd
