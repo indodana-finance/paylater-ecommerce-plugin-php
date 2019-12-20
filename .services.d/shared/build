@@ -1,25 +1,14 @@
-local SHARED_SCRIPTS_DIRECTORY=".services.d/shared"
-source ${SHARED_SCRIPTS_DIRECTORY}/helper
-
-local SERVICE_NAME=$1
-local ENVIRONMENT=$2
-local BUILD_DIRECTORY=$3
+local SHARED_SCRIPTS_DIR=".services.d/shared"
+source ${SHARED_SCRIPTS_DIR}/helper
 
 echo -e "${GREEN}[BUILD]${NC} Cleaning old files... ${YELLOW}(~15 seconds)${NC}"
-pushd ${BUILD_DIRECTORY}
-  # Build directory is owned by nginx user (www-data)
-  # We will need to sudo to safely remove the directory
+
+cd ${BUILD_DIR}
+  # Delete all directory safely
   sudo rm -rf upload
   sudo rm -rf logs
   rm -f *
-popd
+cd ${PROJECT_DIR}
 
-echo -e "${GREEN}[BUILD]${NC} Copying ${SERVICE_NAME} to build directory... ${YELLOW}(~30 seconds)${NC}"
-pushd ${SERVICE_NAME}
-  cp -r * ../${BUILD_DIRECTORY}
-popd
-
-pushd ${BUILD_DIRECTORY}
-  echo -e "${GREEN}[BUILD]${NC} Changing ownership to NGINX user (www-data) ${YELLOW}(need sudo)${NC}"
-  sudo chown -R www-data upload
-popd
+echo -e "${GREEN}[BUILD]${NC} Copying ${SERVICE_SOURCE_DIR} to ${SERVICE_BUILD_DIR} directory... ${YELLOW}(~30 seconds)${NC}"
+cp -r $SERVICE_SOURCE_DIR $SERVICE_BUILD_DIR

@@ -4,19 +4,20 @@ set -e
 trap "handle_shared_service_not_found" 1
 
 build() {
-  SERVICE_NAME=$1
-  BUILD_DIRECTORY=$3
+  local -r PROJECT_DIR=$(pwd)
+  local -r SERVICE_NAME=$1
+  local -r ENVIRONMENT=$2
+  local -r BUILD_DIR="$PROJECT_DIR/$3"
+  local -r SERVICE_SOURCE_DIR="$PROJECT_DIR/$SERVICE_NAME"
+  local -r SERVICE_BUILD_DIR="$BUILD_DIR/$SERVICE_NAME"
 
-  pushd ${BUILD_DIRECTORY}
-    sudo rm -rf plugin
-  popd
+  rm -rf "$SERVICE_BUILD_DIR/plugin"
 
   local SHARED_SCRIPTS_DIRECTORY=".services.d/shared"
-  source ${SHARED_SCRIPTS_DIRECTORY}/build $1 $2 $3
+  source ${SHARED_SCRIPTS_DIRECTORY}/build
 
-  pushd ${SERVICE_NAME}/plugin
-    sudo cp * -r ../../${BUILD_DIRECTORY}/upload
-  popd
+  # Copy plugin dir to CMS upload dir (register the plugin automatically)
+  cp -r $SERVICE_BUILD_DIR/plugin/* $SERVICE_BUILD_DIR/upload
 }
 
 run() {
