@@ -1,4 +1,7 @@
 <?php
+
+use Exception;
+
 class IndodanaApi
 {
   const SANDBOX_URL = 'https://sandbox01-api.indodana.com/chermes';
@@ -6,7 +9,6 @@ class IndodanaApi
 
   private $apiKey;
   private $apiSecret;
-  private $isProduction;
 
   private $baseUrl;
 
@@ -14,7 +16,6 @@ class IndodanaApi
   {
     $this->apiKey = $apiKey;
     $this->apiSecret = $apiSecret;
-    $this->isProduction = $isProduction;
 
     $environment = strtolower($environment);
 
@@ -44,13 +45,16 @@ class IndodanaApi
     $responseJson = IndodanaRequest::post($url, $json, $header);
     $response = json_decode($responseJson, true);
 
-    if ($response['status'] == "OK") {
-      throw new Exception("WULALA");
+    if ($response['status'] === "OK") {
       IndodanaLogger::log(IndodanaLogger::INFO, json_encode($response));
+
+      // TODO: Throw specific error when payment options is empty
       return $response['payments'];
     } else {
       IndodanaLogger::log(IndodanaLogger::ERROR, json_encode($response));
-      throw new Exception('Could not get installments data');
+      throw new Exception(
+        'Could not get installments data. Response: ' . json_encode($response)
+      );
     }
   }
 

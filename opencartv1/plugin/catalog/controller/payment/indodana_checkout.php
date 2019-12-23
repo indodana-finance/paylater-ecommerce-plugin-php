@@ -108,14 +108,10 @@ class ControllerPaymentIndodanaCheckout extends Controller
         $orderInfo = $this->model_checkout_order->getOrder($this->session->data['order_id']);
         $items = $this->getAllItemObjects($this->cart, $orderInfo['order_id']);
         $amount = self::calculateTotalPrice($items);
-        try {
-            $paymentOptions = $this->indodanaApi->getPaymentOptions($amount, $items);
-        } catch (Exception $ex) {
-            $paymentOptions = array();
-        } finally {
-            $this->formatPaymentsToDefaultCurrency($paymentOptions);
-            $this->initializePaymentOptions($paymentOptions);
-        }
+        $paymentOptions = $this->indodanaApi->getPaymentOptions($amount, $items);
+
+        $this->formatPaymentsToDefaultCurrency($paymentOptions);
+        $this->initializePaymentOptions($paymentOptions);
 
         $orderData = $this->generateOrderData($orderInfo, $items, $amount);
         $json = json_encode($orderData);

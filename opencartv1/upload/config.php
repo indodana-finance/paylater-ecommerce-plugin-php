@@ -5,17 +5,19 @@ define('HTTP_SERVER', 'http://localhost:8001/');
 // HTTPS
 define('HTTPS_SERVER', 'http://localhost:8001/');
 
+define('DEV_PROJECT_DIR', __DIR__);
+
 // DIR
-define('DIR_APPLICATION', '/home/yo/Development/repos/opencart-1.5.6.4/upload/catalog/');
-define('DIR_SYSTEM', '/home/yo/Development/repos/opencart-1.5.6.4/upload/system/');
-define('DIR_DATABASE', '/home/yo/Development/repos/opencart-1.5.6.4/upload/system/database/');
-define('DIR_LANGUAGE', '/home/yo/Development/repos/opencart-1.5.6.4/upload/catalog/language/');
-define('DIR_TEMPLATE', '/home/yo/Development/repos/opencart-1.5.6.4/upload/catalog/view/theme/');
-define('DIR_CONFIG', '/home/yo/Development/repos/opencart-1.5.6.4/upload/system/config/');
-define('DIR_IMAGE', '/home/yo/Development/repos/opencart-1.5.6.4/upload/image/');
-define('DIR_CACHE', '/home/yo/Development/repos/opencart-1.5.6.4/upload/system/cache/');
-define('DIR_DOWNLOAD', '/home/yo/Development/repos/opencart-1.5.6.4/upload/download/');
-define('DIR_LOGS', '/home/yo/Development/repos/opencart-1.5.6.4/upload/system/logs/');
+define('DIR_APPLICATION', DEV_PROJECT_DIR . '/catalog/');
+define('DIR_SYSTEM', DEV_PROJECT_DIR . '/system/');
+define('DIR_DATABASE', DEV_PROJECT_DIR . '/system/database/');
+define('DIR_LANGUAGE', DEV_PROJECT_DIR . '/catalog/language/');
+define('DIR_TEMPLATE', DEV_PROJECT_DIR . '/catalog/view/theme/');
+define('DIR_CONFIG', DEV_PROJECT_DIR . '/system/config/');
+define('DIR_IMAGE', DEV_PROJECT_DIR . '/image/');
+define('DIR_CACHE', DEV_PROJECT_DIR . '/system/cache/');
+define('DIR_DOWNLOAD', DEV_PROJECT_DIR . '/download/');
+define('DIR_LOGS', DEV_PROJECT_DIR . '/system/logs/');
 
 // DB
 define('DB_DRIVER', 'mysql');
