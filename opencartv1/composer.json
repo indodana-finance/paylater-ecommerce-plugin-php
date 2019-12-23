@@ -7,6 +7,6 @@
         }
     ],
     "require": {
-        "sentry/sdk": "^2.0"
+        "sentry/sentry": "^1.0"
     }
 }

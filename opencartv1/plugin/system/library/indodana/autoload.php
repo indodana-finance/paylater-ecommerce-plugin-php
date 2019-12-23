@@ -16,6 +16,8 @@ spl_autoload_register(function($className) {
 
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
 
-Sentry\init([
-  'dsn' => 'https://0428e82d300d49928120905613b936e2@sentry.io/1864574'
-]);
+$client = new Raven_Client('https://0428e82d300d49928120905613b936e2@sentry.io/1864574');
+$error_handler = new Raven_ErrorHandler($client);
+$error_handler->registerExceptionHandler();
+$error_handler->registerErrorHandler();
+$error_handler->registerShutdownFunction();

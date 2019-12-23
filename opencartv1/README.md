@@ -1,10 +1,12 @@
+# TODO: Add tutorial how to install plugins from composer (for dev)
+
 # OpenCart Payment Plugin
 
 This documentation will document the process of developing a plugins for OpenCart. By doing this we hope future developers won't get stuck on a mistake that previous developers make and development time become shorter.
 
 ## Admin and Catalog
 
-When you open the upload folder, you will notice two separete folders, admin and catalog. 
+When you open the upload folder, you will notice two separete folders, admin and catalog.
 
 * Admin folder dictates how the module interacts with the webmaster, including setting up the initial configuration. The rests are MVC, each plugins have its own controllers and view. The view will dictate what to show when the merchants press the edit button, and the controller controls the passage of data.
 

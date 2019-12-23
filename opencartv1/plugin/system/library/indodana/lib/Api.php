@@ -45,6 +45,7 @@ class IndodanaApi
     $response = json_decode($responseJson, true);
 
     if ($response['status'] == "OK") {
+      throw new Exception("WULALA");
       IndodanaLogger::log(IndodanaLogger::INFO, json_encode($response));
       return $response['payments'];
     } else {
