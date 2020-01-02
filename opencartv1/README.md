@@ -1,8 +1,21 @@
-# TODO: Add tutorial how to install plugins from composer (for dev)
-
 # OpenCart Payment Plugin
 
 This documentation will document the process of developing a plugins for OpenCart. By doing this we hope future developers won't get stuck on a mistake that previous developers make and development time become shorter.
+
+## Installing Dependencies and Running
+Assuming you've setup the db (mysql) for opencartv1.
+Go to the root project of this repo, you'll find a [makefile](https://github.com/cermati/paylater-indodana-online-shop/blob/master/makefile) there,
+
+```
+# Install dependencies
+make opencart-v1-install-dependencies
+
+# Now you can run the server to start opencartv1
+make opencart-v1-serve
+
+# For debugging, open another terminal and run
+make log-tail-opencart-v1
+```
 
 ## Admin and Catalog
 
