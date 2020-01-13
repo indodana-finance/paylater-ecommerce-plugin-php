@@ -101,7 +101,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
         $data = array();
         $data['paymentOptions'] = $paymentOptions;
 
-        
+
         do_action('woocommerce_credit_card_form_start', $this->id);
         echo Renderer::render(ABSPATH . 'wp-content/plugins/indodana-payment/view/indodana-payment-form.php', $data);
         do_action('woocommerce_credit_card_form_end', $this->id);
@@ -128,8 +128,9 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
     private function getTotalAmount($items)
     {
         $price = 0;
+
         foreach ($items as $item) {
-            $price += $item['price'];
+            $price += ($item['price'] * $item['quantity']);
         }
 
         return $price;
@@ -223,11 +224,46 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
         return $productObjects;
     }
 
-    private function getTransactionObject($order, $orderId)
-    {
+    private function getFeeObjectsFromOrder($order) {
+      $shippingFee = $order->get_shipping_total();
+
+      $feeObjects = [];
+
+      $feeObjects[] = [
+        'id' => 'shippingfee',
+        'url' => '',
+        'name' => 'Shipping Fee',
+        'price' => $shippingFee,
+        'type' => '',
+        'quantity' => 1
+      ];
+
+      return $feeObjects;
+    }
+
+    private function getDiscountObjectsFromOrder($order) {
+      $discount = $order->get_discount_total();
+
+      $discountObjects = [];
+
+      $discountObjects[] = [
+        'id' => 'discount',
+        'url' => '',
+        'name' => 'Total Discount',
+        'price' => $discount,
+        'type' => '',
+        'quantity' => 1
+      ];
+
+      return $discountObjects;
+    }
+
+    private function getTransactionObject($order, $orderId) {
         $items = array();
         $productObjects = $this->getProductObjectsFromOrder($order);
-        $items = array_merge($items, $productObjects);
+        $fees = $this->getFeeObjectsFromOrder($order);
+        $discounts = $this->getDiscountObjectsFromOrder($order);
+        $items = array_merge($items, $productObjects, $fees, $discounts);
 
         $transactionObject = array(
             'merchantOrderId'   => $orderId,
