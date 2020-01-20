@@ -287,7 +287,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
 
     return [
       // Use storeUrl as store id because it's less likely to change
-      'id' => $storeUrl,
+      'id' => md5($storeUrl),
       'name' => $storeName,
       'email' => $this->config->get('indodana_store_email'),
       'url' => $storeUrl,
@@ -393,7 +393,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
   private function getNotificationUrl()
   {
     // TODO: If in dev environment then this function should return
-    // 'https://stg-k-api.indodana.com/chermes/public/v1/stub/merchant/always-accept-purchase-transaction'
+    // return'https://stg-k-api.indodana.com/chermes/public/v1/stub/merchant/always-accept-purchase-transaction';
     return $this->url->link('payment/indodana_checkout/notify');
   }
 }
