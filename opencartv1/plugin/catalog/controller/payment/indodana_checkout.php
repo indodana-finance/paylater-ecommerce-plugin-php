@@ -265,19 +265,41 @@ class ControllerPaymentIndodanaCheckout extends Controller
         $approvedNotificationUrl = $this->getNotificationUrl();
         $cancellationRedirectUrl = $this->getCancellationRedirectUrl();
         $backToStoreUrl = $this->getBackToStoreUrl();
+        $storeDetail = self::getStoreDetail();
 
         $orderData = array(
             'transactionDetails'        => $transactionDetails,
             'customerDetails'           => $customerDetails,
             'billingAddress'            => $billingAddress,
             'shippingAddress'           => $shippingAddress,
-            'customerDetails'           => $customerDetails,
             'approvedNotificationUrl'   => $approvedNotificationUrl,
             'cancellationRedirectUrl'   => $cancellationRedirectUrl,
             'backToStoreUrl'            => $backToStoreUrl
+            'sellers' => [$storeDetail],
         );
 
         return $orderData;
+    }
+
+    public static function getStoreDetail() {
+      $storeUrl = $this->config->get('indodana_store_url');
+      $storeName = $this->config->get('indodana_store_name');
+
+      return [
+        // Use storeUrl as store id because it's less likely to change
+        'id' => $storeUrl,
+        'name' => $storeName,
+        'email' => $this->config->get('indodana_store_email'),
+        'url' => $storeUrl,
+        'address' => [
+          'firstName' => $storeName,
+          'phone' => $this->config->get('indodana_store_phone'),
+          'address' => $this->config->get('indodana_store_address'),
+          'city' => $this->config->get('indodana_store_city'),
+          'postalCode' => $this->config->get('indodana_store_postal_code'),
+          'countryCode' => $this->config->get('indodana_store_country_code'),
+        ]
+      ];
     }
 
     private static function getTransactionDetails($orderInfo, $items, $amount) {

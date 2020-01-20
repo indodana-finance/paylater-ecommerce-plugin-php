@@ -18,6 +18,95 @@
           <tr>
             <td><h2>Indodana Paylater Configuration</h2></td>
           </tr>
+
+          <tr>
+            <td>Store Name</td>
+            <td>
+              <input type="text" name="indodana_store_name" value="<?=$indodana_store_name; ?>" size="30"/>
+              <?php if ($error_store_name_empty) { ?>
+                <span class="error"><?=$error_store_name_empty; ?></span>
+              <?php } ?>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Store Url</td>
+            <td>
+              <input type="text" name="indodana_store_url" value="<?=$indodana_store_url; ?>" size="30"/>
+              <?php if ($error_store_url_empty) { ?>
+                <span class="error"><?=$error_store_url_empty; ?></span>
+              <?php } ?>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Store Email</td>
+            <td>
+              <input type="text" name="indodana_store_email" value="<?=$indodana_store_email; ?>" size="30"/>
+              <?php if ($error_store_email_empty) { ?>
+                <span class="error"><?=$error_store_email_empty; ?></span>
+              <?php } ?>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Store Phone</td>
+            <td>
+              <input type="text" name="indodana_store_phone" value="<?=$indodana_store_phone; ?>" size="30"/>
+              <?php if ($error_store_phone_empty) { ?>
+                <span class="error"><?=$error_store_phone_empty; ?></span>
+              <?php } ?>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Store Country Code</td>
+            <td>
+              <select name="indodana_checkout_default_order_pending_status_id">
+                <option
+                  value="ID"
+                  <?php if ($indodana_store_country_code === "ID") { ?>
+                  selected="selected"
+                  <?php } ?>
+                >ID</option>
+              </select>
+
+              <?php if ($error_store_country_code_empty) { ?>
+                <span class="error"><?=$error_store_country_code_empty; ?></span>
+              <?php } ?>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Store City</td>
+            <td>
+              <input type="text" name="indodana_store_city" value="<?=$indodana_store_city; ?>" size="30"/>
+              <?php if ($error_store_city_empty) { ?>
+                <span class="error"><?=$error_store_city_empty; ?></span>
+              <?php } ?>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Store Address</td>
+            <td>
+              <input type="text" name="indodana_store_address" value="<?=$indodana_store_address; ?>" size="30"/>
+              <?php if ($error_store_address_empty) { ?>
+                <span class="error"><?=$error_store_address_empty; ?></span>
+              <?php } ?>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Store Postal Code</td>
+            <td>
+              <input type="text" name="indodana_store_postal_code" value="<?=$indodana_store_postal_code; ?>" size="30"/>
+              <?php if ($error_store_postal_code_empty) { ?>
+                <span class="error"><?=$error_store_postal_code_empty; ?></span>
+              <?php } ?>
+            </td>
+          </tr>
+
           <tr>
             <td><?=$entry_api_secret; ?></td>
             <td>
@@ -95,7 +184,7 @@
                 <?php } ?>
               <?php } ?>
             </select></td>
-          </tr>          
+          </tr>
           <tr>
             <td><?=$entry_status; ?></td>
             <td><select name="indodana_checkout_status">
@@ -120,11 +209,11 @@
         </table>
       </form>
       <h2>Log</h2>
-      <textarea 
-        wrap="off" 
+      <textarea
+        wrap="off"
         style="width: 98%; height: 300px; padding: 5px; border: 1px solid #CCCCCC; background: #FFFFFF; overflow: scroll;"
       ><?= $log; ?></textarea>
     </div>
   </div>
 </div>
-<?=$footer; ?> 
+<?=$footer; ?>
