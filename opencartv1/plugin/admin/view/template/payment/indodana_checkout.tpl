@@ -62,7 +62,8 @@
           <tr>
             <td>Store Country Code</td>
             <td>
-              <select name="indodana_checkout_default_order_pending_status_id">
+              <select name="indodana_store_country_code">
+                <option value="">-- Select --</option>
                 <option
                   value="ID"
                   <?php if ($indodana_store_country_code === "ID") { ?>

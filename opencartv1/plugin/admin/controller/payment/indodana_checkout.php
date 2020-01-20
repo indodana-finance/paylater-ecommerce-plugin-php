@@ -179,7 +179,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
         $this->errors['error_permission'] = $this->language->get('error_permission');
       }
 
-      foreach($indodanaConfigEmptyErrorMapping as $fieldName => $emptyErrorKey) {
+      foreach($this->indodanaConfigEmptyErrorMapping as $fieldName => $emptyErrorKey) {
         if (empty($this->request->post[$fieldName])) {
           $this->errors[$emptyErrorKey] = $this->language->get($emptyErrorKey);
         }
