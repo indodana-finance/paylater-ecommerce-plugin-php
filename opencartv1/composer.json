@@ -7,7 +7,8 @@
         }
     ],
     "require": {
-        "sentry/sentry": "^1.0"
+        "sentry/sentry": "^1.0",
+        "respect/validation": "^1.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7"

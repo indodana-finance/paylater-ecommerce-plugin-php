@@ -23,8 +23,8 @@
             <td>Store Name</td>
             <td>
               <input type="text" name="indodana_store_name" value="<?=$indodana_store_name; ?>" size="30"/>
-              <?php if ($error_store_name_empty) { ?>
-                <span class="error"><?=$error_store_name_empty; ?></span>
+              <?php if ($indodana_store_name_validation_error) { ?>
+                <span class="error"><?=$indodana_store_name_validation_error; ?></span>
               <?php } ?>
             </td>
           </tr>
@@ -33,8 +33,8 @@
             <td>Store Url</td>
             <td>
               <input type="text" name="indodana_store_url" value="<?=$indodana_store_url; ?>" size="30"/>
-              <?php if ($error_store_url_empty) { ?>
-                <span class="error"><?=$error_store_url_empty; ?></span>
+              <?php if ($indodana_store_url_validation_error) { ?>
+                <span class="error"><?=$indodana_store_name_validation_error; ?></span>
               <?php } ?>
             </td>
           </tr>
@@ -43,8 +43,8 @@
             <td>Store Email</td>
             <td>
               <input type="text" name="indodana_store_email" value="<?=$indodana_store_email; ?>" size="30"/>
-              <?php if ($error_store_email_empty) { ?>
-                <span class="error"><?=$error_store_email_empty; ?></span>
+              <?php if ($indodana_store_email_validation_error) { ?>
+                <span class="error"><?=$indodana_store_email_validation_error; ?></span>
               <?php } ?>
             </td>
           </tr>
@@ -53,8 +53,8 @@
             <td>Store Phone</td>
             <td>
               <input type="text" name="indodana_store_phone" value="<?=$indodana_store_phone; ?>" size="30"/>
-              <?php if ($error_store_phone_empty) { ?>
-                <span class="error"><?=$error_store_phone_empty; ?></span>
+              <?php if ($indodana_store_phone_validation_error) { ?>
+                <span class="error"><?=$indodana_store_phone_validation_error; ?></span>
               <?php } ?>
             </td>
           </tr>
@@ -72,8 +72,8 @@
                 >ID</option>
               </select>
 
-              <?php if ($error_store_country_code_empty) { ?>
-                <span class="error"><?=$error_store_country_code_empty; ?></span>
+              <?php if ($indodana_store_country_code_validation_error) { ?>
+                <span class="error"><?=$indodana_store_country_code_validation_error; ?></span>
               <?php } ?>
             </td>
           </tr>
@@ -82,8 +82,8 @@
             <td>Store City</td>
             <td>
               <input type="text" name="indodana_store_city" value="<?=$indodana_store_city; ?>" size="30"/>
-              <?php if ($error_store_city_empty) { ?>
-                <span class="error"><?=$error_store_city_empty; ?></span>
+              <?php if ($indodana_store_city_validation_error) { ?>
+                <span class="error"><?=$indodana_store_city_validation_error; ?></span>
               <?php } ?>
             </td>
           </tr>
@@ -92,8 +92,8 @@
             <td>Store Address</td>
             <td>
               <input type="text" name="indodana_store_address" value="<?=$indodana_store_address; ?>" size="30"/>
-              <?php if ($error_store_address_empty) { ?>
-                <span class="error"><?=$error_store_address_empty; ?></span>
+              <?php if ($indodana_store_address_validation_error) { ?>
+                <span class="error"><?=$indodana_store_address_validation_error; ?></span>
               <?php } ?>
             </td>
           </tr>
@@ -102,8 +102,8 @@
             <td>Store Postal Code</td>
             <td>
               <input type="text" name="indodana_store_postal_code" value="<?=$indodana_store_postal_code; ?>" size="30"/>
-              <?php if ($error_store_postal_code_empty) { ?>
-                <span class="error"><?=$error_store_postal_code_empty; ?></span>
+              <?php if ($indodana_store_postal_code_validation_error) { ?>
+                <span class="error"><?=$indodana_store_postal_code_validation_error; ?></span>
               <?php } ?>
             </td>
           </tr>
@@ -112,8 +112,8 @@
             <td><?=$entry_api_secret; ?></td>
             <td>
               <input type="text" name="indodana_checkout_api_secret" value="<?=$indodana_checkout_api_secret; ?>" size="30"/>
-              <?php if ($error_api_secret_empty) { ?>
-                <span class="error"><?=$error_api_secret_empty; ?></span>
+              <?php if ($indodana_checkout_api_secret_validation_error) { ?>
+                <span class="error"><?=$indodana_checkout_api_secret_validation_error; ?></span>
               <?php } ?>
             </td>
           </tr>
@@ -121,8 +121,8 @@
             <td><?=$entry_api_key; ?></td>
             <td>
               <input type="text" name="indodana_checkout_api_key" value="<?=$indodana_checkout_api_key; ?>" size="30"/>
-              <?php if ($error_api_key_empty) { ?>
-                <span class="error"><?=$error_api_key_empty; ?></span>
+              <?php if ($indodana_checkout_api_key_validation_error) { ?>
+                <span class="error"><?=$indodana_checkout_api_key_validation_error; ?></span>
               <?php } ?>
             </td>
           </tr>
@@ -202,8 +202,8 @@
             <td><?=$entry_sort_order; ?></td>
             <td>
               <input type="text" name="indodana_checkout_sort_order" value="<?=$indodana_checkout_sort_order; ?>" size="30"/>
-              <?php if ($error_sort_order_empty) { ?>
-                <span class="error"><?=$error_sort_order_empty; ?></span>
+              <?php if ($indodana_checkout_sort_order_validation_error) { ?>
+                <span class="error"><?=$indodana_checkout_sort_order_validation_error; ?></span>
               <?php } ?>
             </td>
           </tr>
