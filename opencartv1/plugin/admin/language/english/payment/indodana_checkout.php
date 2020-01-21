@@ -42,6 +42,10 @@ $_['indodana_store_address_validation_error'] = 'Store Address is invalid';
 $_['indodana_store_city_validation_error'] = 'Store City is invalid';
 $_['indodana_store_postal_code_validation_error'] = 'Store Postal Code is invalid';
 $_['indodana_store_country_code_validation_error'] = 'Store Country Code is invalid';
+$_['indodana_checkout_default_order_failed_status_id_validation_error'] = 'Invalid value';
+$_['indodana_checkout_default_order_pending_status_id_validation_error'] = 'Invalid value';
+$_['indodana_checkout_default_order_success_status_id_validation_error'] = 'Invalid value';
+
 
 $_['country_codes'] = array(
     "IDN",

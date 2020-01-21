@@ -68,11 +68,18 @@ class IndodanaApi
     $response = json_decode($responseJson, true);
 
     $isPaymentSuccessful = false;
+
     if ($response['transactionStatus'] === 'PROCESSED' || $response['transactionStatus'] === 'COMPLETED') {
       $isPaymentSuccessful = true;
     }
 
     return $isPaymentSuccessful;
+  }
+
+  public function transactionIsPaidByCustomer($transactionStatus) {
+    $transactionStatus = strtoupper($transactionStatus);
+
+    return $transactionStatus === 'INITIATED' || $transactionStatus === 'PROCESSED';
   }
 
   public function getBaseUrl() {

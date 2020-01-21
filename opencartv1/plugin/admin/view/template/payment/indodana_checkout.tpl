@@ -152,39 +152,84 @@
           </tr>
           <tr>
             <td><?=$entry_order_pending_status; ?></td>
-            <td><select name="indodana_checkout_default_order_pending_status_id">
-              <?php foreach ($order_statuses as $order_status) { ?>
-                <?php if ($order_status['order_status_id'] == $indodana_checkout_default_order_pending_status_id) { ?>
-                  <option value="<?=$order_status['order_status_id']; ?>" selected="selected"><?=$order_status['name']; ?></option>
-                <?php } else { ?>
-                  <option value="<?=$order_status['order_status_id']; ?>"><?=$order_status['name']; ?></option>
+            <td>
+              <select name="indodana_checkout_default_order_pending_status_id">
+                <option
+                  value=""
+                  <?php if (!$indodana_checkout_default_order_pending_status_id) { ?>
+                  selected="selected"
+                  <?php } ?>
+                >
+                  -- Select --
+                </option>
+
+                <?php foreach ($order_statuses as $order_status) { ?>
+                  <?php if ($order_status['order_status_id'] == $indodana_checkout_default_order_pending_status_id) { ?>
+                    <option value="<?=$order_status['order_status_id']; ?>" selected="selected"><?=$order_status['name']; ?></option>
+                  <?php } else { ?>
+                    <option value="<?=$order_status['order_status_id']; ?>"><?=$order_status['name']; ?></option>
+                  <?php } ?>
                 <?php } ?>
+              </select>
+
+              <?php if ($indodana_checkout_default_order_pending_status_id_validation_error) { ?>
+                <span class="error"><?=$indodana_checkout_default_order_pending_status_id_validation_error; ?></span>
               <?php } ?>
-            </select></td>
+            </td>
           </tr>
           <tr>
             <td><?=$entry_order_success_status; ?></td>
-            <td><select name="indodana_checkout_default_order_success_status_id">
-              <?php foreach ($order_statuses as $order_status) { ?>
-                <?php if ($order_status['order_status_id'] == $indodana_checkout_default_order_success_status_id) { ?>
-                  <option value="<?=$order_status['order_status_id']; ?>" selected="selected"><?=$order_status['name']; ?></option>
-                <?php } else { ?>
-                  <option value="<?=$order_status['order_status_id']; ?>"><?=$order_status['name']; ?></option>
+            <td>
+              <select name="indodana_checkout_default_order_success_status_id">
+                <option
+                  value=""
+                  <?php if (!$indodana_checkout_default_order_success_status_id) { ?>
+                  selected="selected"
+                  <?php } ?>
+                >
+                  -- Select --
+                </option>
+
+                <?php foreach ($order_statuses as $order_status) { ?>
+                  <?php if ($order_status['order_status_id'] == $indodana_checkout_default_order_success_status_id) { ?>
+                    <option value="<?=$order_status['order_status_id']; ?>" selected="selected"><?=$order_status['name']; ?></option>
+                  <?php } else { ?>
+                    <option value="<?=$order_status['order_status_id']; ?>"><?=$order_status['name']; ?></option>
+                  <?php } ?>
                 <?php } ?>
+              </select>
+
+              <?php if ($indodana_checkout_default_order_success_status_id_validation_error) { ?>
+                <span class="error"><?=$indodana_checkout_default_order_success_status_id_validation_error; ?></span>
               <?php } ?>
-            </select></td>
+            </td>
           </tr>
           <tr>
             <td><?=$entry_order_failed_status; ?></td>
-            <td><select name="indodana_checkout_default_order_failed_status_id">
-              <?php foreach ($order_statuses as $order_status) { ?>
-                <?php if ($order_status['order_status_id'] == $indodana_checkout_default_order_failed_status_id) { ?>
-                  <option value="<?=$order_status['order_status_id']; ?>" selected="selected"><?=$order_status['name']; ?></option>
-                <?php } else { ?>
-                  <option value="<?=$order_status['order_status_id']; ?>"><?=$order_status['name']; ?></option>
+            <td>
+              <select name="indodana_checkout_default_order_failed_status_id">
+                <option
+                  value=""
+                  <?php if (!$indodana_checkout_default_order_failed_status_id) { ?>
+                  selected="selected"
+                  <?php } ?>
+                >
+                  -- Select --
+                </option>
+
+                <?php foreach ($order_statuses as $order_status) { ?>
+                  <?php if ($order_status['order_status_id'] == $indodana_checkout_default_order_failed_status_id) { ?>
+                    <option value="<?=$order_status['order_status_id']; ?>" selected="selected"><?=$order_status['name']; ?></option>
+                  <?php } else { ?>
+                    <option value="<?=$order_status['order_status_id']; ?>"><?=$order_status['name']; ?></option>
+                  <?php } ?>
                 <?php } ?>
+              </select>
+
+              <?php if ($indodana_checkout_default_order_failed_status_id_validation_error) { ?>
+                <span class="error"><?=$indodana_checkout_default_order_failed_status_id_validation_error; ?></span>
               <?php } ?>
-            </select></td>
+            </td>
           </tr>
           <tr>
             <td><?=$entry_status; ?></td>

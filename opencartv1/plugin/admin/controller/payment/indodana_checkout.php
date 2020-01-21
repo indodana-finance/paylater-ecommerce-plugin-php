@@ -106,6 +106,18 @@ class ControllerPaymentIndodanaCheckout extends Controller {
         'validator' => Validator::notOptional(),
         'errorKey' => 'indodana_checkout_sort_order_validation_error',
       ],
+      'indodana_checkout_default_order_failed_status_id' => [
+        'validator' => Validator::notOptional(),
+        'errorKey' => 'indodana_checkout_default_order_failed_status_id_validation_error',
+      ],
+      'indodana_checkout_default_order_pending_status_id'=> [
+        'validator' => Validator::notOptional(),
+        'errorKey' => 'indodana_checkout_default_order_pending_status_id_validation_error',
+      ],
+      'indodana_checkout_default_order_success_status_id'=> [
+        'validator' => Validator::notOptional(),
+        'errorKey' => 'indodana_checkout_default_order_success_status_id_validation_error',
+      ],
     ];
   }
 

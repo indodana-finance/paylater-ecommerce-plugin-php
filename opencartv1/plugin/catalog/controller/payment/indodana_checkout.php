@@ -20,11 +20,12 @@ class ControllerPaymentIndodanaCheckout extends Controller
     $transactionStatus = $postData['transactionStatus'];
     $orderId = $postData['merchantOrderId'];
 
-    $transactionSuccessful = $this->indodanaApi->checkIfTransactionSuccessful($orderId);
-    if ($transactionSuccessful) {
-      $this->handlePaymentSuccess($orderId);
-      $this->handlePaymentExpired($orderId);
+    $transactionIsPaid = $this->indodanaApi->transactionIsPaidByCustomer($transactionStatus);
+
+    if ($transactionIsPaid) {
+      $this->handleTransactionPaymentSuccess($orderId);
     } else {
+      $this->handleTransactionPaymentFailed($orderId);
     }
 
     header('Content-type: application/json');
@@ -77,7 +78,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
     $this->redirect($this->url->link(''));
   }
 
-  private function handlePaymentSuccess($orderId)
+  private function handleTransactionPaymentSuccess($orderId)
   {
     $this->model_checkout_order->update(
       $orderId,
@@ -86,7 +87,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
     );
   }
 
-  private function handlePaymentExpired($orderId)
+  private function handleTransactionPaymentFailed($orderId)
   {
     $this->model_checkout_order->update(
       $orderId,
@@ -205,7 +206,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
     $taxObject = array(
       'id' => 'taxfee',
       'url' => '',
-      'name' => 'TAAAAAAAAAAAXXXXXXXXXXX',
+      'name' => 'TAXFEE',
       'price' => ceil($totalTax),
       'type' => '',
       'quantity' => 1
@@ -232,6 +233,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
 
   private static function calculateTotalPrice($items) {
     $total = 0;
+
     foreach($items as $item) {
       $total += $item['price'] * $item['quantity'];
     }
