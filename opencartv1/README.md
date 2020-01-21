@@ -13,8 +13,14 @@ make opencart-v1-install-dependencies
 # Now you can run the server to start opencartv1
 make opencart-v1-serve
 
-# For debugging, open another terminal and run
-make log-tail-opencart-v1
+# For debugging and see log, open another terminal and run
+make opencart-v1-log-tail
+
+# If you want to simulate payment then open opencartv1/plugin/catalog/controller/payment/indodana_checkout.php
+# then follow instruction in getBackToStoreUrl(), getCancellationRedirectUrl(), and getNotificationUrl()
+# -------------------------------
+# If you want to simulate notify merchant request (after installment request is approved) just do this
+curl -X POST http://localhost:8001?route=payment/indodana_checkout/notify --data '{"transactionStatus": "PAID", "merchantOrderId": <fill merchant order id here>}' -v
 ```
 
 ## Admin and Catalog

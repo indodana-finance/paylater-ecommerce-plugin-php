@@ -79,7 +79,8 @@ class IndodanaApi
   public function transactionIsPaidByCustomer($transactionStatus) {
     $transactionStatus = strtoupper($transactionStatus);
 
-    return $transactionStatus === 'INITIATED' || $transactionStatus === 'PROCESSED';
+    // We will add 'PAID' status in the future
+    return $transactionStatus === 'INITIATED' || $transactionStatus === 'PAID';
   }
 
   public function getBaseUrl() {

@@ -15,7 +15,11 @@ class ControllerPaymentIndodanaCheckout extends Controller
     $this->indodanaApi = new IndodanaApi($apiKey, $apiSecret, $environment);
 
     $postData = IndodanaHelper::getJsonPost();
-    IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
+
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf("Got payment confirmation from Indodana %s", json_encode($postData))
+    );
 
     $transactionStatus = $postData['transactionStatus'];
     $orderId = $postData['merchantOrderId'];
@@ -30,10 +34,10 @@ class ControllerPaymentIndodanaCheckout extends Controller
 
     header('Content-type: application/json');
 
-    $response = array(
+    $response = [
       'status'   => 'OK',
       'message' => 'OK'
-    );
+    ];
 
     echo json_encode($response);
   }
