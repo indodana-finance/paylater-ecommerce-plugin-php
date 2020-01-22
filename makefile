@@ -38,7 +38,7 @@ woocommerce-build:
 woocommerce-test:
 	$(woocommerce)/vendor/bin/
 
-opencart-serve: opencart-v1-build
+woocommerce-serve: woocommerce-build
 	php -S localhost:8001 -t $(woocommerce_build_dir)
 
 woocommerce-log-tail:
