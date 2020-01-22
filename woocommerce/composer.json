@@ -1,0 +1,13 @@
+{
+    "name": "indodana/woocommerce",
+    "authors": [
+        {
+            "name": "Sendy Halim",
+            "email": "sendyhalim93@gmail.com"
+        }
+    ],
+    "require": {
+        "respect/validation": "^1.1",
+        "sentry/sdk": "^2.1"
+    }
+}
