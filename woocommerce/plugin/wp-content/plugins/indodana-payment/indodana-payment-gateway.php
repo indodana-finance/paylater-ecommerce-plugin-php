@@ -280,7 +280,6 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
     $this->api_secret = $this->get_option('api_secret');
 
     add_action('woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ));
-    add_action('wp_enqueue_scripts', array( $this, 'payment_scripts' ));
     add_action('woocommerce_api_wc_indodana_gateway', array(&$this, 'indodana_callback'));
   }
 
@@ -528,7 +527,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
 
     $order_data = $this->generate_order_data($order_id);
 
-    $orderData['paymentType'] = $_POST['payment_selection'];
+    $order_data['paymentType'] = $_POST['payment_selection'];
 
     $checkout_url = $this->indodana_api->getCheckoutUrl($order_data);
 
@@ -580,17 +579,16 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
       'order_id'  => $order_id
     ), 'https://example.com');
 
-    $orderData = array(
+    return [
       'transactionDetails'        => $transaction_object,
       'customerDetails'           => $customer_object,
       'billingAddress'            => $billing_object,
       'shippingAddress'           => $shipping_object,
       'approvedNotificationUrl'   => $approved_notification_url,
       'cancellationRedirectUrl'   => $cancellation_redirect_url,
-      'backToStoreUrl'            => $back_to_store_url
-    );
-
-    return $orderData;
+      'backToStoreUrl'            => $back_to_store_url,
+      'sellers' => [ $this->get_store_object() ]
+    ];
   }
 
   /**
@@ -786,6 +784,27 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
     );
 
     echo json_encode($response);
+  }
+
+  private function get_store_object() {
+    $store_url = $this->get_option('store_url');
+    $store_name = $this->get_option('store_name');
+
+    return [
+      // Use storeUrl as store id because it's less likely to change
+      'id' => md5($store_url),
+      'name' => $store_name,
+      'email' => $this->get_option('store_email'),
+      'url' => $store_url,
+      'address' => [
+        'firstName' => $store_name,
+        'phone' => $this->get_option('store_phone_number'),
+        'address' => $this->get_option('store_address'),
+        'city' => $this->get_option('store_city'),
+        'postalCode' => $this->get_option('store_postal_code'),
+        'countryCode' => $this->get_option('store_country_code'),
+      ]
+    ];
   }
 
   private function handle_redirect_due_to_cancellation($order_id) {

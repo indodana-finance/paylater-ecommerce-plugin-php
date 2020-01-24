@@ -2,7 +2,7 @@
   <div class='checkout-product'>
     <?php foreach($paymentOptions as $paymentOption) { ?>
       <label class='payment-option'>
-        <input type='radio' name='paymentSelection' class='checkbox-default' value='<?=$paymentOption['id'] ?>'>
+        <input type='radio' name='payment_selection' class='checkbox-default' value='<?=$paymentOption['id'] ?>'>
         <span class="checkbox checkbox-styled"></span>
         <p class="installment-type"><?=$paymentOption['paymentType']; ?></p>
         <div class="filler"></div>
@@ -19,7 +19,7 @@
       height: 0;
       width: 0;
     }
-    
+
     .checkbox-default:checked ~ .checkbox {
       background-color: #3db3b3;
     }
