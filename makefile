@@ -42,7 +42,7 @@ woocommerce-serve: woocommerce-build
 	php -S localhost:8001 -t $(woocommerce_build_dir)
 
 woocommerce-log-tail:
-	tail -f ./$(woocommerce)/system/library/indodana/log/indodana.log
+	tail -f ./$(woocommerce_build_dir)/wp-content/plugins/indodana-payment/library/Indodana/Payment/log/info.log
 
 
 

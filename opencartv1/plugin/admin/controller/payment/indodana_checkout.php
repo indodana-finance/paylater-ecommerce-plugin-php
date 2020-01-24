@@ -61,7 +61,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
   private function setupValidationRules() {
     // Well surely there are better ways to do validation for this,
     // but let's just do this for now to reduce chance to break other things.
-    $this->fieldValidatorMapping = [
+    $this->fieldValidatorMapping = [ // TODO: Use camelCase
       'indodana_store_name'          => [
         'validator' => Validator::notOptional(),
         'errorKey' => 'indodana_store_name_validation_error',
