@@ -562,22 +562,22 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
       'order_id'  => $order_id
     ), home_url('/'));
 
-    // Uncomment for dev mode
-    $approved_notification_url = add_query_arg(array(
-      'wc-api'    => 'WC_Indodana_Gateway',
-    ), 'https://example.com');
+    // TODO: Uncomment for dev mode
+    // $approved_notification_url = add_query_arg(array(
+    //   'wc-api'    => 'WC_Indodana_Gateway',
+    // ), 'https://example.com');
 
-    $cancellation_redirect_url = add_query_arg(array(
-      'wc-api'    => 'WC_Indodana_Gateway',
-      'method'    => 'cancel',
-      'order_id'  => $order_id
-    ), 'https://example.com');
+    // $cancellation_redirect_url = add_query_arg(array(
+    //   'wc-api'    => 'WC_Indodana_Gateway',
+    //   'method'    => 'cancel',
+    //   'order_id'  => $order_id
+    // ), 'https://example.com');
 
-    $back_to_store_url = add_query_arg(array(
-      'wc-api'    => 'WC_Indodana_Gateway',
-      'method'    => 'complete',
-      'order_id'  => $order_id
-    ), 'https://example.com');
+    // $back_to_store_url = add_query_arg(array(
+    //   'wc-api'    => 'WC_Indodana_Gateway',
+    //   'method'    => 'complete',
+    //   'order_id'  => $order_id
+    // ), 'https://example.com');
 
     return [
       'transactionDetails'        => $transaction_object,
