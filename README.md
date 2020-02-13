@@ -1,6 +1,6 @@
 # Paylater Indodana Online Shop (PIOS)
 
-This repository contains sevent most used ecommerce platform based on PHP, such as:
+This repository contains most used ecommerce platform based on PHP, such as:
 
 * Woocommerce
 * Opencart (v1, v2, v3)
@@ -14,12 +14,13 @@ This is done by using NodeJS worker that will get a new credential 10 minutes be
 To simplify the process, we hardcode the deployment port, so make sure it doesn't clash with another application. Here is the mapping that we used, don't worry we tried to make the port as unique as possible.
 
 | Service     | Version | PHP Version | Port |
-| ----------  |:-------:|:-----------:| ---- |
-| OpenCart v1 | 1.5.6.4 | 5.6         | 6101 |
-| OpenCart v2 | 2.3.0.2 | 5.6         | 6102 |
-| OpenCart v3 | 3.0.3.2 | 5.6         | 6103 |
-| Prestashop  | 1.7.5.2 | 7.2         | 6104 |
-| Woocommerce | 3.6.4   | 7.2         | 6105 |
+| ----------- | ------- | ----------- | ---- |
+| OpenCart v1 | 1.5.6.4 | 5.6         | 6011 |
+| OpenCart v2 | 2.3.0.2 | 5.6         | 6012 |
+| OpenCart v3 | 3.0.3.2 | 5.6         | 6013 |
+| Woocommerce | 3.6.4   | 7.2         | 6021 |
+| Magento 1   | 1.9.2.4 | 5.6         | 6031 |
+| Prestashop  | 1.7.5.2 | 7.2         | 6041 |
 
 # System Requirements
 

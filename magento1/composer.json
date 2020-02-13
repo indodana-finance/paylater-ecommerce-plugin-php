@@ -1,0 +1,17 @@
+{
+    "name": "root/paylater-indodana-online-shop",
+    "authors": [
+        {
+            "name": "Sendy Halim",
+            "email": "sendyhalim93@gmail.com"
+        }
+    ],
+    "require": {
+        "respect/validation": "^1.1",
+        "sentry/sentry": "1.0",
+        "php-http/curl-client": "^2.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7"
+    }
+}

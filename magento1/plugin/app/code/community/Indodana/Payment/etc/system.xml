@@ -46,7 +46,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </order_status>
-                        <order_status translate="label">
+                        <order_status_failed translate="label">
                             <label>Failed Payment Order Status</label>
                             <config_path>payment/indodanapayment/order_status_failed</config_path>
                             <frontend_type>select</frontend_type>
@@ -55,7 +55,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </order_status>
+                        </order_status_failed>
                         <api_key translate="label">
                             <label>Indodana API Key</label>
                             <config_path>payment/indodanapayment/api_key</config_path>

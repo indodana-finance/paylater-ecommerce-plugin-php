@@ -35,7 +35,7 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
 
     private function handleApprovedTransaction($orderId) {
         $order = Mage::getModel('sales/order');
-        $order->loadByIncrementId($orderId);
+        $order->load($orderId);
 
         $invoice = $order->prepareInvoice()
             ->setTransactionId($order->getId())
@@ -75,7 +75,9 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
     {
         if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
-            $this->_log($_GET);
+            // I don't know what's this but I will comment out this line for this action to be working
+            // $this->_log($_GET);
+
             Mage::getSingleton('checkout/session')->unsQuoteId();
             Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/success', array('_secure' => false));
 
@@ -194,10 +196,31 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
             'shippingAddress'           => $shippingObject,
             'approvedNotificationUrl'   => $approvedNotificationUrl,
             'cancellationRedirectUrl'   => $cancellationRedirectUrl,
-            'backToStoreUrl'            => $backToStoreUrl
+            'backToStoreUrl'            => $backToStoreUrl,
+            'sellers'                   => [ $this->getSellerObject() ]
         );
 
         return $orderData;
+    }
+
+    private function getSellerObject() {
+      $seller_url = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
+      $seller_name = Mage::app()->getStore()->getName();
+
+      return [
+        'id' => md5($seller_url),
+        'name' => $seller_name,
+        'email' => Mage::getStoreConfig('trans_email/ident_general/email'),
+        'url' => Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB),
+        'address' => [
+          'firstName' => $seller_name,
+          'phone' => Mage::getStoreConfig('general/store_information/phone'),
+          'address' => Mage::getStoreConfig('general/store_information/address'),
+          'city' => '-',
+          'postalCode' => '-',
+          'countryCode' => '-'
+        ]
+      ];
     }
 
     private function getTransactionObject($orderId, $itemObjects, $totalPrice)
@@ -258,6 +281,7 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
         $productObjects = $this->getProductObjects($order);
         $taxObject = $this->getTaxObject($order);
         $shippingCostObject = $this->getShippingCostObject($order);
+        $discountObject = $this->getDiscountObject($order);
 
         $itemObjects = array();
         $itemObjects = array_merge($itemObjects, $productObjects);
@@ -265,6 +289,10 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
 
         if ($shippingCostObject != null) {
             $itemObjects[] = $shippingCostObject;
+        }
+
+        if ($discountObject != null) {
+            $itemObjects[] = $discountObject;
         }
 
         return $itemObjects;
@@ -279,9 +307,11 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
                 'id'        => $product->getId(),
                 'url'       => $product->getProductUrl(),
                 'name'      => $product->getName(),
-                'price'     => ceil($product->getPrice()),
+                'price'     => $product->getPrice(),
                 'type'      => '',
-                'quantity'  => $item->getQtyToInvoice()
+                'quantity'  => $item->getQtyToInvoice(),
+                'parentType' => 'SELLER',
+                'parentId' => md5(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB))
             );
             array_push($productObjects, $productObject);
         }
@@ -291,12 +321,13 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
 
     private function getTaxObject($order)
     {
-        $taxAmount = $order->getTaxAmount();
+        $taxAmount = ceil($order->getTaxAmount());
+
         $taxObject = array(
             'id'        => 'taxfee',
             'url'       => '',
             'name'      => 'Tax Fee',
-            'price'     => ceil($taxAmount),
+            'price'     => $taxAmount,
             'type'      => '',
             'quantity'  => 1
         );
@@ -310,17 +341,33 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
             return null;
         }
 
-        $shippingAmount = $order->getShippingAmount();
+        $shippingAmount = ceil($order->getShippingAmount());
+
         $shippingObject = array(
             'id'        => 'shippingfee',
             'url'       => '',
             'name'      => 'Shipping Fee',
-            'price'     => ceil($shippingAmount),
+            'price'     => $shippingAmount,
             'type'      => '',
             'quantity'  => 1
         );
         
         return $shippingObject;
+    }
+
+    private function getDiscountObject($order) {
+      $discountAmount = abs(ceil($order->getDiscountAmount()));
+
+      $discountObject = array(
+            'id'        => 'discount',
+            'url'       => '',
+            'name'      => 'Discount',
+            'price'     => $discountAmount,
+            'type'      => '',
+            'quantity'  => 1
+      );
+
+      return $discountObject;
     }
 
     private function calculateTotalPrice($itemObjects)

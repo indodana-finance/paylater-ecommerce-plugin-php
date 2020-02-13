@@ -32,7 +32,6 @@
                 <model>indodanapayment/standard</model>
                 <active>1</active>
                 <title>Indodana</title>
-                <order_status>pending</order_status>
                 <payment_action>sale</payment_action>
                 <sort_order>1</sort_order>
                 <environment>sandbox</environment>
