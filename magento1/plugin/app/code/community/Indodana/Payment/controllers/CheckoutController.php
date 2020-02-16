@@ -189,6 +189,11 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
         $cancellationRedirectUrl = Mage::getUrl('indodanapayment/checkout/cancel');
         $backToStoreUrl = Mage::getUrl('indodanapayment/checkout/success');
 
+        // For dev mode
+        // $approvedNotificationUrl = 'https://example.com/indodanapayment/checkout/notify';
+        // $cancellationRedirectUrl = 'https://example.com/indodanapayment/checkout/cancel';
+        // $backToStoreUrl = 'https://example.com/indodanapayment/checkout/success';
+
         $orderData = array(
             'transactionDetails'        => $transactionObject,
             'customerDetails'           => $customerObject,
@@ -372,12 +377,22 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
 
     private function calculateTotalPrice($itemObjects)
     {
-        $total = 0;
-        foreach($itemObjects as $transactionObject) {
-            $total += $transactionObject['price'] * $transactionObject['quantity'];
+      $total_price = 0;
+      $price_cut_ids = ['discount'];
+
+      foreach($itemObjects as $transactionObject) {
+        $this_transaction_total_price = $transactionObject['price'] * $transactionObject['quantity'];
+
+        if (in_array($transactionObject['id'], $price_cut_ids)) {
+          $total_price -= $this_transaction_total_price;
+
+          continue;
         }
 
-        return $total;
+        $total_price += $this_transaction_total_price;
+      }
+
+      return $total_price;
     }
 
     private function countryCode($country_code)

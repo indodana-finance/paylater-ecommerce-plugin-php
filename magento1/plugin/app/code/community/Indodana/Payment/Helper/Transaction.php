@@ -7,6 +7,7 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract
         $productObjects = $this->getProductObjects($cart);
         $taxObject = $this->getTaxObject($cart);
         $shippingCostObject = $this->getShippingCostObject($cart);
+        $discountObject = $this->getDiscountObject($cart);
 
         $transactionObjects = array();
         $transactionObjects = array_merge($transactionObjects, $productObjects);
@@ -14,6 +15,10 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract
 
         if ($shippingCostObject != null) {
             $transactionObjects[] = $shippingCostObject;
+        }
+
+        if ($discountObject != null) {
+            $transactionObjects[] = $discountObject;
         }
 
         return $transactionObjects;
@@ -36,6 +41,25 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract
         }
 
         return $productObjects;
+    }
+
+    private function getDiscountObject($cart) {
+      $discountAmountTotal = 0;
+
+      foreach ($cart->getAllItems() as $item){
+          $discountAmountTotal += $item->getDiscountAmount();
+      }
+
+      $discountObject = array(
+            'id'        => 'discount',
+            'url'       => '',
+            'name'      => 'Discount',
+            'price'     => abs(ceil($discountAmountTotal)),
+            'type'      => '',
+            'quantity'  => 1
+      );
+
+      return $discountObject;
     }
 
     private function getTaxObject($cart)
@@ -77,13 +101,23 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract
         return $shippingObject;
     }
 
-    public function calculateTotalPrice($transactionObjects)
+    public function calculateTotalPrice($itemObjects)
     {
-        $total = 0;
-        foreach($transactionObjects as $transactionObject) {
-            $total += $transactionObject['price'] * $transactionObject['quantity'];
+      $total_price = 0;
+      $price_cut_ids = ['discount'];
+
+      foreach($itemObjects as $transactionObject) {
+        $this_transaction_total_price = $transactionObject['price'] * $transactionObject['quantity'];
+
+        if (in_array($transactionObject['id'], $price_cut_ids)) {
+          $total_price -= $this_transaction_total_price;
+
+          continue;
         }
 
-        return $total;
+        $total_price += $this_transaction_total_price;
+      }
+
+      return $total_price;
     }
 }

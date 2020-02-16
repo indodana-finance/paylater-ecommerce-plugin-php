@@ -504,13 +504,22 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
   }
 
   private function get_total_amount($items) {
-    $price = 0;
+    $total_price = 0;
+    $price_cut_ids = ['discount'];
 
-    foreach ($items as $item) {
-      $price += ($item['price'] * $item['quantity']);
+    foreach($items as $item) {
+      $this_item_total_price = $item['price'] * $item['quantity'];
+
+      if (in_array($item['id'], $price_cut_ids)) {
+        $total_price -= $this_item_total_price;
+
+        continue;
+      }
+
+      $total_price += $this_item_total_price;
     }
 
-    return $price;
+    return $total_price;
   }
 
   public function process_payment($order_id) {
@@ -564,19 +573,19 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
 
     // TODO: Uncomment for dev mode
     // $approved_notification_url = add_query_arg(array(
-    //   'wc-api'    => 'WC_Indodana_Gateway',
+      // 'wc-api'    => 'WC_Indodana_Gateway',
     // ), 'https://example.com');
 
     // $cancellation_redirect_url = add_query_arg(array(
-    //   'wc-api'    => 'WC_Indodana_Gateway',
-    //   'method'    => 'cancel',
-    //   'order_id'  => $order_id
+      // 'wc-api'    => 'WC_Indodana_Gateway',
+      // 'method'    => 'cancel',
+      // 'order_id'  => $order_id
     // ), 'https://example.com');
 
     // $back_to_store_url = add_query_arg(array(
-    //   'wc-api'    => 'WC_Indodana_Gateway',
-    //   'method'    => 'complete',
-    //   'order_id'  => $order_id
+      // 'wc-api'    => 'WC_Indodana_Gateway',
+      // 'method'    => 'complete',
+      // 'order_id'  => $order_id
     // ), 'https://example.com');
 
     return [
@@ -596,29 +605,78 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
    * https://docs.woocommerce.com/wc-apidocs/class-WC_Order.html
    * https://docs.woocommerce.com/wc-apidocs/class-WC_Cart.html
    */
-  private function get_product_objects_from_order($order) {
+  private function get_product_objects($order) {
     IndodanaLogger::log(
       IndodanaLogger::INFO,
-      sprintf('[get_product_objects_from_order] Order object %s', print_r($order, true))
+      sprintf('[get_product_objects] Order object %s', print_r($order, true))
     );
 
     $product_objects = [];
 
+    $store_url = $this->get_option('store_url');
+
     foreach ($order->get_items() as $item_id => $item) {
       $product = $item->get_product();
+
       $product_object = [
         'id'        => (string) $item_id,
         'url'       => '',
         'name'      => $product->get_name(),
         'price'     => $product->get_price(),
         'type'      => '',
-        'quantity'  => $item->get_quantity()
+        'quantity'  => $item->get_quantity(),
+        'parentType' => 'SELLER',
+        'parentId' => md5($store_url)
       ];
 
       $product_objects[] = $product_object;
     }
 
     return $product_objects;
+  }
+
+  /**
+   * Can also accept cart
+   * https://docs.woocommerce.com/wc-apidocs/class-WC_Order.html
+   * https://docs.woocommerce.com/wc-apidocs/class-WC_Cart.html
+   */
+  private function get_shipping_fee_object($order) {
+    $shippingFee = $order->get_shipping_total();
+
+    if ($shippingFee == 0) {
+      return null;
+    }
+
+    return [
+      'id' => 'shippingfee',
+      'url' => '',
+      'name' => 'Shipping Fee',
+      'price' => $shippingFee,
+      'type' => '',
+      'quantity' => 1
+    ];
+  }
+
+  /**
+   * Can also accept cart
+   * https://docs.woocommerce.com/wc-apidocs/class-WC_Order.html
+   * https://docs.woocommerce.com/wc-apidocs/class-WC_Cart.html
+   */
+  private function get_tax_fee_object($order) {
+    $taxFee = $order->get_total_tax();
+
+    if ($taxFee == 0) {
+      return null;
+    }
+
+    return [
+      'id' => 'taxfee',
+      'url' => '',
+      'name' => 'Tax Fee',
+      'price' => $taxFee,
+      'type' => '',
+      'quantity' => 1
+    ];
   }
 
   /**
@@ -663,6 +721,28 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
    * https://docs.woocommerce.com/wc-apidocs/class-WC_Order.html
    * https://docs.woocommerce.com/wc-apidocs/class-WC_Cart.html
    */
+  private function get_discount_object($order) {
+    $discount = $order->get_discount_total();
+
+    if ($discount == 0) {
+      return null;
+    }
+
+    return [
+      'id' => 'discount',
+      'url' => '',
+      'name' => 'Total Discount',
+      'price' => $discount,
+      'type' => '',
+      'quantity' => 1
+    ];
+  }
+
+  /**
+   * Can also accept cart
+   * https://docs.woocommerce.com/wc-apidocs/class-WC_Order.html
+   * https://docs.woocommerce.com/wc-apidocs/class-WC_Cart.html
+   */
   private function get_discount_objects_from_order($order) {
     $discount = $order->get_discount_total();
 
@@ -683,11 +763,25 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
   }
 
   private function get_transaction_object($order, $order_id) {
+    $product_objects = $this->get_product_objects($order);
+    $shipping_fee_object = $this->get_shipping_fee_object($order);
+    $tax_fee_object = $this->get_tax_fee_object($order);
+    $discount_object = $this->get_discount_object($order);
+
     $items = array();
-    $product_objects = $this->get_product_objects_from_order($order);
-    $fees = $this->get_fee_objects_from_order($order);
-    $discounts = $this->get_discount_objects_from_order($order);
-    $items = array_merge($items, $product_objects, $fees, $discounts);
+    $items = array_merge($items, $product_objects);
+
+    if ($shipping_fee_object != null) {
+      $items[] = $shipping_fee_object;
+    }
+
+    if ($tax_fee_object != null) {
+      $items[] = $tax_fee_object;
+    }
+
+    if ($discount_object != null) {
+      $items[] = $discount_object;
+    }
 
     $transaction_object = array(
       'merchantOrderId'   => $order_id,
