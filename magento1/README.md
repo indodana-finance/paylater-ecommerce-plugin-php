@@ -6,7 +6,7 @@
 
 1. Setup Database
 
-    ```
+    ```sql
     mysql> CREATE DATABASE magento1;
 
     mysql> CREATE USER 'magento1' IDENTIFIED BY 'magento1';
@@ -20,7 +20,7 @@
 
 2. Run your Magento application
 
-    ```
+    ```shell
     $ make magento1-install-dependencies
 
     $ make magento1-serve
