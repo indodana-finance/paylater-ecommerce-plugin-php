@@ -35,7 +35,7 @@ woocommerce-test:
 	$(woocommerce)/vendor/bin/
 
 woocommerce-serve: woocommerce-build
-	php -S localhost:6021 -t $(woocommerce_build_dir)
+	php7.2 -S localhost:6021 -t $(woocommerce_build_dir)
 
 woocommerce-log-tail:
 	tail -f ./$(woocommerce_build_dir)/wp-content/plugins/indodana-payment/library/Indodana/Payment/log/info.log
