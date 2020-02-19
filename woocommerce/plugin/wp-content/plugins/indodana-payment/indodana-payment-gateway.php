@@ -278,6 +278,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
     $this->is_production = $this->get_option('environment') === 'production';
     $this->api_key = $this->get_option('api_key');
     $this->api_secret = $this->get_option('api_secret');
+    $this->use_billing_address_for_shipping_address = $this->get_option('use_billing_address_for_shipping_address');
 
     add_action('woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ));
     add_action('woocommerce_api_wc_indodana_gateway', array(&$this, 'indodana_callback'));
@@ -371,11 +372,20 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
         'validationMessage' => 'API Key is required',
       ),
       'api_secret' => array(
-        'title'         => __('Api Secret*', 'indodana-api-key-input-title'),
+        'title'         => __('Api Secret*', 'indodana-api-secret-input-title'),
         'type'          => 'text',
         'description'   => __('Enter Api Secret provided by Indodana', 'indodana-api-secret-input-label'),
         'validator'        => Validator::notOptional(),
         'validationMessage' => 'API Secret is required',
+      ),
+      'use_billing_address_for_shipping_address' => array(
+        'title'             => __('Use Billing Address for Shipping Address*', 'indodana-use-billing-address-for-shipping-address-input-title'),
+        'type'              => 'select',
+        'default'           => 'no',
+        'options'           => array(
+          'no'    => __('No', 'indodana-use-billing-address-for-shipping-address-value-no'),
+          'yes'   => __('Yes', 'indodana-use-billing-address-for-shipping-address-value-no')
+        )
       )
     );
   }
@@ -802,6 +812,10 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
   }
 
   private function get_shipping_object($order) {
+    if (strtolower($this->get_option('use_billing_address_for_shipping_address')) === 'yes') {
+      return $this->get_billing_object($order);
+    }
+
     return array(
       'firstName'     => $order->get_shipping_first_name(),
       'lastName'      => $order->get_shipping_last_name(),
