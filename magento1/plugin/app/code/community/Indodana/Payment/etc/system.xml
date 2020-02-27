@@ -57,7 +57,7 @@
                             <show_in_store>0</show_in_store>
                         </order_status_failed>
                         <api_key translate="label">
-                            <label>Indodana API Key</label>
+                            <label>API Key</label>
                             <config_path>payment/indodanapayment/api_key</config_path>
                             <frontend_type>text</frontend_type>
                             <sort_order>6</sort_order>
@@ -66,7 +66,7 @@
                             <show_in_store>0</show_in_store>
                         </api_key>
                         <api_secret translate="label">
-                            <label>Indodana API Secret</label>
+                            <label>API Secret</label>
                             <config_path>payment/indodanapayment/api_secret</config_path>
                             <frontend_type>text</frontend_type>
                             <sort_order>7</sort_order>
@@ -74,6 +74,16 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </api_secret>
+                        <environment translate="label">
+                            <label>Environment</label>
+                            <config_path>payment/indodanapayment/environment</config_path>
+                            <frontend_type>select</frontend_type>
+                            <source_model>Indodana_Payment_Model_System_Config_Source_Environment</source_model>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </environment>
                         <sort_order translate="label">
                             <label>Sort Order</label>
                             <config_path>payment/indodanapayment/sort_order</config_path>

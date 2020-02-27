@@ -3,8 +3,10 @@
 require_once INDODANA_PLUGIN_ROOT_DIR . 'autoload.php';
 
 use Respect\Validation\Validator;
+use IndodanaCommon\IndodanaService;
+use IndodanaCommon\IndodanaInterface;
 
-class WC_Indodana_Gateway extends WC_Payment_Gateway
+class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterface
 {
   private static $country_code_options = [
     '' => 'Please select',
@@ -254,8 +256,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
     'ZWE' => 'ZWE',
   ];
 
-  private $indodana_api;
-  private $validation_rules;
+  private $indodana_service;
 
   public function __construct() {
     $this->id = 'indodana';
@@ -272,18 +273,21 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
     $this->init_form_fields();
     $this->init_settings();
 
-    $this->enabled = $this->get_option('enabled');
     $this->title = $this->get_option('title');
     $this->description = $this->get_option('description');
-    $this->is_production = $this->get_option('environment') === 'production';
-    $this->api_key = $this->get_option('api_key');
-    $this->api_secret = $this->get_option('api_secret');
-    $this->use_billing_address_for_shipping_address = $this->get_option('use_billing_address_for_shipping_address');
+
+    $this->indodana_service = new IndodanaService([
+      'apiKey'       => $this->get_option('api_key'),
+      'apiSecret'    => $this->get_option('api_secret'),
+      'isProduction' => $this->get_option('environment') === 'production',
+      'seller'       => $this->getSeller()
+    ]);
 
     add_action('woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ));
     add_action('woocommerce_api_wc_indodana_gateway', array(&$this, 'indodana_callback'));
   }
 
+  // Form on admin settings
   public function init_form_fields() {
     $this->form_fields = array(
       'enabled' => array(
@@ -447,89 +451,128 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
     return $this->validate_field($key, $value);
   }
 
+  public function getTotalAmount($cart) 
+  {
+    return (float) $cart->total;
+  }
+
+  public function getTotalDiscountAmount($cart)
+  {
+    return (float) $cart->get_discount_total($cart);
+  }
+
+  public function getTotalShippingAmount($cart)
+  {
+    return (float) $cart->get_shipping_total();
+  }
+
+  public function getTotalTaxAmount($cart)
+  {
+    return (float) $cart->get_total_tax();
+  }
+
+  public function getItems($cart)
+  {
+    $items = $cart->get_cart();
+
+    $cartItems = [];
+
+    foreach($items as $item) {
+      $product = $item['data'];
+
+      $cartItems[] = [
+        'id' => (string) $product->get_id(),
+        'name' => $product->get_title(),
+        'price' => (float) $product->get_price(),
+        'url' => get_permalink($product->get_id()),
+        'imageUrl' => wp_get_attachment_image_url($product->get_image_id(), 'full'),
+        'type' => $product->get_type(),
+        'quantity' => (int) $item['quantity'],
+      ];
+    }
+
+    return $cartItems;
+  }
+
+  public function getCustomerDetails($order)
+  {
+    return [
+      'firstName' => $order->get_billing_first_name(),
+      'lastName'  => $order->get_billing_last_name(),
+      'email'     => $order->get_billing_email(),
+      'phone'     => $order->get_billing_phone(),
+    ];
+  }
+
+  public function getBillingAddress($order)
+  {
+    return [
+      'firstName'   => $order->get_billing_first_name(),
+      'lastName'    => $order->get_billing_last_name(),
+      'address'     => $order->get_billing_address_1(),
+      'city'        => $order->get_billing_city(),
+      'postalCode'  => $order->get_billing_postcode(),
+      'phone'       => $order->get_billing_phone(),
+      'countryCode' => $order->get_billing_country()
+    ];
+  }
+
+  public function getShippingAddress($order)
+  {
+    if (strtolower($this->get_option('use_billing_address_for_shipping_address')) === 'yes') {
+      return $this->getBillingAddress($order);
+    }
+
+    return [
+      'firstName'   => $order->get_shipping_first_name(),
+      'lastName'    => $order->get_shipping_last_name(),
+      'address'     => $order->get_shipping_address_1(),
+      'city'        => $order->get_shipping_city(),
+      'postalCode'  => $order->get_shipping_postcode(),
+      'phone'       => $order->get_billing_phone(),
+      'countryCode' => $order->get_shipping_country(),
+    ];
+  }
+
+  public function getSeller() {
+    $store_name = $this->get_option('store_name');
+
+    return [
+      'name'    => $store_name,
+      'email'   => $this->get_option('store_email'),
+      'url'     => $this->get_option('store_url'),
+      'address' => [
+        'firstName'   => $store_name,
+        'phone'       => $this->get_option('store_phone_number'),
+        'address'     => $this->get_option('store_address'),
+        'city'        => $this->get_option('store_city'),
+        'postalCode'  => $this->get_option('store_postal_code'),
+        'countryCode' => $this->get_option('store_country_code'),
+      ]
+    ];
+  }
+
   public function payment_fields() {
     echo wpautop(wp_kses_post($this->description));
 
-    $this->indodana_api = new IndodanaApi(
-      $this->api_key,
-      $this->api_secret,
-      $this->is_production
-    );
-
-    $items = array();
-
     $cart = WC()->cart;
-    $product_objects = $this->get_product_object_from_cart($cart->get_cart());
-    $fee_objects = $this->get_fee_objects_from_order($cart);
-    $discount_objects = $this->get_discount_objects_from_order($cart);
-    $items = array_merge($items, $product_objects, $fee_objects, $discount_objects);
 
-    $totalAmount = $this->get_total_amount($items);
-    $paymentOptions = $this->indodana_api->getPaymentOptions(
-      $totalAmount,
-      $items
-    );
+    $payment_options = $this->indodana_service->getInstallmentOptions([
+      'totalAmount'    => $this->getTotalAmount($cart),
+      'discountAmount' => $this->getTotalDiscountAmount($cart),
+      'shippingAmount' => $this->getTotalShippingAmount($cart),
+      'taxAmount'      => $this->getTotalTaxAmount($cart),
+      'items'          => $this->getItems($cart)
+    ]);
 
-    $data = array();
-    $data['paymentOptions'] = $paymentOptions;
-
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
-      sprintf(
-        'Items %s, total amount %s, Payment options %s',
-        print_r($items, true),
-        $totalAmount,
-        print_r($paymentOptions, true)
-      )
-    );
+    $data = [];
+    $data['paymentOptions'] = $payment_options;
 
     do_action('woocommerce_credit_card_form_start', $this->id);
+
     echo Renderer::render(ABSPATH . 'wp-content/plugins/indodana-payment/view/indodana-payment-form.php', $data);
+
     do_action('woocommerce_credit_card_form_end', $this->id);
-  }
-
-  private function get_product_object_from_cart($cart) {
-    $product_objects = array();
-
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
-      sprintf('[get_product_object_from_cart] Cart object %s', print_r($cart, true))
-    );
-
-    foreach ($cart as $item) {
-      $product_id = $item['product_id'];
-      $product_object = array(
-        'id'        => (string) $product_id,
-        'url'       => '',
-        'name'      => $item['data']->get_title(),
-        'price'     => $item['data']->get_price(),
-        'type'      => '',
-        'quantity'  => $item['quantity']
-      );
-
-      $product_objects[] = $product_object;
-    }
-
-    return $product_objects;
-  }
-
-  private function get_total_amount($items) {
-    $total_price = 0;
-    $price_cut_ids = ['discount'];
-
-    foreach($items as $item) {
-      $this_item_total_price = $item['price'] * $item['quantity'];
-
-      if (in_array($item['id'], $price_cut_ids)) {
-        $total_price -= $this_item_total_price;
-
-        continue;
-      }
-
-      $total_price += $this_item_total_price;
-    }
-
-    return $total_price;
   }
 
   public function process_payment($order_id) {
@@ -538,32 +581,8 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
       sprintf('[process_payment] POST data %s', print_r($_POST, true))
     );
 
-    $this->indodana_api = new IndodanaApi(
-      $this->api_key,
-      $this->api_secret,
-      $this->is_production
-    );
-
-    $order_data = $this->generate_order_data($order_id);
-
-    $order_data['paymentType'] = $_POST['payment_selection'];
-
-    $checkout_url = $this->indodana_api->getCheckoutUrl($order_data);
-
-    WC()->cart->empty_cart();
-
-    return array(
-      'result' => 'success',
-      'redirect' => $checkout_url
-    );
-  }
-
-  private function generate_order_data($order_id) {
+    $cart = WC()->cart;
     $order = wc_get_order($order_id);
-    $transaction_object = $this->get_transaction_object($order, $order_id);
-    $customer_object = $this->get_customer_object($order);
-    $billing_object = $this->get_billing_object($order);
-    $shipping_object = $this->get_shipping_object($order);
 
     $approved_notification_url = add_query_arg(array(
       'wc-api'    => 'WC_Indodana_Gateway',
@@ -581,7 +600,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
       'order_id'  => $order_id
     ), home_url('/'));
 
-    // TODO: Uncomment for dev mode
+    // DEV MODE
     // $approved_notification_url = add_query_arg(array(
       // 'wc-api'    => 'WC_Indodana_Gateway',
     // ), 'https://example.com');
@@ -597,246 +616,29 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
       // 'method'    => 'complete',
       // 'order_id'  => $order_id
     // ), 'https://example.com');
+    
+    $checkout_url = $this->indodana_service->checkout([
+      'merchantOrderId'         => $order_id,
+      'totalAmount'             => $this->getTotalAmount($cart),
+      'discountAmount'          => $this->getTotalDiscountAmount($cart),
+      'shippingAmount'          => $this->getTotalShippingAmount($cart),
+      'taxAmount'               => $this->getTotalTaxAmount($cart),
+      'items'                   => $this->getItems($cart),
+      'customerDetails'         => $this->getCustomerDetails($order),
+      'billingAddress'          => $this->getBillingAddress($order),
+      'shippingAddress'         => $this->getShippingAddress($order),
+      'paymentType'             => $_POST['payment_selection'],
+      'approvedNotificationUrl' => $approved_notification_url,
+      'cancellationRedirectUrl' => $cancellation_redirect_url,
+      'backToStoreUrl'          => $back_to_store_url
+    ]);
+
+    WC()->cart->empty_cart();
 
     return [
-      'transactionDetails'        => $transaction_object,
-      'customerDetails'           => $customer_object,
-      'billingAddress'            => $billing_object,
-      'shippingAddress'           => $shipping_object,
-      'approvedNotificationUrl'   => $approved_notification_url,
-      'cancellationRedirectUrl'   => $cancellation_redirect_url,
-      'backToStoreUrl'            => $back_to_store_url,
-      'sellers' => [ $this->get_store_object() ]
+      'result' => 'success',
+      'redirect' => $checkout_url
     ];
-  }
-
-  /**
-   * Can also accept cart
-   * https://docs.woocommerce.com/wc-apidocs/class-WC_Order.html
-   * https://docs.woocommerce.com/wc-apidocs/class-WC_Cart.html
-   */
-  private function get_product_objects($order) {
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
-      sprintf('[get_product_objects] Order object %s', print_r($order, true))
-    );
-
-    $product_objects = [];
-
-    $store_url = $this->get_option('store_url');
-
-    foreach ($order->get_items() as $item_id => $item) {
-      $product = $item->get_product();
-
-      $product_object = [
-        'id'        => (string) $item_id,
-        'url'       => '',
-        'name'      => $product->get_name(),
-        'price'     => $product->get_price(),
-        'type'      => '',
-        'quantity'  => $item->get_quantity(),
-        'parentType' => 'SELLER',
-        'parentId' => md5($store_url)
-      ];
-
-      $product_objects[] = $product_object;
-    }
-
-    return $product_objects;
-  }
-
-  /**
-   * Can also accept cart
-   * https://docs.woocommerce.com/wc-apidocs/class-WC_Order.html
-   * https://docs.woocommerce.com/wc-apidocs/class-WC_Cart.html
-   */
-  private function get_shipping_fee_object($order) {
-    $shippingFee = $order->get_shipping_total();
-
-    if ($shippingFee == 0) {
-      return null;
-    }
-
-    return [
-      'id' => 'shippingfee',
-      'url' => '',
-      'name' => 'Shipping Fee',
-      'price' => $shippingFee,
-      'type' => '',
-      'quantity' => 1
-    ];
-  }
-
-  /**
-   * Can also accept cart
-   * https://docs.woocommerce.com/wc-apidocs/class-WC_Order.html
-   * https://docs.woocommerce.com/wc-apidocs/class-WC_Cart.html
-   */
-  private function get_tax_fee_object($order) {
-    $taxFee = $order->get_total_tax();
-
-    if ($taxFee == 0) {
-      return null;
-    }
-
-    return [
-      'id' => 'taxfee',
-      'url' => '',
-      'name' => 'Tax Fee',
-      'price' => $taxFee,
-      'type' => '',
-      'quantity' => 1
-    ];
-  }
-
-  /**
-   * Can also accept cart
-   * https://docs.woocommerce.com/wc-apidocs/class-WC_Order.html
-   * https://docs.woocommerce.com/wc-apidocs/class-WC_Cart.html
-   */
-  private function get_fee_objects_from_order($order) {
-    $fee_objects = [];
-
-    $shippingFee = $order->get_shipping_total();
-
-    if ($shippingFee) {
-      $fee_objects[] = [
-        'id' => 'shippingfee',
-        'url' => '',
-        'name' => 'Shipping Fee',
-        'price' => $shippingFee,
-        'type' => '',
-        'quantity' => 1
-      ];
-    }
-
-    $taxFee = $order->get_total_tax();
-
-    if ($taxFee) {
-      $fee_objects[] = [
-        'id' => 'taxfee',
-        'url' => '',
-        'name' => 'Tax Fee',
-        'price' => $taxFee,
-        'type' => '',
-        'quantity' => 1
-      ];
-    }
-
-    return $fee_objects;
-  }
-
-  /**
-   * Can also accept cart
-   * https://docs.woocommerce.com/wc-apidocs/class-WC_Order.html
-   * https://docs.woocommerce.com/wc-apidocs/class-WC_Cart.html
-   */
-  private function get_discount_object($order) {
-    $discount = $order->get_discount_total();
-
-    if ($discount == 0) {
-      return null;
-    }
-
-    return [
-      'id' => 'discount',
-      'url' => '',
-      'name' => 'Total Discount',
-      'price' => $discount,
-      'type' => '',
-      'quantity' => 1
-    ];
-  }
-
-  /**
-   * Can also accept cart
-   * https://docs.woocommerce.com/wc-apidocs/class-WC_Order.html
-   * https://docs.woocommerce.com/wc-apidocs/class-WC_Cart.html
-   */
-  private function get_discount_objects_from_order($order) {
-    $discount = $order->get_discount_total();
-
-    $discount_objects = [];
-
-    if ($discount) {
-      $discount_objects[] = [
-        'id' => 'discount',
-        'url' => '',
-        'name' => 'Total Discount',
-        'price' => $discount,
-        'type' => '',
-        'quantity' => 1
-      ];
-    }
-
-    return $discount_objects;
-  }
-
-  private function get_transaction_object($order, $order_id) {
-    $product_objects = $this->get_product_objects($order);
-    $shipping_fee_object = $this->get_shipping_fee_object($order);
-    $tax_fee_object = $this->get_tax_fee_object($order);
-    $discount_object = $this->get_discount_object($order);
-
-    $items = array();
-    $items = array_merge($items, $product_objects);
-
-    if ($shipping_fee_object != null) {
-      $items[] = $shipping_fee_object;
-    }
-
-    if ($tax_fee_object != null) {
-      $items[] = $tax_fee_object;
-    }
-
-    if ($discount_object != null) {
-      $items[] = $discount_object;
-    }
-
-    $transaction_object = array(
-      'merchantOrderId'   => $order_id,
-      'items'             => $items,
-      'amount'            => $this->get_total_amount($items)
-    );
-
-    return $transaction_object;
-  }
-
-  private function get_customer_object($order) {
-    return array(
-      'firstName' => $order->get_billing_first_name(),
-      'lastName'  => $order->get_billing_last_name(),
-      'email'     => $order->get_billing_email(),
-      'phone'     => $order->get_billing_phone(),
-    );
-  }
-
-  private function get_shipping_object($order) {
-    if (strtolower($this->get_option('use_billing_address_for_shipping_address')) === 'yes') {
-      return $this->get_billing_object($order);
-    }
-
-    return array(
-      'firstName'     => $order->get_shipping_first_name(),
-      'lastName'      => $order->get_shipping_last_name(),
-      'address'       => $order->get_shipping_address_1(),
-      'city'          => $order->get_shipping_city(),
-      'postalCode'    => $order->get_shipping_postcode(),
-      'phone'         => $order->get_billing_phone(),
-      'countryCode'   => $order->get_shipping_country(),
-    );
-  }
-
-  private function get_billing_object($order) {
-    return array(
-      'firstName'     => $order->get_billing_first_name(),
-      'lastName'      => $order->get_billing_last_name(),
-      'address'       => $order->get_billing_address_1(),
-      'city'          => $order->get_billing_city(),
-      'postalCode'    => $order->get_billing_postcode(),
-      'phone'         => $order->get_billing_phone(),
-      'countryCode'   => $order->get_billing_country(),
-    );
   }
 
   public function indodana_callback() {
@@ -892,27 +694,6 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway
     );
 
     echo json_encode($response);
-  }
-
-  private function get_store_object() {
-    $store_url = $this->get_option('store_url');
-    $store_name = $this->get_option('store_name');
-
-    return [
-      // Use storeUrl as store id because it's less likely to change
-      'id' => md5($store_url),
-      'name' => $store_name,
-      'email' => $this->get_option('store_email'),
-      'url' => $store_url,
-      'address' => [
-        'firstName' => $store_name,
-        'phone' => $this->get_option('store_phone_number'),
-        'address' => $this->get_option('store_address'),
-        'city' => $this->get_option('store_city'),
-        'postalCode' => $this->get_option('store_postal_code'),
-        'countryCode' => $this->get_option('store_country_code'),
-      ]
-    ];
   }
 
   private function handle_redirect_due_to_cancellation($order_id) {

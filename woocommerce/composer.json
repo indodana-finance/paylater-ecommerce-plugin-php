@@ -1,13 +1,23 @@
 {
-    "name": "indodana/woocommerce",
-    "authors": [
-        {
-            "name": "Sendy Halim",
-            "email": "sendyhalim93@gmail.com"
-        }
-    ],
-    "require": {
-        "respect/validation": "^1.1",
-        "sentry/sdk": "^2.1"
+  "name": "indodana/indodana-paylater-woocommerce",
+  "authors": [
+    {
+      "name": "Sendy Halim",
+      "email": "sendyhalim93@gmail.com"
     }
+  ],
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../packages/common",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
+  "require": {
+    "indodana/indodana-paylater-ecommerce-common": "@dev",
+    "respect/validation": "^1.1",
+    "sentry/sdk": "^2.1"
+  }
 }

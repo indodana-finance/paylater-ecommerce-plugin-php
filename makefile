@@ -60,8 +60,7 @@ magento1-serve: magento1-build
 	php5.6 -S localhost:6031 -t $(magento1_build_dir)
 
 magento1-log-tail:
-	.build/magento1/dev/magento1/plugin/lib/Indodana/Payment/log/info.log
-	tail -f ./$(woocommerce_build_dir)/var/report/1580915571157
+	tail -f ./$(magento1_build_dir)/lib/Indodana/Payment/log/info.log
 
 
 

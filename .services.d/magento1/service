@@ -17,10 +17,10 @@ build() {
   source ${SHARED_SCRIPTS_DIRECTORY}/build
 
   # Copy composer vendor/ dir to plugin dir
-  cp -r $SERVICE_SOURCE_DIR/vendor $SERVICE_BUILD_DIR/plugin/lib/Indodana/Payment/
+  cp -Lr $SERVICE_SOURCE_DIR/vendor $SERVICE_BUILD_DIR/plugin/lib/Indodana/Payment/
 
   # Copy plugin dir to CMS upload dir (register the plugin automatically)
-  cp -r $SERVICE_BUILD_DIR/plugin/* $SERVICE_BUILD_DIR/upload
+  cp -Lr $SERVICE_BUILD_DIR/plugin/* $SERVICE_BUILD_DIR/upload
 }
 
 run() {

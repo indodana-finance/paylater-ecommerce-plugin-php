@@ -1,0 +1,11 @@
+{
+  "name": "indodana/indodana-paylater-ecommerce-common",
+  "autoload": {
+    "psr-4": {
+      "IndodanaCommon\\":"src/"
+    }
+  },
+  "require": {
+    "stvyang-i/indodana-paylater-sdk-php": "^0.3.0"
+  }
+}
