@@ -24,3 +24,5 @@
 /cli/pkictl
 /vendor/
 vendor/
+
+/opencartv2/upload/
