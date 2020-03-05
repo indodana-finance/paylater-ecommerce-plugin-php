@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4307034c938363e8bf07fa9658f10991",
+    "content-hash": "b73a73447773fb174f94e161fd4b61dc",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -78,87 +78,6 @@
             "transport-options": {
                 "symlink": true
             }
-        },
-        {
-            "name": "monolog/monolog",
-            "version": "2.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "c861fcba2ca29404dc9e617eedd9eff4616986b8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/c861fcba2ca29404dc9e617eedd9eff4616986b8",
-                "reference": "c861fcba2ca29404dc9e617eedd9eff4616986b8",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.2",
-                "psr/log": "^1.0.1"
-            },
-            "provide": {
-                "psr/log-implementation": "1.0.0"
-            },
-            "require-dev": {
-                "aws/aws-sdk-php": "^2.4.9 || ^3.0",
-                "doctrine/couchdb": "~1.0@dev",
-                "elasticsearch/elasticsearch": "^6.0",
-                "graylog2/gelf-php": "^1.4.2",
-                "jakub-onderka/php-parallel-lint": "^0.9",
-                "php-amqplib/php-amqplib": "~2.4",
-                "php-console/php-console": "^3.1.3",
-                "phpspec/prophecy": "^1.6.1",
-                "phpunit/phpunit": "^8.3",
-                "predis/predis": "^1.1",
-                "rollbar/rollbar": "^1.3",
-                "ruflin/elastica": ">=0.90 <3.0",
-                "swiftmailer/swiftmailer": "^5.3|^6.0"
-            },
-            "suggest": {
-                "aws/aws-sdk-php": "Allow sending log messages to AWS services like DynamoDB",
-                "doctrine/couchdb": "Allow sending log messages to a CouchDB server",
-                "elasticsearch/elasticsearch": "Allow sending log messages to an Elasticsearch server via official client",
-                "ext-amqp": "Allow sending log messages to an AMQP server (1.0+ required)",
-                "ext-mbstring": "Allow to work properly with unicode symbols",
-                "ext-mongodb": "Allow sending log messages to a MongoDB server (via driver)",
-                "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
-                "mongodb/mongodb": "Allow sending log messages to a MongoDB server (via library)",
-                "php-amqplib/php-amqplib": "Allow sending log messages to an AMQP server using php-amqplib",
-                "php-console/php-console": "Allow sending log messages to Google Chrome",
-                "rollbar/rollbar": "Allow sending log messages to Rollbar",
-                "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Monolog\\": "src/Monolog"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jordi Boggiano",
-                    "email": "j.boggiano@seld.be",
-                    "homepage": "http://seld.be"
-                }
-            ],
-            "description": "Sends your logs to files, sockets, inboxes, databases and various web services",
-            "homepage": "http://github.com/Seldaek/monolog",
-            "keywords": [
-                "log",
-                "logging",
-                "psr-3"
-            ],
-            "time": "2019-12-20T14:22:59+00:00"
         },
         {
             "name": "php-http/curl-client",
@@ -671,53 +590,6 @@
             "time": "2016-08-06T14:39:51+00:00"
         },
         {
-            "name": "psr/log",
-            "version": "1.1.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-fig/log.git",
-                "reference": "446d54b4cb6bf489fc9d75f55843658e6f25d801"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/446d54b4cb6bf489fc9d75f55843658e6f25d801",
-                "reference": "446d54b4cb6bf489fc9d75f55843658e6f25d801",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.1.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Psr\\Log\\": "Psr/Log/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "PHP-FIG",
-                    "homepage": "http://www.php-fig.org/"
-                }
-            ],
-            "description": "Common interface for logging libraries",
-            "homepage": "https://github.com/php-fig/log",
-            "keywords": [
-                "log",
-                "psr",
-                "psr-3"
-            ],
-            "time": "2019-11-01T11:05:21+00:00"
-        },
-        {
             "name": "respect/validation",
             "version": "1.1.31",
             "source": {
@@ -782,29 +654,35 @@
         },
         {
             "name": "sentry/sentry",
-            "version": "1.0.0",
+            "version": "1.11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/getsentry/sentry-php.git",
-                "reference": "98389d53216208c618f373578b3889aba7038ac9"
+                "reference": "159eeaa02bb2ef8a8ec669f3c88e4bff7e6a7ffe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/getsentry/sentry-php/zipball/98389d53216208c618f373578b3889aba7038ac9",
-                "reference": "98389d53216208c618f373578b3889aba7038ac9",
+                "url": "https://api.github.com/repos/getsentry/sentry-php/zipball/159eeaa02bb2ef8a8ec669f3c88e4bff7e6a7ffe",
+                "reference": "159eeaa02bb2ef8a8ec669f3c88e4bff7e6a7ffe",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
-                "monolog/monolog": "*",
-                "php": ">=5.2.4"
+                "php": "^5.3|^7.0"
             },
             "conflict": {
                 "raven/raven": "*"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^1.8.0",
-                "phpunit/phpunit": "^4.6.6"
+                "monolog/monolog": "^1.0",
+                "phpunit/phpunit": "^4.8.35 || ^5.7"
+            },
+            "suggest": {
+                "ext-hash": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "monolog/monolog": "Automatically capture Monolog events as breadcrumbs"
             },
             "bin": [
                 "bin/sentry"
@@ -812,7 +690,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "0.23.x-dev"
+                    "dev-master": "1.11.x-dev"
                 }
             },
             "autoload": {
@@ -836,7 +714,7 @@
                 "log",
                 "logging"
             ],
-            "time": "2016-07-28T13:29:26+00:00"
+            "time": "2020-02-12T18:38:11+00:00"
         },
         {
             "name": "stvyang-i/indodana-paylater-sdk-php",
@@ -1041,6 +919,87 @@
                 "instantiate"
             ],
             "time": "2019-10-21T16:45:58+00:00"
+        },
+        {
+            "name": "monolog/monolog",
+            "version": "2.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Seldaek/monolog.git",
+                "reference": "c861fcba2ca29404dc9e617eedd9eff4616986b8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/c861fcba2ca29404dc9e617eedd9eff4616986b8",
+                "reference": "c861fcba2ca29404dc9e617eedd9eff4616986b8",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2",
+                "psr/log": "^1.0.1"
+            },
+            "provide": {
+                "psr/log-implementation": "1.0.0"
+            },
+            "require-dev": {
+                "aws/aws-sdk-php": "^2.4.9 || ^3.0",
+                "doctrine/couchdb": "~1.0@dev",
+                "elasticsearch/elasticsearch": "^6.0",
+                "graylog2/gelf-php": "^1.4.2",
+                "jakub-onderka/php-parallel-lint": "^0.9",
+                "php-amqplib/php-amqplib": "~2.4",
+                "php-console/php-console": "^3.1.3",
+                "phpspec/prophecy": "^1.6.1",
+                "phpunit/phpunit": "^8.3",
+                "predis/predis": "^1.1",
+                "rollbar/rollbar": "^1.3",
+                "ruflin/elastica": ">=0.90 <3.0",
+                "swiftmailer/swiftmailer": "^5.3|^6.0"
+            },
+            "suggest": {
+                "aws/aws-sdk-php": "Allow sending log messages to AWS services like DynamoDB",
+                "doctrine/couchdb": "Allow sending log messages to a CouchDB server",
+                "elasticsearch/elasticsearch": "Allow sending log messages to an Elasticsearch server via official client",
+                "ext-amqp": "Allow sending log messages to an AMQP server (1.0+ required)",
+                "ext-mbstring": "Allow to work properly with unicode symbols",
+                "ext-mongodb": "Allow sending log messages to a MongoDB server (via driver)",
+                "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
+                "mongodb/mongodb": "Allow sending log messages to a MongoDB server (via library)",
+                "php-amqplib/php-amqplib": "Allow sending log messages to an AMQP server using php-amqplib",
+                "php-console/php-console": "Allow sending log messages to Google Chrome",
+                "rollbar/rollbar": "Allow sending log messages to Rollbar",
+                "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Monolog\\": "src/Monolog"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "http://seld.be"
+                }
+            ],
+            "description": "Sends your logs to files, sockets, inboxes, databases and various web services",
+            "homepage": "http://github.com/Seldaek/monolog",
+            "keywords": [
+                "log",
+                "logging",
+                "psr-3"
+            ],
+            "time": "2019-12-20T14:22:59+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -1695,6 +1654,53 @@
             ],
             "abandoned": true,
             "time": "2017-06-30T09:13:00+00:00"
+        },
+        {
+            "name": "psr/log",
+            "version": "1.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/log.git",
+                "reference": "446d54b4cb6bf489fc9d75f55843658e6f25d801"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/446d54b4cb6bf489fc9d75f55843658e6f25d801",
+                "reference": "446d54b4cb6bf489fc9d75f55843658e6f25d801",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Log\\": "Psr/Log/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for logging libraries",
+            "homepage": "https://github.com/php-fig/log",
+            "keywords": [
+                "log",
+                "psr",
+                "psr-3"
+            ],
+            "time": "2019-11-01T11:05:21+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
