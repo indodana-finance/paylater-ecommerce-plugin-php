@@ -6,11 +6,14 @@ namespace IndodanaCommon;
 
 use Exception;
 use Respect\Validation\Validator;
+use Respect\Validation\Exceptions\NestedValidationException;
 use Indodana\Exceptions\IndodanaRequestException;
 use Indodana\Exceptions\IndodanaSdkException;
 use Indodana\Indodana;
+use Indodana\IndodanaHttpClient;
 use Indodana\RespectValidation\RespectValidationHelper;
 use IndodanaCommon\Exceptions\IndodanaCommonException;
+use IndodanaCommon\IndodanaConstant;
 use IndodanaCommon\IndodanaHelper;
 use IndodanaCommon\IndodanaLogger;
 
@@ -58,6 +61,86 @@ class IndodanaService
       },
       $namespace
     );
+  }
+
+  public static function validateConfiguration(array $config = [])
+  {
+    $validator = Validator::create()
+      ->key('storeName', Validator::stringType()->notEmpty())
+      ->key('storeUrl', Validator::domain()->notEmpty())
+      ->key('storeEmail', Validator::email()->notEmpty())
+      ->key('storePhone', Validator::stringType()->notEmpty()) // Respect doesn't have validation for Indonesia phone
+      ->key('storeCountryCode', Validator::in(IndodanaConstant::getCountryCodes()))
+      ->key('storeCity', Validator::stringType()->notEmpty())
+      ->key('storeAddress', Validator::stringType()->notEmpty())
+      ->key('storePostalCode', Validator::postalCode('ID')->notEmpty()) // We only validate Indonesia postal code atm
+      ->key('apiKey', Validator::stringType()->notEmpty())
+      ->key('apiSecret', Validator::stringType()->notEmpty())
+      ->key('environment', Validator::in(IndodanaConstant::getEnvironmentKeys()))
+      ->key('defaultOrderPendingStatus', Validator::stringType()->notEmpty())
+      ->key('defaultOrderSuccessStatus', Validator::stringType()->notEmpty())
+      ->key('defaultOrderFailedStatus', Validator::stringType()->notEmpty())
+      ->key('status', Validator::stringType()->notOptional())
+      ->key('sortOrder', Validator::intType()->notOptional());
+
+    $namespace = '[Common-ValidateConfiguration]';
+
+    try {
+      $validator->assert($config);
+
+      return [
+        'errors' => []
+      ];
+    } catch (NestedValidationException $exception) {
+      $stringValidationMessage = '{{name}} must not be empty and contain text';
+
+      // These custom error message are not perfect.
+      // TODO: On next iteration, consider remove `findMessages` because on newest Respect, it's not included anymore.
+      // It seems that the newest Respect force developer to validate each key on a map separately -> Need more research
+      $exceptionValidationMessages = $exception->findMessages([
+        'storeName'                 => $stringValidationMessage,
+        'storeUrl'                  => '{{name}} must not be empty and valid URL',
+        'storeEmail'                => '{{name}} must not be empty and valid email',
+        'storePhone'                => $stringValidationMessage,
+        'storeCountryCode'          ,
+        'storeCity'                 => $stringValidationMessage,
+        'storeAddress'              => $stringValidationMessage,
+        'storePostalCode'           => '{{name}} must not be empty and valid Indonesia postal code',
+        'apiKey'                    => $stringValidationMessage,
+        'apiSecret'                 => $stringValidationMessage,
+        'environment'               ,
+        'defaultOrderPendingStatus' => $stringValidationMessage,
+        'defaultOrderSuccessStatus' => $stringValidationMessage,
+        'defaultOrderFailedStatus'  => $stringValidationMessage,
+        'status'                    ,
+        'sortOrder'                 => '{{name}} must not be empty and contain number',
+      ]);
+
+      $frontendValidationMessages = [];
+
+      $frontendConfigMapping = IndodanaConstant::getFrontendConfigMapping();
+
+      foreach ($exceptionValidationMessages as $configKey => $exceptionValidationMessage) {
+        if (empty($exceptionValidationMessage)) {
+          continue;
+        }
+
+        // We haven't handled if the value of configKey is empty
+        $frontendConfigValue = $frontendConfigMapping[$configKey];
+
+        $frontendValidationMessage = str_replace(
+          $configKey,
+          $frontendConfigValue,
+          $exceptionValidationMessage
+        );
+
+        $frontendValidationMessages[$configKey] = $frontendValidationMessage;
+      }
+
+      return [
+        'errors' => $frontendValidationMessages
+      ];
+    }
   }
 
   private function setSeller(array $args = []) {
@@ -316,5 +399,48 @@ class IndodanaService
   public function getAuthToken()
   {
     return $this->indodana->getAuthToken();
+  }
+
+  public static function getSentryDsn($pluginName)
+  {
+    $namespace = '[Common-Checkout]';
+
+    $sentryDsn = IndodanaHelper::wrapIndodanaException(
+      function() use ($pluginName, $namespace){
+        $result = IndodanaHttpClient::get(
+          Indodana::PRODUCTION_URL . '/public/v1/merchant-plugin/sentry',
+          [],
+          [ 'pluginName' => $pluginName ]
+        );
+
+        return $result['data']['sentryDsn'];
+      },
+      function() {
+        throw new Exception('Invalid Sentry configuration.');
+      },
+      $namespace
+    );
+
+    return $sentryDsn;
+  }
+
+  public function isValidAuthorization($authorizationHeader) {
+    $bearerToken = $this->getBearerToken($authorizationHeader);
+
+    return (
+      !empty($bearerToken) &&
+      $this->indodana->validateAccessToken($bearerToken)
+    );
+  }
+
+  private function getBearerToken($authorizationHeader)
+  {
+    if (!empty($authorizationHeader)) {
+      if (preg_match('/Bearer\s(\S+)/', $authorizationHeader, $matches)) {
+        return $matches[1];
+      }
+    }
+
+    return null;
   }
 }

@@ -20,6 +20,29 @@ opencart-v1-log-tail:
 
 
 
+# Opencart v2
+# ----------------------------------
+
+opencartv2_build_dir=.build/opencartv2/dev/opencartv2/upload
+opencartv2_dir = ./opencartv2
+
+opencartv2-install-dependencies:
+	cd ./opencartv2/ && composer install
+
+opencartv2-build:
+	./cli/svctl build opencartv2 dev
+
+opencartv2-test:
+	$(opencartv2_dir)/vendor/bin/
+
+opencartv2-serve: opencartv2-build
+	php5.6 -S localhost:6102 -t $(opencartv2_build_dir)
+
+opencartv2-log-tail:
+	tail -f ./$(opencartv2_build_dir)/system/library/indodana/log/indodana.log
+
+
+
 # Woocommerce
 # ----------------------------------
 woocommerce_build_dir=.build/woocommerce/dev/woocommerce/upload

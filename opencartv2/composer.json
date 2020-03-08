@@ -1,0 +1,22 @@
+{
+  "name": "indodana/indodana-paylater-opencartv2",
+  "authors": [
+    {
+      "name": "Indodana",
+      "email": "dev@indodana.com"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../packages/common",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
+  "require": {
+    "indodana/indodana-paylater-ecommerce-common": "@dev",
+    "sentry/sentry": "1.11.0"
+  }
+}

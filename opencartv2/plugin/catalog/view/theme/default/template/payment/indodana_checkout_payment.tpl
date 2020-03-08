@@ -1,16 +1,16 @@
-<div id='content'>
-  <h2><?=$textPaymentOptions ?></h2>
+<div>
+  <h2><?=$title ?></h2>
   <input type='hidden' value='<?=$orderData; ?>' id='orderData'/>
   <input type='hidden' value='<?=$authorization; ?>' id='authorization'/>
   <input type='hidden' value='<?=$merchantConfirmPaymentUrl; ?>' id='merchantConfirmPaymentUrl' />
   <input type='hidden' value='<?=$indodanaBaseUrl; ?>' id='indodanaBaseUrl' />
-  <div class='checkout-product'>
-    <table>
+  <div class='table-responsive'>
+    <table class="table table-bordered table-hover">
       <thead><tr>
         <td></td>
-        <td><?=$textPaymentOptionsName ?></td>
-        <td><?=$textPaymentOptionsMonthlyInstallment ?></td>
-        <td><?=$textPaymentOptionsTotalAmount ?></td>
+        <td><?=$text_payment_options_name ?></td>
+        <td><?=$text_payment_options_monthly_installment ?></td>
+        <td><?=$text_payment_options_total_amount ?></td>
       </tr></thead>
       <tbody>
         <?php foreach($paymentOptions as $paymentOption) { ?>
@@ -23,8 +23,10 @@
         <?php } ?>
       </tbody>
     </table>
-    <div class='right'>
-      <input type='button' style='float: right;' value='<?=$textButtonConfirm; ?>' id='confirmButton' class='button'/>
+    <div class='buttons'>
+      <div class="pull-right">
+        <input type='button' value='<?=$text_button_confirm; ?>' id='confirmButton' class='btn btn-primary'/>
+      </div>
     </div>
   </div>
 </div>
@@ -66,7 +68,6 @@ function getAuthorizationHeader() {
 function redirectToCheckoutUrl(paymentOptionId, paymentData) {
   var data = paymentData;
   var baseUrl = $('#indodanaBaseUrl').val();
-  console.log(baseUrl);
   data.paymentType = paymentOptionId;
   $.ajax({
     url: `${baseUrl}/merchant/v1/checkout_url`,
@@ -84,4 +85,3 @@ function redirectToCheckoutUrl(paymentOptionId, paymentData) {
     }
   });
 }
-</script>
