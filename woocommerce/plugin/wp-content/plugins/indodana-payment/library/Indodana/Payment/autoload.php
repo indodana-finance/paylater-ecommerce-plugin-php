@@ -5,7 +5,12 @@ define('INDODANA_PLUGIN_ROOT_DIR', __DIR__ . DIRECTORY_SEPARATOR);
 define('INDODANA_LIB_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR);
 define('INDODANA_LOG_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR);
 
-Sentry\init(['dsn' => 'https://aaaf792679a149128b5a2cf1441684b4@sentry.io/1892625' ]);
+// Initialize Sentry
+use IndodanaCommon\IndodanaService;
+
+$sentryDsn = IndodanaService::getSentryDsn('WOOCOMMERCE');
+
+Sentry\init(['dsn' => $sentryDsn ]);
 
 spl_autoload_register(function($className) {
     static $classMap;

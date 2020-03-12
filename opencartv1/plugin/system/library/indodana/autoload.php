@@ -4,7 +4,11 @@ require_once(__DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'a
 define('INDODANA_LIB_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR);
 define('INDODANA_LOG_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR);
 
-$client = new Raven_Client('https://0428e82d300d49928120905613b936e2@sentry.io/1864574');
+use IndodanaCommon\IndodanaService;
+
+$sentryDsn = IndodanaService::getSentryDsn('OPENCARTV1');
+
+$client = new Raven_Client($sentryDsn);
 $error_handler = new Raven_ErrorHandler($client);
 $error_handler->registerExceptionHandler();
 $error_handler->registerErrorHandler();

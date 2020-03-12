@@ -8,8 +8,11 @@ define('INDODANA_LIB_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEP
 define('INDODANA_LOG_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR);
 
 // Initialize Sentry
-$client = new Raven_Client('https://1c802ead2db94064aea8611b55cf536f@sentry.io/3073180');
+use IndodanaCommon\IndodanaService;
 
+$sentryDsn = IndodanaService::getSentryDsn('MAGENTO1');
+
+$client = new Raven_Client($sentryDsn);
 $error_handler = new Raven_ErrorHandler($client);
 $error_handler->registerExceptionHandler();
 $error_handler->registerErrorHandler();
