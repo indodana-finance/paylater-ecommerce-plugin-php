@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d3a9be5deecf45bc2e3984080021dcf",
+    "content-hash": "d38da6cf1c491f8f138f97edb3994d45",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -299,14 +299,14 @@
         },
         {
             "name": "indodana/indodana-paylater-ecommerce-common",
-            "version": "dev-T22384-indodana_common",
+            "version": "dev-finalize_common",
             "dist": {
                 "type": "path",
                 "url": "../packages/common",
-                "reference": "94fc1b6c646610b757509a1d97bc467e98a03ca6"
+                "reference": "c264dd5c8f17682cb4092023b862da8773b2e534"
             },
             "require": {
-                "stvyang-i/indodana-paylater-sdk-php": "0.2.0"
+                "indodana/indodana-paylater-sdk": "1.0.0-RC1"
             },
             "type": "library",
             "autoload": {
@@ -317,6 +317,44 @@
             "transport-options": {
                 "symlink": true
             }
+        },
+        {
+            "name": "indodana/indodana-paylater-sdk",
+            "version": "1.0.0-RC1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/indodana/indodana-paylater-sdk-php.git",
+                "reference": "b38d612fe3c91c27ff36ae04ecf3a1bfb2d3ae53"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/indodana/indodana-paylater-sdk-php/zipball/b38d612fe3c91c27ff36ae04ecf3a1bfb2d3ae53",
+                "reference": "b38d612fe3c91c27ff36ae04ecf3a1bfb2d3ae53",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.6|^7.0",
+                "respect/validation": "^1.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Indodana\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Indodana",
+                    "email": "dev@indodana.com"
+                },
+                {
+                    "name": "Steven Yang",
+                    "email": "syang@indodana.com"
+                }
+            ],
+            "description": "Indodana Paylater SDK for PHP that provides merchant integration functionalities",
+            "time": "2020-03-10T08:05:30+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",
@@ -371,35 +409,34 @@
         },
         {
             "name": "ocramius/package-versions",
-            "version": "1.5.1",
+            "version": "1.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Ocramius/PackageVersions.git",
-                "reference": "1d32342b8c1eb27353c8887c366147b4c2da673c"
+                "reference": "44af6f3a2e2e04f2af46bcb302ad9600cba41c7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Ocramius/PackageVersions/zipball/1d32342b8c1eb27353c8887c366147b4c2da673c",
-                "reference": "1d32342b8c1eb27353c8887c366147b4c2da673c",
+                "url": "https://api.github.com/repos/Ocramius/PackageVersions/zipball/44af6f3a2e2e04f2af46bcb302ad9600cba41c7d",
+                "reference": "44af6f3a2e2e04f2af46bcb302ad9600cba41c7d",
                 "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^1.0.0",
-                "php": "^7.3.0"
+                "php": "^7.1.0"
             },
             "require-dev": {
-                "composer/composer": "^1.8.6",
-                "doctrine/coding-standard": "^6.0.0",
+                "composer/composer": "^1.6.3",
+                "doctrine/coding-standard": "^5.0.1",
                 "ext-zip": "*",
-                "infection/infection": "^0.13.4",
-                "phpunit/phpunit": "^8.2.5",
-                "vimeo/psalm": "^3.4.9"
+                "infection/infection": "^0.7.1",
+                "phpunit/phpunit": "^7.5.17"
             },
             "type": "composer-plugin",
             "extra": {
                 "class": "PackageVersions\\Installer",
                 "branch-alias": {
-                    "dev-master": "1.6.x-dev"
+                    "dev-master": "2.0.x-dev"
                 }
             },
             "autoload": {
@@ -418,7 +455,7 @@
                 }
             ],
             "description": "Composer plugin that provides efficient querying for installed package versions (no runtime IO)",
-            "time": "2019-07-17T15:49:50+00:00"
+            "time": "2019-11-15T16:17:10+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -1177,16 +1214,16 @@
         },
         {
             "name": "sentry/sentry",
-            "version": "2.3.1",
+            "version": "2.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/getsentry/sentry-php.git",
-                "reference": "6d736f8cefa989f6171e30e1d1bfa214f7f5ab58"
+                "reference": "b3e71feb32f1787b66a3b4fdb8686972e9c7ba94"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/getsentry/sentry-php/zipball/6d736f8cefa989f6171e30e1d1bfa214f7f5ab58",
-                "reference": "6d736f8cefa989f6171e30e1d1bfa214f7f5ab58",
+                "url": "https://api.github.com/repos/getsentry/sentry-php/zipball/b3e71feb32f1787b66a3b4fdb8686972e9c7ba94",
+                "reference": "b3e71feb32f1787b66a3b4fdb8686972e9c7ba94",
                 "shasum": ""
             },
             "require": {
@@ -1258,44 +1295,11 @@
                 "logging",
                 "sentry"
             ],
-            "time": "2020-01-23T09:40:22+00:00"
-        },
-        {
-            "name": "stvyang-i/indodana-paylater-sdk-php",
-            "version": "0.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/stvyang/indodana-paylater-sdk.git",
-                "reference": "73571687b5a3c0bc6e611d53305282af48ffe788"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/stvyang/indodana-paylater-sdk/zipball/73571687b5a3c0bc6e611d53305282af48ffe788",
-                "reference": "73571687b5a3c0bc6e611d53305282af48ffe788",
-                "shasum": ""
-            },
-            "require": {
-                "respect/validation": "^1.1"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Indodana\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "authors": [
-                {
-                    "name": "Steven Yang",
-                    "email": "syang@indodana.com"
-                }
-            ],
-            "description": "Indodana Paylater SDK for PHP that provides merchant integration functionalities",
-            "time": "2020-02-26T08:04:50+00:00"
+            "time": "2020-03-06T09:24:53+00:00"
         },
         {
             "name": "symfony/options-resolver",
-            "version": "v5.0.4",
+            "version": "v5.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/options-resolver.git",
@@ -1468,7 +1472,7 @@
     ],
     "packages-dev": [],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "RC",
     "stability-flags": {
         "indodana/indodana-paylater-ecommerce-common": 20
     },

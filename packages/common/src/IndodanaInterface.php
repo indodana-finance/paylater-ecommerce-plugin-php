@@ -4,9 +4,8 @@ namespace IndodanaCommon;
 
 interface IndodanaInterface
 {
-  // Transaction
-  // Could be cart or order. But for communication purposes, let's use order
-
+  // For transactionDetails payload. Could be from cart or order
+  // ------------------------------
   public function getTotalAmount($order);
 
   public function getTotalDiscountAmount($order);
@@ -18,7 +17,7 @@ interface IndodanaInterface
   public function getItems($order);
 
   // Others
-
+  // ------------------------------
   public function getCustomerDetails($order);
 
   public function getBillingAddress($order);

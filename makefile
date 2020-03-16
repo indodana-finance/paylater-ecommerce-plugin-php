@@ -13,7 +13,7 @@ opencart-v1-test:
 	$(opencart_v1_dir)/vendor/bin/
 
 opencart-v1-serve: opencart-v1-build
-	php5.6 -S localhost:6011 -t $(opencart_v1_build_dir)
+	php5.6 -S localhost:6101 -t $(opencart_v1_build_dir)
 
 opencart-v1-log-tail:
 	tail -f ./$(opencart_v1_build_dir)/system/library/indodana/log/indodana.log
@@ -58,7 +58,7 @@ woocommerce-test:
 	$(woocommerce)/vendor/bin/
 
 woocommerce-serve: woocommerce-build
-	php7.2 -S localhost:6021 -t $(woocommerce_build_dir)
+	php7.2 -S localhost:6201 -t $(woocommerce_build_dir)
 
 woocommerce-log-tail:
 	tail -f ./$(woocommerce_build_dir)/wp-content/plugins/indodana-payment/library/Indodana/Payment/log/info.log
@@ -80,7 +80,7 @@ magento1-test:
 	$(magento1_dir)/vendor/bin/
 
 magento1-serve: magento1-build
-	php5.6 -S localhost:6031 -t $(magento1_build_dir)
+	php5.6 -S localhost:6301 -t $(magento1_build_dir)
 
 magento1-log-tail:
 	tail -f ./$(magento1_build_dir)/lib/Indodana/Payment/log/info.log

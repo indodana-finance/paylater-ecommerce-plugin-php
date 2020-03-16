@@ -2,8 +2,6 @@
 
 namespace IndodanaCommon;
 
-// require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
-
 use Exception;
 use Respect\Validation\Validator;
 use Respect\Validation\Exceptions\NestedValidationException;
@@ -43,7 +41,7 @@ class IndodanaService
 
         IndodanaHelper::setIfExists($indodanaConfig, $config, 'apiKey');
         IndodanaHelper::setIfExists($indodanaConfig, $config, 'apiSecret');
-        IndodanaHelper::setIfExists($indodanaConfig, $config, 'isProduction');
+        IndodanaHelper::setIfExists($indodanaConfig, $config, 'environment');
 
         $this->indodana = new Indodana($indodanaConfig);
 
@@ -63,6 +61,21 @@ class IndodanaService
     );
   }
 
+  private function setSeller(array $args = []) {
+    $validator = Validator::create()
+      ->key('url', Validator::stringType()->notEmpty());
+
+    $validationResult = RespectValidationHelper::validate($validator, $args);
+
+    if (!$validationResult->isSuccess()) {
+      throw new IndodanaCommonException($validationResult->printErrorMessages());
+    }
+
+    $this->seller = array_merge($args, [
+      'id' => md5($args['url'])
+    ]);
+  }
+
   public static function validateConfiguration(array $config = [])
   {
     $validator = Validator::create()
@@ -73,10 +86,10 @@ class IndodanaService
       ->key('storeCountryCode', Validator::in(IndodanaConstant::getCountryCodes()))
       ->key('storeCity', Validator::stringType()->notEmpty())
       ->key('storeAddress', Validator::stringType()->notEmpty())
-      ->key('storePostalCode', Validator::postalCode('ID')->notEmpty()) // We only validate Indonesia postal code atm
+      ->key('storePostalCode', Validator::postalCode('ID')->notEmpty()) // We only validate Indonesia postal code atm (5 digits)
       ->key('apiKey', Validator::stringType()->notEmpty())
       ->key('apiSecret', Validator::stringType()->notEmpty())
-      ->key('environment', Validator::in(IndodanaConstant::getEnvironmentKeys()))
+      ->key('environment', Validator::in(IndodanaConstant::getEnvironments()))
       ->key('defaultOrderPendingStatus', Validator::stringType()->notEmpty())
       ->key('defaultOrderSuccessStatus', Validator::stringType()->notEmpty())
       ->key('defaultOrderFailedStatus', Validator::stringType()->notEmpty())
@@ -143,19 +156,15 @@ class IndodanaService
     }
   }
 
-  private function setSeller(array $args = []) {
-    $validator = Validator::create()
-      ->key('url', Validator::stringType()->notEmpty());
-
-    $validationResult = RespectValidationHelper::validate($validator, $args);
-
-    if (!$validationResult->isSuccess()) {
-      throw new IndodanaCommonException($validationResult->printErrorMessages());
-    }
-
-    $this->seller = array_merge($args, [
-      'id' => md5($args['url'])
-    ]);
+  private function getShippingFee($shippingAmount) {
+    return [
+      'id' => 'shippingfee',
+      'url' => '',
+      'name' => 'Shipping Fee',
+      'price' => (float) abs($shippingAmount),
+      'type' => '',
+      'quantity' => 1
+    ];
   }
 
   private function getTaxFee($taxAmount) {
@@ -164,17 +173,6 @@ class IndodanaService
       'url' => '',
       'name' => 'Tax Fee',
       'price' => (float) abs($taxAmount),
-      'type' => '',
-      'quantity' => 1
-    ];
-  }
-
-  private function getShippingFee($shippingAmount) {
-    return [
-      'id' => 'shippingfee',
-      'url' => '',
-      'name' => 'Shipping Fee',
-      'price' => (float) abs($shippingAmount),
       'type' => '',
       'quantity' => 1
     ];
@@ -207,7 +205,7 @@ class IndodanaService
       $discount
     ]);
 
-    // Add sellerId for each item
+    // Add seller id for each item
     foreach($items as &$item) {
       $item['parentType'] = 'SELLER';
       $item['parentId'] = $this->seller['id'];
@@ -238,8 +236,9 @@ class IndodanaService
       return $address;
     }
 
-    // Set postalCode default value
     $clonedAddress = $address;
+
+    // Set postalCode default value
     $clonedAddress['postalCode'] = '00000';
 
     return $clonedAddress;
@@ -362,8 +361,10 @@ class IndodanaService
 
     $payload['transactionDetails'] = $transactionDetails;
 
+    IndodanaHelper::setIfExists($payload, $input, 'customerDetails');
+
     // For merchant plugin, seller should be only 1
-    $payload['sellers'] = [$this->seller];
+    $payload['sellers'] = [ $this->seller ];
 
     // Set billing address with default postalCode if not exists
     $billingAddress = isset($input['billingAddress']) ? $input['billingAddress'] : [];
@@ -373,7 +374,6 @@ class IndodanaService
     $shippingAddress = isset($input['shippingAddress']) ? $input['shippingAddress'] : [];
     $payload['shippingAddress'] = $this->getAddressWithPostalCode($shippingAddress);
 
-    IndodanaHelper::setIfExists($payload, $input, 'customerDetails');
     IndodanaHelper::setIfExists($payload, $input, 'paymentType');
     IndodanaHelper::setIfExists($payload, $input, 'approvedNotificationUrl');
     IndodanaHelper::setIfExists($payload, $input, 'cancellationRedirectUrl');
@@ -401,6 +401,26 @@ class IndodanaService
     return $this->indodana->getAuthToken();
   }
 
+  public function isValidAuthToken($authToken) {
+    $credentials = $this->getAuthCredentials($authToken);
+
+    return (
+      !empty($credentials) &&
+      $this->indodana->validateAuthCredentials($credentials)
+    );
+  }
+
+  private function getAuthCredentials($authToken)
+  {
+    if (!empty($authToken)) {
+      if (preg_match('/Bearer\s(\S+)/', $authToken, $matches)) {
+        return $matches[1];
+      }
+    }
+
+    return null;
+  }
+
   public static function getSentryDsn($pluginName)
   {
     $namespace = '[Common-Checkout]';
@@ -408,7 +428,7 @@ class IndodanaService
     $sentryDsn = IndodanaHelper::wrapIndodanaException(
       function() use ($pluginName, $namespace){
         $result = IndodanaHttpClient::get(
-          Indodana::PRODUCTION_URL . '/public/v1/merchant-plugin/sentry',
+          Indodana::PRODUCTION_BASE_URL . '/public/v1/merchant-plugin/sentry',
           [],
           [ 'pluginName' => $pluginName ]
         );
@@ -422,25 +442,5 @@ class IndodanaService
     );
 
     return $sentryDsn;
-  }
-
-  public function isValidAuthorization($authorizationHeader) {
-    $bearerToken = $this->getBearerToken($authorizationHeader);
-
-    return (
-      !empty($bearerToken) &&
-      $this->indodana->validateAccessToken($bearerToken)
-    );
-  }
-
-  private function getBearerToken($authorizationHeader)
-  {
-    if (!empty($authorizationHeader)) {
-      if (preg_match('/Bearer\s(\S+)/', $authorizationHeader, $matches)) {
-        return $matches[1];
-      }
-    }
-
-    return null;
   }
 }

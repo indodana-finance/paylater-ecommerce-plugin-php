@@ -6,6 +6,6 @@
     }
   },
   "require": {
-    "stvyang-i/indodana-paylater-sdk-php": "^0.3.0"
+    "indodana/indodana-paylater-sdk": "1.0.0-RC1"
   }
 }

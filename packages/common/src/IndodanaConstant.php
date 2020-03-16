@@ -2,10 +2,12 @@
 
 namespace IndodanaCommon;
 
+use Indodana\Indodana;
+
 class IndodanaConstant
 {
-  const SANDBOX = 'SANDBOX';
-  const PRODUCTION = 'PRODUCTION';
+  const SANDBOX = Indodana::SANDBOX_ENVIRONMENT;
+  const PRODUCTION = Indodana::PRODUCTION_ENVIRONMENT;
 
   const DISABLED = 'DISABLED';
   const ENABLED = 'ENABLED';
@@ -45,11 +47,13 @@ class IndodanaConstant
     'IDN' => 'IDN'
   ];
 
-  public static function getCountryCodeMapping() {
+  public static function getCountryCodeMapping()
+  {
     return self::countryCodeMapping;
   }
 
-  public static function getCountryCodes() {
+  public static function getCountryCodes()
+  {
     return array_keys(self::countryCodeMapping);
   }
 
@@ -58,14 +62,14 @@ class IndodanaConstant
     return self::frontendConfigMapping;
   }
 
-  public static function getConfigKeys()
-  {
-    return array_keys(self::frontendConfigMapping);
-  }
-
   public static function getEnvironmentMapping()
   {
     return self::environmentMapping;
+  }
+
+  public static function getEnvironments()
+  {
+    return array_keys(self::environmentMapping);
   }
 
   public static function getStatusMapping()
@@ -73,13 +77,8 @@ class IndodanaConstant
     return self::statusMapping;
   }
 
-  public static function getStatusKeys()
+  public static function getSuccessTransactionStatus()
   {
-    return array_keys(self::statusMapping);
-  }
-
-  public static function getEnvironmentKeys()
-  {
-    return array_keys(self::environmentMapping);
+    return [ 'INITIATED', 'PAID' ];
   }
 }

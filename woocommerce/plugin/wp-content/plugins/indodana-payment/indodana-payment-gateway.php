@@ -3,8 +3,12 @@
 require_once INDODANA_PLUGIN_ROOT_DIR . 'autoload.php';
 
 use Respect\Validation\Validator;
-use IndodanaCommon\IndodanaService;
+use IndodanaCommon\IndodanaConstant;
 use IndodanaCommon\IndodanaInterface;
+use IndodanaCommon\IndodanaHelper;
+use IndodanaCommon\IndodanaLogger;
+use IndodanaCommon\IndodanaService;
+use IndodanaCommon\MerchantResponse;
 
 class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterface
 {
@@ -408,7 +412,6 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     }
 
     return $value;
-
   }
 
   public function validate_store_name_field($key, $value) {
@@ -602,21 +605,21 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
 
     // DEV MODE
     // $approved_notification_url = add_query_arg(array(
-      // 'wc-api'    => 'WC_Indodana_Gateway',
+    // 'wc-api'    => 'WC_Indodana_Gateway',
     // ), 'https://example.com');
 
     // $cancellation_redirect_url = add_query_arg(array(
-      // 'wc-api'    => 'WC_Indodana_Gateway',
-      // 'method'    => 'cancel',
-      // 'order_id'  => $order_id
+    // 'wc-api'    => 'WC_Indodana_Gateway',
+    // 'method'    => 'cancel',
+    // 'order_id'  => $order_id
     // ), 'https://example.com');
 
     // $back_to_store_url = add_query_arg(array(
-      // 'wc-api'    => 'WC_Indodana_Gateway',
-      // 'method'    => 'complete',
-      // 'order_id'  => $order_id
+    // 'wc-api'    => 'WC_Indodana_Gateway',
+    // 'method'    => 'complete',
+    // 'order_id'  => $order_id
     // ), 'https://example.com');
-    
+
     $checkout_url = $this->indodana_service->checkout([
       'merchantOrderId'         => $order_id,
       'totalAmount'             => $this->getTotalAmount($cart),
@@ -642,11 +645,15 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
   }
 
   public function indodana_callback() {
+    // Approve notification url
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-      $this->handle_transaction_approved();
+      $this->handle_approved_transaction();
+
       exit();
-    } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-      if (!isset($_GET['method'])) {
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+      if (!isset($_GET['method']) && !isset($_GET['order_id'])) {
         return;
       }
 
@@ -654,55 +661,88 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       $order_id = $_GET['order_id'];
 
       switch ($method) {
-      case 'cancel':
-        $this->handle_redirect_due_to_cancellation($order_id);
-        break;
-      case 'complete':
-        $this->handle_redirect_due_to_completion($order_id);
-        break;
-      default:
-        return;
+        case 'cancel': {
+          $this->handle_redirect_cancellation($order_id); // Cancellation redirect url
+          break;
+        }
+        case 'complete': {
+          $this->handle_redirect_completion($order_id); // Back to store url
+          break;
+        }
       }
     }
   }
 
-  private function handle_transaction_approved() {
-    $post_data = IndodanaHelper::getJsonPost();
-    IndodanaLogger::log(IndodanaLogger::INFO, json_encode($post_data));
+  private function handle_approved_transaction() {
+    $namespace = '[Woocommerce-handle_approved_transaction]';
 
-    $order_id = $post_data['merchantOrderId'];
-    $order = new WC_Order($order_id);
+    $request_headers = getallheaders();
 
-    $transactionStatus = $post_data['transactionStatus'];
-
-    switch($transactionStatus) {
-    case 'INITIATED':
-    // PAID will be added in the future by our API,
-    // TODO: Things like this should provided by our http API,
-    // for example: succesful transaction statuses should be obtained from api calls
-    case 'PAID':
-      $order->payment_complete();
-      break;
-    default:
-      $order->update_status('on-hold');
-    }
-
-    header('Content-type: application/json');
-    $response = array(
-      'status'    => 'OK',
-      'message'   => 'Payment status updated'
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request headers: %s',
+        $namespace,
+        json_encode($request_headers)
+      )
     );
 
-    echo json_encode($response);
+    $auth_token = isset($request_headers['Authorization']) ? $request_headers['Authorization'] : '';
+
+    $is_valid_authorization = $this->indodana_service->isValidAuthToken($auth_token);
+
+    if (!$is_valid_authorization) {
+      return MerchantResponse::printInvalidRequestAuthResponse($namespace);
+    }
+
+    $request_body = IndodanaHelper::getRequestBody();
+
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($request_body)
+      )
+    );
+
+    if (!isset($request_body['transactionStatus']) || !isset($request_body['merchantOrderId'])) {
+      return MerchantResponse::printInvalidRequestBodyResponse($namespace);
+    }
+
+    $transaction_status = $request_body['transactionStatus'];
+    $order_id = $request_body['merchantOrderId'];
+    $order = wc_get_order($order_id);
+
+    if (!$order) {
+      return MerchantResponse::printNotFoundOrderResponse(
+        $order_id,
+        $namespace
+      );
+    }
+
+    if (!in_array($transaction_status, IndodanaConstant::getSuccessTransactionStatus())) {
+      return MerchantResponse::printInvalidTransactionStatusResponse(
+        $transaction_status,
+        $order_id,
+        $namespace
+      );
+    }
+
+    $order->payment_complete();
+
+    return MerchantResponse::printSuccessResponse($namespace);
   }
 
-  private function handle_redirect_due_to_cancellation($order_id) {
+  private function handle_redirect_cancellation($order_id) {
     $order = new WC_Order($order_id);
+
     wp_redirect($order->get_checkout_payment_url(false));
   }
 
-  private function handle_redirect_due_to_completion($order_id) {
+  private function handle_redirect_completion($order_id) {
     $order = new WC_Order($order_id);
+
     wp_redirect($order->get_checkout_order_received_url());
   }
 }

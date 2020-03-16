@@ -2,8 +2,16 @@
   "name": "indodana/indodana-paylater-woocommerce",
   "authors": [
     {
+      "name": "Indodana",
+      "email": "dev@indodana.com"
+    },
+    {
       "name": "Sendy Halim",
       "email": "sendyhalim93@gmail.com"
+    },
+    {
+      "name": "Steven Yang",
+      "email": "syang@indodana.com"
     }
   ],
   "repositories": [
@@ -15,6 +23,7 @@
       }
     }
   ],
+  "minimum-stability": "RC",
   "require": {
     "indodana/indodana-paylater-ecommerce-common": "@dev",
     "respect/validation": "^1.1",

@@ -62,7 +62,7 @@ class IndodanaHelper
     }
   }
 
-  public static function getPostData()
+  public static function getRequestBody()
   {
     $postData = file_get_contents('php://input');
 

@@ -2,7 +2,12 @@
 
 require_once Mage::getBaseDir('lib') . '/Indodana/Payment/autoload.php';
 
+use IndodanaCommon\IndodanaHelper;
+use IndodanaCommon\IndodanaConstant;
+use IndodanaCommon\IndodanaInterface;
 use IndodanaCommon\IndodanaLogger;
+use IndodanaCommon\IndodanaService;
+use IndodanaCommon\MerchantResponse;
 
 /*
     You might realize that this class has a very similar function or APIs to the one in Helper
@@ -22,28 +27,73 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
       return;
     }
 
-    $postData = IndodanaHelper::getJsonPost();
-    IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
+    $namespace = '[MagentoV1-notify]';
 
-    $orderId = $postData['merchantOrderId'];
-    $this->handleApprovedTransaction($orderId);
+    $requestHeaders = getallheaders();
 
-    $response = array(
-      'status'    => 'OK',
-      'message'   => 'Payment status updated'
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request headers: %s',
+        $namespace,
+        json_encode($requestHeaders)
+      )
     );
 
-    header('Content-Type: application/json');
-    echo json_encode($response);
-  }
+    $authToken = isset($requestHeaders['Authorization']) ? $requestHeaders['Authorization'] : '';
 
-  private function handleApprovedTransaction($orderId) {
-    /* Load order by orderId */
+    $isValidAuthorization = Mage::helper('indodanapayment/transaction')
+      ->getIndodanaService()
+      ->isValidAuthToken($authToken);
+
+    if (!$isValidAuthorization) {
+      return MerchantResponse::printInvalidRequestAuthResponse($namespace);
+    }
+
+    $requestBody = IndodanaHelper::getRequestBody();
+
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($requestBody)
+      )
+    );
+
+    if (!isset($requestBody['transactionStatus']) || !isset($requestBody['merchantOrderId'])) {
+      return MerchantResponse::printInvalidRequestBodyResponse($namespace);
+    }
+
+    $transactionStatus = $requestBody['transactionStatus'];
+    $orderId = $requestBody['merchantOrderId'];
+
     $order = Mage::getModel('sales/order');
-
     $order->load($orderId);
 
-    /* Save transaction */
+    if (!$order) {
+      return MerchantResponse::printNotFoundOrderResponse(
+        $orderId,
+        $namespace
+      );
+    }
+
+    if (!in_array($transactionStatus, IndodanaConstant::getSuccessTransactionStatus())) {
+      return MerchantResponse::printInvalidTransactionStatusResponse(
+        $transactionStatus,
+        $orderId,
+        $namespace
+      );
+    }
+
+    $this->handleApprovedTransaction($order);
+
+    return MerchantResponse::printSuccessResponse($namespace);
+  }
+
+  private function handleApprovedTransaction(&$order) {
+    // Save transaction
+    // --------------------
     $invoice = $order->prepareInvoice()
        ->setTransactionId($order->getId())
        ->addComment('Payment successfully processed by Indodana.')
@@ -56,7 +106,8 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
 
     $transaction->save();
 
-    /* Mark order as success */
+    // Mark order as success
+    // --------------------
     $statusIfSuccess = Mage::helper('indodanapayment')->getSuccessfulTransactionStatus();
 
     $order->setStatus($statusIfSuccess);
@@ -73,8 +124,8 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
       return;
     }
 
-    $postData = IndodanaHelper::getJsonPost();
-    IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
+    $requestBody = IndodanaHelper::getRequestBody();
+    IndodanaLogger::log(IndodanaLogger::INFO, json_encode($requestBody));
 
     $response = array(
       'success'   => 'OK'

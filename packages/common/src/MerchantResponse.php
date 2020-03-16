@@ -2,45 +2,88 @@
 
 namespace IndodanaCommon;
 
+use IndodanaCommon\IndodanaLogger;
+
 class MerchantResponse
 {
-  public static function createSuccessResponse()
+  private static function printResponse($response, $namespace)
   {
-    return [
-      'status'  => 'OK',
-      'message' => 'Payment status updated'
-    ];
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Response: %s',
+        $namespace,
+        json_encode($response)
+      )
+    );
+
+    header('Content-type: application/json');
+
+    echo json_encode($response);
   }
 
-  public static function createInvalidAuthResponse()
+  public static function printSuccessResponse($namespace)
   {
-    return [
-      'status'  => 'REJECTED',
-      'message' => 'Invalid authorization header'
-    ];
+    return self::printResponse(
+      [
+        'status'  => 'OK',
+        'message' => 'OK'
+      ],
+      $namespace
+    );
   }
 
-  public static function createInvalidRequestBodyResponse()
+  public static function printInvalidRequestAuthResponse($namespace)
   {
-    return [
-      'status'  => 'REJECTED',
-      'message' => 'Invalid request body'
-    ];
+    return self::printResponse(
+      [
+        'status'  => 'REJECTED',
+        'message' => 'Invalid request authorization'
+      ],
+      $namespace
+    );
   }
 
-  public static function createNotFoundOrderResponse($order_id)
+  public static function printInvalidRequestBodyResponse($namespace)
   {
-    return [
-      'status'  => 'REJECTED',
-      'message' => "Order Not found for merchant order id: ${order_id}"
-    ];
+    return self::printResponse(
+      [
+        'status'  => 'REJECTED',
+        'message' => 'Invalid request body'
+      ],
+      $namespace
+    );
   }
 
-  public static function createNotFoundOrderStatusResponse($order_id)
+  public static function printNotFoundOrderResponse($order_id, $namespace)
   {
-    return [
-      'status'  => 'REJECTED',
-      'message' => "Status not found for merchant order id: ${order_id}"
-    ];
+    return self::printResponse(
+      [
+        'status'  => 'REJECTED',
+        'message' => "Order not found for merchant order id: ${order_id}"
+      ],
+      $namespace
+    );
+  }
+
+  public static function printMissingOrderStatusResponse($order_id, $namespace)
+  {
+    return self::printResponse(
+      [
+        'status'  => 'REJECTED',
+        'message' => "Order status is missing for merchant order id: ${order_id}"
+      ],
+      $namespace
+    );
+  }
+
+  public static function printInvalidTransactionStatusResponse($transaction_status, $order_id, $namespace) {
+    return self::printResponse(
+      [
+        'status'  => 'REJECTED',
+        'message' => "Invalid transaction status: ${transaction_status} for merchant order id: ${order_id}"
+      ],
+      $namespace
+    );
   }
 }

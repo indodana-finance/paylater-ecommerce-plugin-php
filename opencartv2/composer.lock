@@ -4,18 +4,18 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "058ee955cc2646e81407aceb55aa69bf",
+    "content-hash": "523367710afddabaf2a9a9af96b32c81",
     "packages": [
         {
             "name": "indodana/indodana-paylater-ecommerce-common",
-            "version": "dev-T22384-launch_opencartv2",
+            "version": "dev-finalize_common",
             "dist": {
                 "type": "path",
                 "url": "../packages/common",
-                "reference": "3ae31bbe384318428deb0a557aa03554c339285e"
+                "reference": "c264dd5c8f17682cb4092023b862da8773b2e534"
             },
             "require": {
-                "stvyang-i/indodana-paylater-sdk-php": "^0.3.0"
+                "indodana/indodana-paylater-sdk": "1.0.0-RC1"
             },
             "type": "library",
             "autoload": {
@@ -26,6 +26,44 @@
             "transport-options": {
                 "symlink": true
             }
+        },
+        {
+            "name": "indodana/indodana-paylater-sdk",
+            "version": "1.0.0-RC1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/indodana/indodana-paylater-sdk-php.git",
+                "reference": "b38d612fe3c91c27ff36ae04ecf3a1bfb2d3ae53"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/indodana/indodana-paylater-sdk-php/zipball/b38d612fe3c91c27ff36ae04ecf3a1bfb2d3ae53",
+                "reference": "b38d612fe3c91c27ff36ae04ecf3a1bfb2d3ae53",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.6|^7.0",
+                "respect/validation": "^1.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Indodana\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Indodana",
+                    "email": "dev@indodana.com"
+                },
+                {
+                    "name": "Steven Yang",
+                    "email": "syang@indodana.com"
+                }
+            ],
+            "description": "Indodana Paylater SDK for PHP that provides merchant integration functionalities",
+            "time": "2020-03-10T08:05:30+00:00"
         },
         {
             "name": "respect/validation",
@@ -155,39 +193,6 @@
             "time": "2020-02-12T18:38:11+00:00"
         },
         {
-            "name": "stvyang-i/indodana-paylater-sdk-php",
-            "version": "0.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/stvyang/indodana-paylater-sdk.git",
-                "reference": "93ae2f1d5e065cafd1ad55960992bedba8dc1a70"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/stvyang/indodana-paylater-sdk/zipball/93ae2f1d5e065cafd1ad55960992bedba8dc1a70",
-                "reference": "93ae2f1d5e065cafd1ad55960992bedba8dc1a70",
-                "shasum": ""
-            },
-            "require": {
-                "respect/validation": "^1.1"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Indodana\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "authors": [
-                {
-                    "name": "Steven Yang",
-                    "email": "syang@indodana.com"
-                }
-            ],
-            "description": "Indodana Paylater SDK for PHP that provides merchant integration functionalities",
-            "time": "2020-02-26T17:59:31+00:00"
-        },
-        {
             "name": "symfony/polyfill-mbstring",
             "version": "v1.14.0",
             "source": {
@@ -249,7 +254,7 @@
     ],
     "packages-dev": [],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "RC",
     "stability-flags": {
         "indodana/indodana-paylater-ecommerce-common": 20
     },

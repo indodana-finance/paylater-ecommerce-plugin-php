@@ -15,10 +15,11 @@
       }
     }
   ],
+  "minimum-stability": "RC",
   "require": {
     "indodana/indodana-paylater-ecommerce-common": "@dev",
     "respect/validation": "^1.1",
-    "sentry/sentry": "1.11.0",
+    "sentry/sentry": "~1.11.0",
     "php-http/curl-client": "^2.1"
   },
   "require-dev": {

@@ -25,12 +25,11 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
       $apiKey = $this->config->get('indodana_checkout_api_key');
       $apiSecret = $this->config->get('indodana_checkout_api_secret');
       $environment = $this->config->get('indodana_checkout_environment');
-      $isProduction = $environment === 'PRODUCTION';
 
       $this->indodanaService = new IndodanaService([
         'apiKey'        => $apiKey,
         'apiSecret'     => $apiSecret,
-        'isProduction'  => $isProduction,
+        'environment'   => $environment,
         'seller'        => $this->getSeller(),
       ]);
     }
@@ -217,112 +216,103 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     ];
   }
 
-  private function printResponse($response) 
-  {
-    header('Content-type: application/json');
-
-    echo json_encode($response);
-  }
-
   public function notify()
   {
     $this->load->model('checkout/order');
 
-    $headers = getallheaders();
-    $authorizationHeader = isset($headers['Authorization']) ? $headers['Authorization'] : '';
+    $namespace = '[OpencartV2-notify]';
 
-    $isValidAuthorization = $this->getIndodanaService()->isValidAuthorization($authorizationHeader);
+    $request_headers = getallheaders();
 
-    if (!$isValidAuthorization) {
-      return $this->printResponse(MerchantResponse::createInvalidAuthResponse());
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request headers: %s',
+        $namespace,
+        json_encode($request_headers)
+      )
+    );
+
+    $auth_token = isset($request_headers['Authorization']) ? $request_headers['Authorization'] : '';
+
+    $is_valid_authorization = $this->getIndodanaService()->isValidAuthToken($auth_token);
+
+    if (!$is_valid_authorization) {
+      return MerchantResponse::printInvalidRequestAuthResponse($namespace);
     }
 
-    $postData = IndodanaHelper::getPostData();
-    IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
+    $request_body = IndodanaHelper::getRequestBody();
 
-    if (
-      !isset($postData['transactionStatus']) || 
-      !isset($postData['merchantOrderId'])
-    ) {
-      return $this->printResponse(MerchantResponse::createInvalidRequestBodyResponse());
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($request_body)
+      )
+    );
+
+    if (!isset($request_body['transactionStatus']) || !isset($request_body['merchantOrderId'])) {
+      return MerchantResponse::printInvalidRequestBodyResponse($namespace);
     }
 
-    $transaction_status = $postData['transactionStatus'];
-    $order_id = $postData['merchantOrderId'];
+    $transaction_status = $request_body['transactionStatus'];
+    $order_id = $request_body['merchantOrderId'];
     $order = $this->model_checkout_order->getOrder($order_id);
 
     if (!$order) {
-      return $this->printResponse(MerchantResponse::createNotFoundOrderResponse($order_id));
+      return MerchantResponse::printNotFoundOrderResponse(
+        $order_id,
+        $namespace
+      );
     }
 
-    if (empty($order['order_status'])) {
-      return $this->printResponse(MerchantResponse::createNotFoundOrderStatusResponse($order_id));
+    if (!in_array($transaction_status, IndodanaConstant::getSuccessTransactionStatus())) {
+      return MerchantResponse::printInvalidTransactionStatusResponse(
+        $transaction_status,
+        $order_id,
+        $namespace
+      );
     }
 
-    if ($transaction_status === IndodanaConstant::INITIATED) {
-      $this->handlePaymentSuccess($order_id);
+    $this->handle_approved_transaction($order_id);
 
-      return $this->printResponse(MerchantResponse::createSuccessResponse());
-    }
+    return MerchantResponse::printSuccessResponse($namespace);
   }
 
-  public function confirmOrder()
+  private function handle_approved_transaction($order_id)
   {
-    $this->load->model('checkout/order');
-
-    $postData = IndodanaHelper::getPostData();
-
-    IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
-
-    $orderId = $postData['orderId'];
-
-    $this->model_checkout_order->addOrderHistory(
-      $orderId,
-      $this->config->get('indodana_checkout_default_order_pending_status_id')
-    );
-
-    header('Content-type: application/json');
-
-    $response = array(
-      'success' => 'OK'
-    );
-
-    echo json_encode($response);
-  }
-
-  public function cancel()
-  {
-    $this->load->model('checkout/order');
-
-    $postData = IndodanaHelper::getPostData();
-    IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
-
-    $orderId = $postData['merchantOrderId'];
-
-    $this->model_checkout_order->addOrderHistory(
-      $orderId,
-      $this->config->get('indodana_checkout_default_order_failed_status_id')
-    );
-
-    $this->redirect($this->url->link(''));
-  }
-
-  private function handlePaymentSuccess($order_id)
-  {
-    $this->load->model('checkout/order');
-
     $this->model_checkout_order->addOrderHistory(
       $order_id,
       $this->config->get('indodana_checkout_default_order_success_status_id')
     );
   }
 
-  private function handlePaymentExpired($orderId)
+  public function confirmOrder()
   {
-    $this->model_checkout_order->addOrderHistory(
-      $orderId,
-      $this->config->get('indodana_checkout_default_order_failed_status_id')
+    $this->load->model('checkout/order');
+
+    $namespace = '[OpencartV2-confirmOrder]';
+
+    $request_body = IndodanaHelper::getRequestBody();
+
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($request_body)
+      )
     );
+
+    $order_id = $request_body['orderId'];
+
+    $this->model_checkout_order->addOrderHistory(
+      $order_id,
+      $this->config->get('indodana_checkout_default_order_pending_status_id')
+    );
+
+    return MerchantResponse::printSuccessResponse($namespace);
   }
 
   public function index()
