@@ -1,22 +1,22 @@
 # Opencart v1
 # ----------------------------------
-opencart_v1_build_dir=.build/opencartv1/dev/opencartv1/upload
-opencart_v1_dir = ./opencartv1
+opencartv1_build_dir=.build/opencartv1/dev/opencartv1/upload
+opencartv1_dir = ./opencartv1
 
-opencart-v1-install-dependencies:
+opencartv1-install-dependencies:
 	cd ./opencartv1/ && composer install
 
-opencart-v1-build:
+opencartv1-build:
 	./cli/svctl build opencartv1 dev
 
-opencart-v1-test:
-	$(opencart_v1_dir)/vendor/bin/
+opencartv1-test:
+	$(opencartv1_dir)/vendor/bin/
 
-opencart-v1-serve: opencart-v1-build
-	php5.6 -S localhost:6101 -t $(opencart_v1_build_dir)
+opencartv1-serve: opencartv1-build
+	php5.6 -S localhost:6101 -t $(opencartv1_build_dir)
 
-opencart-v1-log-tail:
-	tail -f ./$(opencart_v1_build_dir)/system/library/indodana/log/indodana.log
+opencartv1-log-tail:
+	tail -f ./$(opencartv1_build_dir)/system/library/indodana/log/indodana.log
 
 
 

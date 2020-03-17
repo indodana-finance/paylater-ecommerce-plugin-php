@@ -280,14 +280,6 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     return MerchantResponse::printSuccessResponse($namespace);
   }
 
-  private function handle_approved_transaction($order_id)
-  {
-    $this->model_checkout_order->addOrderHistory(
-      $order_id,
-      $this->config->get('indodana_checkout_default_order_success_status_id')
-    );
-  }
-
   public function confirmOrder()
   {
     $this->load->model('checkout/order');
@@ -313,6 +305,41 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     );
 
     return MerchantResponse::printSuccessResponse($namespace);
+  }
+
+  public function cancel()
+  {
+    $this->load->model('checkout/order');
+
+    $namespace = '[OpencartV2-cancel]';
+
+    $request_body = IndodanaHelper::getRequestBody();
+
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($request_body)
+      )
+    );
+
+    $order_id = $request_body['merchantOrderId'];
+
+    $this->model_checkout_order->addOrderHistory(
+      $order_id,
+      $this->config->get('indodana_checkout_default_order_failed_status_id')
+    );
+
+    $this->redirect($this->url->link(''));
+  }
+
+  private function handle_approved_transaction($order_id)
+  {
+    $this->model_checkout_order->addOrderHistory(
+      $order_id,
+      $this->config->get('indodana_checkout_default_order_success_status_id')
+    );
   }
 
   public function index()

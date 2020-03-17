@@ -1,102 +1,346 @@
 <?php
+
 require_once DIR_SYSTEM . 'library/indodana/autoload.php';
 
-class ControllerPaymentIndodanaCheckout extends Controller
+use IndodanaCommon\IndodanaHelper;
+use IndodanaCommon\IndodanaConstant;
+use IndodanaCommon\IndodanaInterface;
+use IndodanaCommon\IndodanaLogger;
+use IndodanaCommon\IndodanaService;
+use IndodanaCommon\MerchantResponse;
+
+class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaInterface
 {
   private $indodanaApi;
+  private $indodanaService;
+  private $defaultCurrency;
+
+  // We need this because the data sometimes have html entity such as &nbsp, etc.
+  private static function decode($html_entity) {
+    return html_entity_decode($html_entity, ENT_QUOTES, 'UTF-8');
+  }
+
+  private function getIndodanaService()
+  {
+    if (!isset($this->indodanaService)) {
+      $apiKey = $this->config->get('indodana_checkout_api_key');
+      $apiSecret = $this->config->get('indodana_checkout_api_secret');
+      $environment = $this->config->get('indodana_checkout_environment');
+
+      $this->indodanaService = new IndodanaService([
+        'apiKey'        => $apiKey,
+        'apiSecret'     => $apiSecret,
+        'environment'   => $environment,
+        'seller'        => $this->getSeller()
+      ]);
+    }
+
+    return $this->indodanaService;
+  }
+
+  private function getDefaultCurrency()
+  {
+    if (!isset($this->defaultCurrency)) {
+      $this->defaultCurrency = $this->config->get('config_currency');
+    }
+
+    return $this->defaultCurrency;
+  }
+
+  public function getTotalAmount($order)
+  {
+    $totalRows = $this->model_payment_indodana_checkout->getTotalRows($order['order_id']);
+
+    return $this->getTotalValueOrderTotalRows($totalRows);
+  }
+
+  public function getTotalDiscountAmount($order)
+  {
+    $discountRows = $this->model_payment_indodana_checkout->getDiscountRows($order['order_id']);
+
+    return $this->getTotalValueOrderTotalRows($discountRows);
+  }
+
+  public function getTotalShippingAmount($order)
+  {
+    $shippingRows = $this->model_payment_indodana_checkout->getShippingRows($order['order_id']);
+    
+    return $this->getTotalValueOrderTotalRows($shippingRows);
+  }
+
+  public function getTotalTaxAmount($order)
+  {
+    $taxRows = $this->model_payment_indodana_checkout->getTaxRows($order['order_id']);
+
+    return $this->getTotalValueOrderTotalRows($taxRows);
+  }
+
+  private function getTotalValueOrderTotalRows($rows)
+  {
+    return array_reduce(
+      $rows,
+      function ($carry, $row) {
+        // All value will be converted to IDR
+        $value = $this->currency->convert((float) $row['value'], $this->getDefaultCurrency(), "IDR");
+
+        $carry += abs($value);
+
+        return $carry;
+      },
+      0
+    );
+  }
+
+  public function getItems($order)
+  {
+    $items = [];
+
+    $order_id = $order['order_id'];
+
+    $order_products = $this->model_account_order->getOrderProducts($order_id);
+
+    foreach ($order_products as $order_product) {
+      $product_id = $order_product['product_id'];
+      $product = $this->model_catalog_product->getProduct($product_id);
+
+      // Get URL
+      $url = $this->url->link(
+        'product/product',
+        'product_id=' . $product_id
+      );
+
+      // Get Image URL
+      $imageUrl = $this->model_tool_image->resize(
+        $product['image'],
+        $this->config->get('config_image_popup_width'),
+        $this->config->get('config_image_popup_height')
+      );
+
+      // Get type
+      $type = '';
+
+      $productCategories = $this->model_catalog_product->getCategories($product_id);
+
+      if (!empty($productCategories)) {
+        $category_id = $productCategories[0]['category_id'];
+
+        $category = $this->model_catalog_category->getCategory($category_id);
+
+        $type = $category['name'];
+      }
+
+      $items[] = [
+        'id'        => self::decode($product_id),
+        'name'      => self::decode($order_product['name']),
+        'price'     => (float) self::decode($order_product['price']),
+        'url'       => self::decode($url),
+        'imageUrl'  => self::decode($imageUrl),
+        'type'      => self::decode($type),
+        'quantity'  => (int) self::decode($order_product['quantity']),
+      ];
+    }
+
+    return $items;
+  }
+
+  public function getCustomerDetails($order) {
+    return [
+      'firstName' => self::decode($order['firstname']),
+      'lastName' => self::decode($order['lastname']),
+      'email' => self::decode($order['email']),
+      'phone' => self::decode($order['telephone']),
+    ];
+  }
+
+  public function getShippingAddress($order)
+  {
+    if (!$this->cart->hasShipping()) {
+      return $this->getBillingAddress($order);
+    }
+
+    $firstName = self::decode($order['shipping_firstname']);
+    $lastName = self::decode($order['shipping_lastname']);
+    $address = self::decode($order['shipping_address_1']);
+    $city = self::decode($order['shipping_city']);
+    $postalCode = self::decode($order['shipping_postcode']);
+    $phone = self::decode($order['telephone']);
+    $countryCode = self::decode($order['payment_iso_code_3']);
+
+    return [
+      'firstName'     => $firstName,
+      'lastName'      => $lastName,
+      'address'       => $address,
+      'city'          => $city,
+      'postalCode'    => $postalCode,
+      'phone'         => $phone,
+      'countryCode'   => $countryCode
+    ];
+  }
+
+  public function getBillingAddress($order)
+  {
+    $firstName = self::decode($order['payment_firstname']);
+    $lastName = self::decode($order['payment_lastname']);
+    $address = self::decode($order['payment_address_1']);
+    $city = self::decode($order['payment_city']);
+    $postalCode = self::decode($order['payment_postcode']);
+    $phone = self::decode($order['telephone']);
+    $countryCode = self::decode($order['payment_iso_code_3']);
+
+    return [
+      'firstName'     => $firstName,
+      'lastName'      => $lastName,
+      'address'       => $address,
+      'city'          => $city,
+      'postalCode'    => $postalCode,
+      'phone'         => $phone,
+      'countryCode'   => $countryCode
+    ];
+  }
+
+  public function getSeller()
+  {
+    $name = $this->config->get('indodana_store_name');
+
+    return [
+      'name'    => $name,
+      'email'   => $this->config->get('indodana_store_email'),
+      'url'     => $this->config->get('indodana_store_url'),
+      'address' => [
+        'firstName'   => $name,
+        'phone'       => $this->config->get('indodana_store_phone'),
+        'address'     => $this->config->get('indodana_store_address'),
+        'city'        => $this->config->get('indodana_store_city'),
+        'postalCode'  => $this->config->get('indodana_store_postal_code'),
+        'countryCode' => $this->config->get('indodana_store_country_code'),
+      ]
+    ];
+  }
 
   public function notify()
   {
     $this->load->model('checkout/order');
 
-    $apiKey = $this->config->get('indodana_checkout_api_key');
-    $apiSecret = $this->config->get('indodana_checkout_api_secret');
-    $environment = $this->config->get('indodana_checkout_environment');
-    $this->indodanaApi = new IndodanaApi($apiKey, $apiSecret, $environment);
+    $namespace = '[OpencartV1-notify]';
 
-    $postData = IndodanaHelper::getJsonPost();
+    $request_headers = getallheaders();
 
     IndodanaLogger::log(
       IndodanaLogger::INFO,
-      sprintf("Got payment confirmation from Indodana %s", json_encode($postData))
+      sprintf(
+        '%s Request headers: %s',
+        $namespace,
+        json_encode($request_headers)
+      )
     );
 
-    $transactionStatus = $postData['transactionStatus'];
-    $orderId = $postData['merchantOrderId'];
+    $auth_token = isset($request_headers['Authorization']) ? $request_headers['Authorization'] : '';
 
-    $transactionIsPaid = $this->indodanaApi->transactionIsPaidByCustomer($transactionStatus);
+    $is_valid_authorization = $this->getIndodanaService()->isValidAuthToken($auth_token);
 
-    if ($transactionIsPaid) {
-      $this->handleTransactionPaymentSuccess($orderId);
-    } else {
-      $this->handleTransactionPaymentFailed($orderId);
+    if (!$is_valid_authorization) {
+      return MerchantResponse::printInvalidRequestAuthResponse($namespace);
     }
 
-    header('Content-type: application/json');
+    $request_body = IndodanaHelper::getRequestBody();
 
-    $response = [
-      'status'   => 'OK',
-      'message' => 'OK'
-    ];
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($request_body)
+      )
+    );
 
-    echo json_encode($response);
+    if (!isset($request_body['transactionStatus']) || !isset($request_body['merchantOrderId'])) {
+      return MerchantResponse::printInvalidRequestBodyResponse($namespace);
+    }
+
+    $transaction_status = $request_body['transactionStatus'];
+    $order_id = $request_body['merchantOrderId'];
+    $order = $this->model_checkout_order->getOrder($order_id);
+
+    if (!$order) {
+      return MerchantResponse::printNotFoundOrderResponse(
+        $order_id,
+        $namespace
+      );
+    }
+
+    if (!in_array($transaction_status, IndodanaConstant::getSuccessTransactionStatus())) {
+      return MerchantResponse::printInvalidTransactionStatusResponse(
+        $transaction_status,
+        $order_id,
+        $namespace
+      );
+    }
+
+    $this->handle_approved_transaction($order_id);
+
+    return MerchantResponse::printSuccessResponse($namespace);
   }
 
   public function confirmOrder()
   {
     $this->load->model('checkout/order');
 
-    $postData = IndodanaHelper::getJsonPost();
-    IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
+    $namespace = '[OpencartV1-confirmOrder]';
 
-    $orderId = $postData['orderId'];
+    $request_body = IndodanaHelper::getRequestBody();
+
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($request_body)
+      )
+    );
+
+    $order_id = $request_body['orderId'];
 
     $this->model_checkout_order->confirm(
-      $orderId,
+      $order_id,
       $this->config->get('indodana_checkout_default_order_pending_status_id')
     );
 
-    header('Content-type: application/json');
-
-    $response = array(
-      'success' => 'OK'
-    );
-
-    echo json_encode($response);
+    return MerchantResponse::printSuccessResponse($namespace);
   }
 
   public function cancel()
   {
     $this->load->model('checkout/order');
 
-    $postData = IndodanaHelper::getJsonPost();
-    IndodanaLogger::log(IndodanaLogger::INFO, json_encode($postData));
+    $namespace = '[OpencartV1-cancel]';
 
-    $orderId = $postData['merchantOrderId'];
+    $request_body = IndodanaHelper::getRequestBody();
+
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($request_body)
+      )
+    );
+
+    $order_id = $request_body['merchantOrderId'];
 
     $this->model_checkout_order->update(
-      $orderId,
+      $order_id,
       $this->config->get('indodana_checkout_default_order_failed_status_id')
     );
 
     $this->redirect($this->url->link(''));
   }
 
-  private function handleTransactionPaymentSuccess($orderId)
+  private function handle_approved_transaction($order_id)
   {
     $this->model_checkout_order->update(
-      $orderId,
+      $order_id,
       $this->config->get('indodana_checkout_default_order_success_status_id'),
       'Indodana payment successful'
-    );
-  }
-
-  private function handleTransactionPaymentFailed($orderId)
-  {
-    $this->model_checkout_order->update(
-      $orderId,
-      $this->config->get('indodana_checkout_default_order_failed_status_id'),
-      'Indodana payment expired'
     );
   }
 
@@ -105,24 +349,52 @@ class ControllerPaymentIndodanaCheckout extends Controller
     $this->loadModel();
     $this->loadLanguageData();
 
-    $apiKey = $this->config->get('indodana_checkout_api_key');
-    $apiSecret = $this->config->get('indodana_checkout_api_secret');
-    $environment = $this->config->get('indodana_checkout_environment');
-    $this->indodanaApi = new IndodanaApi($apiKey, $apiSecret, $environment);
+    $order = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+    $indodanaService = $this->getIndodanaService();
 
-    $orderInfo = $this->model_checkout_order->getOrder($this->session->data['order_id']);
-    $items = $this->getAllItemObjects($this->cart, $orderInfo['order_id']);
-    $amount = self::calculateTotalPrice($items);
-    $paymentOptions = $this->indodanaApi->getPaymentOptions($amount, $items);
+    $paymentOptions = $indodanaService->getInstallmentOptions([
+      'totalAmount'    => $this->getTotalAmount($order),
+      'discountAmount' => $this->getTotalDiscountAmount($order),
+      'shippingAmount' => $this->getTotalShippingAmount($order),
+      'taxAmount'      => $this->getTotalTaxAmount($order),
+      'items'          => $this->getItems($order)
+    ]);
 
     $this->formatPaymentsToDefaultCurrency($paymentOptions);
+
+    $approvedNotificationUrl = $this->url->link('payment/indodana_checkout/notify');
+    $cancellationRedirectUrl = $this->url->link('payment/indodana_checkout/cancel');
+    $backToStoreUrl = $this->url->link('checkout/success');
+
+    // DEV MODE
+    // $approvedNotificationUrl = 'https://example.com/index.php?route=payment/indodana_checkout/notify';
+    // $cancellationRedirectUrl = 'https://example.com/index.php?route=payment/indodana_checkout/cancel';
+    // $backToStoreUrl = 'https://example.com/index.php?route=checkout/success';
+
     $this->initializePaymentOptions($paymentOptions);
 
-    $orderData = $this->generateOrderData($orderInfo, $items, $amount);
-    $json = json_encode($orderData);
-    $this->initializeOrderData($json);
-    $this->initializeAuthorization(IndodanaApi::generateBearer($apiKey, $apiSecret));
-    $this->initializeContextUrl();
+    $orderData = $indodanaService->getCheckoutPayload([
+      'merchantOrderId'         => $order['order_id'],
+      'totalAmount'             => $this->getTotalAmount($order),
+      'discountAmount'          => $this->getTotalDiscountAmount($order),
+      'shippingAmount'          => $this->getTotalShippingAmount($order),
+      'taxAmount'               => $this->getTotalTaxAmount($order),
+      'items'                   => $this->getItems($order),
+      'customerDetails'         => $this->getCustomerDetails($order),
+      'billingAddress'          => $this->getBillingAddress($order),
+      'shippingAddress'         => $this->getShippingAddress($order),
+      'approvedNotificationUrl' => $approvedNotificationUrl,
+      'cancellationRedirectUrl' => $cancellationRedirectUrl,
+      'backToStoreUrl'          => $backToStoreUrl
+    ]);
+
+    $authorizationToken = $this->getIndodanaService()->getAuthToken();
+
+    $this->data['orderData'] = json_encode($orderData);
+    $this->data['paymentOptions'] = $paymentOptions;
+    $this->data['authorization'] = $this->getIndodanaService()->getAuthToken();
+    $this->data['indodanaBaseUrl'] = $indodanaService->getBaseUrl();
+    $this->data['merchantConfirmPaymentUrl'] = $this->url->link('payment/indodana_checkout/confirmOrder');
 
     $this->template = $this->config->get('config_template') . '/template/payment/indodana_checkout_payment.tpl';
     $this->response->setOutput($this->render());
@@ -130,9 +402,13 @@ class ControllerPaymentIndodanaCheckout extends Controller
 
   public function loadModel() {
     $this->language->load('payment/indodana_checkout');
+    $this->load->model('account/order');
+    $this->load->model('catalog/product');
+    $this->load->model('catalog/category');
     $this->load->model('checkout/order');
     $this->load->model('payment/indodana_checkout');
     $this->load->model('setting/setting');
+    $this->load->model('tool/image');
   }
 
   public function loadLanguageData() {
@@ -148,7 +424,7 @@ class ControllerPaymentIndodanaCheckout extends Controller
   }
 
   private function initializeAuthorization($bearer) {
-    $this->data['authorization'] = 'Bearer ' . $bearer;
+    $this->data['authorization'] = $bearer;
   }
 
   public function initializePaymentOptions($paymentOptions) {
@@ -160,92 +436,9 @@ class ControllerPaymentIndodanaCheckout extends Controller
     $this->data['merchantConfirmPaymentUrl'] = $this->url->link('payment/indodana_checkout/confirmOrder');
   }
 
-  private function getAllItemObjects($cart, $orderId) {
-    $itemObjects = array();
-    $defaultCurrency = $this->config->get('config_currency');
-
-    $productObjects = $this->convertProductsToIDR($cart->getProducts(), $defaultCurrency);
-    $itemObjects = array_merge($itemObjects, $productObjects);
-
-    if ($this->cart->hasShipping()) {
-      $shippingObject = $this->getShippingInIDR($orderId, $defaultCurrency);
-      array_push($itemObjects, $shippingObject);
-    }
-
-    $taxObject = $this->getTaxInIDR($orderId, $defaultCurrency);
-    if ($taxObject != null) {
-      array_push($itemObjects, $taxObject);
-    }
-
-    return $itemObjects;
-  }
-
-  public function getShippingInIDR($orderId, $currency) {
-    $shipping = $this->model_payment_indodana_checkout->getShippingDetail($orderId);
-
-    $shippingObject = array(
-      'id' => 'shippingfee',
-      'url' => '',
-      'name' => $shipping['title'],
-      'price' => ceil($this->currency->convert((float) $shipping['value'], $currency, "IDR")),
-      'type' => '',
-      'quantity' => 1
-    );
-
-    return $shippingObject;
-  }
-
-  public function getTaxInIDR($orderId, $currency) {
-    $taxes = $this->model_payment_indodana_checkout->getTaxes($orderId);
-
-    $totalTax = 0;
-    foreach($taxes->rows as $tax) {
-      $totalTax += $this->currency->convert((float) $tax['value'], $currency, 'IDR');
-    }
-
-    if ($totalTax == 0) {
-      return null;
-    }
-
-    $taxObject = array(
-      'id' => 'taxfee',
-      'url' => '',
-      'name' => 'TAXFEE',
-      'price' => ceil($totalTax),
-      'type' => '',
-      'quantity' => 1
-    );
-
-    return $taxObject;
-  }
-
-  public function convertProductsToIDR($products, $currency) {
-    $productObjects = array();
-    foreach($products as $product) {
-      $productObject = array(
-        'id' => $product['product_id'],
-        'url' => '',
-        'name' => $product['name'],
-        'price' => ceil($this->currency->convert($product['price'], $currency, 'IDR')),
-        'type' => '',
-        'quantity' => $product['quantity']
-      );
-      array_push($productObjects, $productObject);
-    }
-    return $productObjects;
-  }
-
-  private static function calculateTotalPrice($items) {
-    $total = 0;
-
-    foreach($items as $item) {
-      $total += $item['price'] * $item['quantity'];
-    }
-    return $total;
-  }
-
   public function formatPaymentsToDefaultCurrency(&$payments) {
     $currency = $this->config->get('config_currency');
+
     foreach ($payments as &$payment) {
       $monthlyInstallment = $payment['monthlyInstallment'];
       $installmentAmount = $payment['installmentAmount'];
@@ -256,151 +449,6 @@ class ControllerPaymentIndodanaCheckout extends Controller
       $payment['monthlyInstallment'] = $this->currency->format($monthlyInstallment, $this->currency->getCode());
       $payment['installmentAmount'] = $this->currency->format($installmentAmount, $this->currency->getCode());
     }
-  }
-
-  public function generateOrderData($orderInfo, $items, $amount) {
-    $transactionDetails = self::getTransactionDetails($orderInfo, $items, $amount);
-    $customerDetails = self::getCustomerDetails($orderInfo);
-    $billingAddress = self::getBillingAddress($orderInfo);
-    $shippingAddress = array();
-    if ($this->cart->hasShipping()) {
-      $shippingAddress = self::getShippingAddress($orderInfo);
-    } else {
-      $shippingAddress = $billingAddress;
-    }
-    $approvedNotificationUrl = $this->getNotificationUrl();
-    $cancellationRedirectUrl = $this->getCancellationRedirectUrl();
-    $backToStoreUrl = $this->getBackToStoreUrl();
-    $storeDetail = $this->getStoreDetail();
-
-    $orderData = array(
-      'transactionDetails'        => $transactionDetails,
-      'customerDetails'           => $customerDetails,
-      'billingAddress'            => $billingAddress,
-      'shippingAddress'           => $shippingAddress,
-      'approvedNotificationUrl'   => $approvedNotificationUrl,
-      'cancellationRedirectUrl'   => $cancellationRedirectUrl,
-      'backToStoreUrl'            => $backToStoreUrl,
-      'sellers' => [$storeDetail],
-    );
-
-    return $orderData;
-  }
-
-  private function getStoreDetail() {
-    $storeUrl = $this->config->get('indodana_store_url');
-    $storeName = $this->config->get('indodana_store_name');
-
-    return [
-      // Use storeUrl as store id because it's less likely to change
-      'id' => md5($storeUrl),
-      'name' => $storeName,
-      'email' => $this->config->get('indodana_store_email'),
-      'url' => $storeUrl,
-      'address' => [
-        'firstName' => $storeName,
-        'phone' => $this->config->get('indodana_store_phone'),
-        'address' => $this->config->get('indodana_store_address'),
-        'city' => $this->config->get('indodana_store_city'),
-        'postalCode' => $this->config->get('indodana_store_postal_code'),
-        'countryCode' => $this->config->get('indodana_store_country_code'),
-      ]
-    ];
-  }
-
-  private static function getTransactionDetails($orderInfo, $items, $amount) {
-    $transactionDetails = array(
-      'merchantOrderId'   => $orderInfo['order_id'],
-      'amount'            => $amount,
-      'items'             => $items
-    );
-
-    return $transactionDetails;
-  }
-
-  private static function getCustomerDetails($orderInfo)
-  {
-    $firstName = self::decode($orderInfo['firstname']);
-    $lastName = self::decode($orderInfo['lastname']);
-    $email = self::decode($orderInfo['email']);
-    $phone = self::decode($orderInfo['telephone']);
-    $customerDetails = array(
-      'firstName' => $firstName,
-      'lastName'  => $lastName,
-      'email'     => $email,
-      'phone'     => $phone
-    );
-
-    return $customerDetails;
-  }
-
-  private static function getBillingAddress($orderInfo)
-  {
-    $firstName = self::decode($orderInfo['payment_firstname']);
-    $lastName = self::decode($orderInfo['payment_lastname']);
-    $address = self::decode($orderInfo['payment_address_1']);
-    $city = self::decode($orderInfo['payment_city']);
-    $postalCode = self::decode($orderInfo['payment_postcode']);
-    $phone = self::decode($orderInfo['telephone']);
-    $countryCode = self::decode($orderInfo['payment_iso_code_3']);
-    $billingAddress = array(
-      'firstName'     => $firstName,
-      'lastName'      => $lastName,
-      'address'       => $address,
-      'city'          => $city,
-      'postalCode'    => $postalCode,
-      'phone'         => $phone,
-      'countryCode'   => $countryCode
-    );
-
-    return $billingAddress;
-  }
-
-  private static function getShippingAddress($orderInfo)
-  {
-    $firstName = self::decode($orderInfo['shipping_firstname']);
-    $lastName = self::decode($orderInfo['shipping_lastname']);
-    $address = self::decode($orderInfo['shipping_address_1']);
-    $city = self::decode($orderInfo['shipping_city']);
-    $postalCode = self::decode($orderInfo['shipping_postcode']);
-    $phone = self::decode($orderInfo['telephone']);
-    $countryCode = self::decode($orderInfo['payment_iso_code_3']);
-    $shippingAddress = array(
-      'firstName'     => $firstName,
-      'lastName'      => $lastName,
-      'address'       => $address,
-      'city'          => $city,
-      'postalCode'    => $postalCode,
-      'phone'         => $phone,
-      'countryCode'   => $countryCode
-    );
-
-    return $shippingAddress;
-  }
-
-  private static function decode($html_entity) {
-    return html_entity_decode($html_entity, ENT_QUOTES, 'UTF-8');
-  }
-
-  private function getBackToStoreUrl()
-  {
-    // Uncomment below code for development purposes
-    // return 'https://tokopedia.com/toko-iphone/iphone-5s';
-    return $this->url->link('checkout/success');
-  }
-
-  private function getCancellationRedirectUrl()
-  {
-    // Uncomment below code for development purposes
-    // return 'https://tokopedia.com/toko-iphone/iphone-5s';
-    return $this->url->link('payment/indodana_checkout/cancel');
-  }
-
-  private function getNotificationUrl()
-  {
-    // TODO: If in dev environment then this function should return
-    // return'https://stg-k-api.indodana.com/chermes/public/v1/stub/merchant/always-accept-purchase-transaction';
-    return $this->url->link('payment/indodana_checkout/notify');
   }
 }
 

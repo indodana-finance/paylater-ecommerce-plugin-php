@@ -25,4 +25,5 @@
 /vendor/
 vendor/
 
+/opencartv1/upload/
 /opencartv2/upload/

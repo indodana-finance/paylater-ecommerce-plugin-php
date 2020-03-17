@@ -19,15 +19,31 @@ class ModelPaymentIndodanaCheckout extends Model {
         return $method_data;
     }
 
-    public function getShippingDetail($orderId) {
-        return $this->db->query("SELECT `title`, `value` FROM `" . DB_PREFIX . "order_total` WHERE `order_id` = " . (int) $orderId . " AND `code` = 'shipping'")->row;
-    }
+  private function getOrderTotalRows($order_id, $codes)
+  {
+    $in_codes = implode("','", $codes);
 
-    public function getTaxes($orderId) {
-        return $this->db->query("SELECT `title`, `value` FROM `". DB_PREFIX . "order_total` WHERE `order_id` = " . (int) $orderId . " AND `code` = 'tax'");
-    }
+    return $this->db->query(
+      "SELECT `title`, `value` FROM `". DB_PREFIX . "order_total` WHERE `order_id` = " . (int) $order_id . " AND `code` IN ('" . $in_codes . "')"
+    )->rows;
+  }
 
-    public function getAdditionalFee() {
+  public function getShippingRows($order_id) {
+    return $this->getOrderTotalRows($order_id, ['shipping']);
+  }
 
-    }
+  public function getTaxRows($order_id)
+  {
+    return $this->getOrderTotalRows($order_id, ['tax']);
+  }
+
+  public function getDiscountRows($order_id)
+  {
+    return $this->getOrderTotalRows($order_id, ['reward', 'coupon', 'voucher']);
+  }
+
+  public function getTotalRows($order_id)
+  {
+    return $this->getOrderTotalRows($order_id, ['total']);
+  }
 }
