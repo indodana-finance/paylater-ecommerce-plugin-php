@@ -9,9 +9,9 @@
 /cli/pkictl
 /cli/pki
 
-./cli/.run.*/
-./cli/.env.*/
-./cli/.build.*/
+/cli/.run.*/
+/cli/.env.*/
+/cli/.build.*/
 
 # SVCTL
 /.build
@@ -22,8 +22,14 @@
 # PKICTL
 /cli/pki/
 /cli/pkictl
-/vendor/
+
+# COMPOSER
 vendor/
 
+# MERCHANT PLUGIN
+/magento1/upload/
 /opencartv1/upload/
 /opencartv2/upload/
+/opencartv3/upload/
+/prestashop/upload/
+/woocommerce/upload/

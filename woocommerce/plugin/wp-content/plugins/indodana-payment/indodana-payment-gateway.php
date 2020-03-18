@@ -277,18 +277,29 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     $this->init_form_fields();
     $this->init_settings();
 
-    $this->title = $this->get_option('title');
-    $this->description = $this->get_option('description');
-
-    $this->indodana_service = new IndodanaService([
-      'apiKey'       => $this->get_option('api_key'),
-      'apiSecret'    => $this->get_option('api_secret'),
-      'isProduction' => $this->get_option('environment') === 'production',
-      'seller'       => $this->getSeller()
-    ]);
-
     add_action('woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ));
     add_action('woocommerce_api_wc_indodana_gateway', array(&$this, 'indodana_callback'));
+  }
+
+  /**
+   * Getter for indodana service
+   *
+   * We decide to "lazily" load indodana service because `get_option` might cause bug if we load this "eagerly"
+   *
+   * @return IndodanaService
+   */
+  private function get_indodana_service()
+  {
+    if (!isset($this->indodana_service)) {
+      $this->indodana_service = new IndodanaService([
+        'apiKey'      => $this->get_option('api_key'),
+        'apiSecret'   => $this->get_option('api_secret'),
+        'environment' => $this->get_option('environment'),
+        'seller'      => $this->getSeller()
+      ]);
+    }
+
+    return $this->indodana_service;
   }
 
   // Form on admin settings
@@ -317,10 +328,10 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
         'title'         => __('Environment', 'indodana-environment-input-title'),
         'type'          => 'select',
         'description'   => __('Choose sandbox if you are testing this plugins', 'indodana-environment-input-label'),
-        'default'       => 'sandbox',
+        'default'       => 'SANDBOX',
         'options'       => array(
-          'sandbox'   => __('Sandbox', 'indodana-environment-value-sandbox'),
-          'production'    => __('Production', 'indodana-environment-value-production')
+          'SANDBOX'   => __('Sandbox', 'indodana-environment-value-sandbox'),
+          'PRODUCTION'    => __('Production', 'indodana-environment-value-production')
         )
       ),
       'store_name' => [
@@ -483,13 +494,21 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     foreach($items as $item) {
       $product = $item['data'];
 
+      // Image might not exists
+      $image_url = !empty($product->get_image_id()) ?
+        wp_get_attachment_image_url($product->get_image_id(), 'full') :
+        '';
+
+      // Type might not exists
+      $type = $product->get_type() ?? '';
+
       $cartItems[] = [
         'id' => (string) $product->get_id(),
         'name' => $product->get_title(),
         'price' => (float) $product->get_price(),
         'url' => get_permalink($product->get_id()),
-        'imageUrl' => wp_get_attachment_image_url($product->get_image_id(), 'full'),
-        'type' => $product->get_type(),
+        'imageUrl' => $image_url,
+        'type' => $type,
         'quantity' => (int) $item['quantity'],
       ];
     }
@@ -560,7 +579,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
 
     $cart = WC()->cart;
 
-    $payment_options = $this->indodana_service->getInstallmentOptions([
+    $payment_options = $this->get_indodana_service()->getInstallmentOptions([
       'totalAmount'    => $this->getTotalAmount($cart),
       'discountAmount' => $this->getTotalDiscountAmount($cart),
       'shippingAmount' => $this->getTotalShippingAmount($cart),
@@ -605,22 +624,22 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
 
     // DEV MODE
     // $approved_notification_url = add_query_arg(array(
-    // 'wc-api'    => 'WC_Indodana_Gateway',
+      // 'wc-api'    => 'WC_Indodana_Gateway',
     // ), 'https://example.com');
 
     // $cancellation_redirect_url = add_query_arg(array(
-    // 'wc-api'    => 'WC_Indodana_Gateway',
-    // 'method'    => 'cancel',
-    // 'order_id'  => $order_id
+      // 'wc-api'    => 'WC_Indodana_Gateway',
+      // 'method'    => 'cancel',
+      // 'order_id'  => $order_id
     // ), 'https://example.com');
 
     // $back_to_store_url = add_query_arg(array(
-    // 'wc-api'    => 'WC_Indodana_Gateway',
-    // 'method'    => 'complete',
-    // 'order_id'  => $order_id
+      // 'wc-api'    => 'WC_Indodana_Gateway',
+      // 'method'    => 'complete',
+      // 'order_id'  => $order_id
     // ), 'https://example.com');
 
-    $checkout_url = $this->indodana_service->checkout([
+    $checkout_url = $this->get_indodana_service()->checkout([
       'merchantOrderId'         => $order_id,
       'totalAmount'             => $this->getTotalAmount($cart),
       'discountAmount'          => $this->getTotalDiscountAmount($cart),
@@ -689,7 +708,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
 
     $auth_token = isset($request_headers['Authorization']) ? $request_headers['Authorization'] : '';
 
-    $is_valid_authorization = $this->indodana_service->isValidAuthToken($auth_token);
+    $is_valid_authorization = $this->get_indodana_service()->isValidAuthToken($auth_token);
 
     if (!$is_valid_authorization) {
       return MerchantResponse::printInvalidRequestAuthResponse($namespace);
