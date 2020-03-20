@@ -2,10 +2,10 @@
 /*
  * Plugin Name: Indodana Payment
  * Plugin URI: https://indodana.com
- * Description: Pay later
+ * Description: "Paylater" service registered on OJK.
  * Author: Indodana
  * Author URI: https://indodana.com
- * Version: 0.0.1
+ * Version: 1.2.0
 */
 
 add_filter( 'woocommerce_payment_gateways', 'indodana_add_payment_gateway_class' );

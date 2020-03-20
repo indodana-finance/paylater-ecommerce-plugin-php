@@ -12,7 +12,7 @@ class ModelPaymentIndodanaCheckout extends Model {
 
         $method_data = array(
           'code'     => 'indodana_checkout',
-          'title'    => '&nbsp&nbsp<img src="https://afpi.or.id/fm/Members/indodana_logo_4500-x-1000.png" height="25" width="112">&nbsp&nbsp',
+          'title'    => '<img src="https://afpi.or.id/fm/Members/indodana_logo_4500-x-1000.png" height="25" width="112">',
           'sort_order' => $this->config->get('indodana_checkout_sort_order')
         );
 

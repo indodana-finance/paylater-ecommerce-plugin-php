@@ -92,9 +92,7 @@ class IndodanaService
       ->key('environment', Validator::in(IndodanaConstant::getEnvironments()))
       ->key('defaultOrderPendingStatus', Validator::stringType()->notEmpty())
       ->key('defaultOrderSuccessStatus', Validator::stringType()->notEmpty())
-      ->key('defaultOrderFailedStatus', Validator::stringType()->notEmpty())
-      ->key('status', Validator::stringType()->notOptional())
-      ->key('sortOrder', Validator::intType()->notOptional());
+      ->key('defaultOrderFailedStatus', Validator::stringType()->notEmpty());
 
     $namespace = '[Common-ValidateConfiguration]';
 
@@ -125,8 +123,6 @@ class IndodanaService
         'defaultOrderPendingStatus' => $stringValidationMessage,
         'defaultOrderSuccessStatus' => $stringValidationMessage,
         'defaultOrderFailedStatus'  => $stringValidationMessage,
-        'status'                    ,
-        'sortOrder'                 => '{{name}} must not be empty and contain number',
       ]);
 
       $frontendValidationMessages = [];

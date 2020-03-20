@@ -12,12 +12,12 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract impl
     if (!isset($this->indodanaService)) {
       $apiKey = Mage::helper('indodanapayment')->getApiKey();
       $apiSecret = Mage::helper('indodanapayment')->getApiSecret();
-      $isProduction = Mage::helper('indodanapayment')->getEnvironment() === 'production';
+      $environment = Mage::helper('indodanapayment')->getEnvironment();
 
       $this->indodanaService = new IndodanaService([
         'apiKey'        => $apiKey,
         'apiSecret'     => $apiSecret,
-        'isProduction'  => $isProduction,
+        'environment'   => $environment,
         'seller'        => $this->getSeller()
       ]);
     }
@@ -44,6 +44,7 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract impl
   public function getTotalShippingAmount($order)
   {
     // I'm not really sure whether to use getShippingInclTax() or getShippingAmount()
+
     // For get installment options
     $totalShippingAmount = (float) $order->getShippingAddress()->getShippingInclTax();
 
@@ -89,8 +90,8 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract impl
         'name'      => $product->getName(),
         'price'     => (float) $product->getPrice(),
         'url'       => $product->getProductUrl(),
-        // TODO: imageUrl
-        'type'      => '',
+        'imageUrl'  => '', // TODO: Search how to do this
+        'type'      => '', // TODO: Search how to do this
         'quantity'  => $quantity
       ];
     }
@@ -159,20 +160,19 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract impl
 
   public function getSeller()
   {
-    // TODO: Add these information to merchant config
-    $sellerName = Mage::app()->getStore()->getFrontendName();
+    $sellerName = Mage::helper('indodanapayment')->getStoreName();
 
     return [
       'name'    => $sellerName,
-      'email'   => Mage::getStoreConfig('trans_email/ident_general/email'),
-      'url'     => Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB),
+      'email'   => Mage::helper('indodanapayment')->getStoreEmail(),
+      'url'     => Mage::helper('indodanapayment')->getStoreUrl(),
       'address' => [
         'firstName'   => $sellerName,
-        'phone'       => Mage::getStoreConfig('general/store_information/phone'),
-        'address'     => Mage::getStoreConfig('general/store_information/address'),
-        'city'        => '-',
-        'postalCode'  => '-',
-        'countryCode' => '-'
+        'phone'       => Mage::helper('indodanapayment')->getStorePhone(),
+        'address'     => Mage::helper('indodanapayment')->getStoreAddress(),
+        'city'        => Mage::helper('indodanapayment')->getStoreCity(),
+        'postalCode'  => Mage::helper('indodanapayment')->getStorePostalCode(),
+        'countryCode' => Mage::helper('indodanapayment')->getStoreCountryCode()
       ]
     ];
   }

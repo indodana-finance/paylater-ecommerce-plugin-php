@@ -9,168 +9,11 @@ use IndodanaCommon\IndodanaLogger;
 use IndodanaCommon\IndodanaService;
 use IndodanaCommon\MerchantResponse;
 
-/*
-    You might realize that this class has a very similar function or APIs to the one in Helper
-    From a first glance, it might be wise to combine them two. 
-
-    But After closer inspection $order object here and $cart object in helper has a slight different set of APIs
-    And combining them two would make it messy
- */
 class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Action
 {
-  public function notifyAction()
-  {
-    // Disallow if not POST
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-      $this->norouteAction();
-
-      return;
-    }
-
-    $namespace = '[MagentoV1-notify]';
-
-    $requestHeaders = getallheaders();
-
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
-      sprintf(
-        '%s Request headers: %s',
-        $namespace,
-        json_encode($requestHeaders)
-      )
-    );
-
-    $authToken = isset($requestHeaders['Authorization']) ? $requestHeaders['Authorization'] : '';
-
-    $isValidAuthorization = Mage::helper('indodanapayment/transaction')
-      ->getIndodanaService()
-      ->isValidAuthToken($authToken);
-
-    if (!$isValidAuthorization) {
-      return MerchantResponse::printInvalidRequestAuthResponse($namespace);
-    }
-
-    $requestBody = IndodanaHelper::getRequestBody();
-
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
-      sprintf(
-        '%s Request body: %s',
-        $namespace,
-        json_encode($requestBody)
-      )
-    );
-
-    if (!isset($requestBody['transactionStatus']) || !isset($requestBody['merchantOrderId'])) {
-      return MerchantResponse::printInvalidRequestBodyResponse($namespace);
-    }
-
-    $transactionStatus = $requestBody['transactionStatus'];
-    $orderId = $requestBody['merchantOrderId'];
-
-    $order = Mage::getModel('sales/order');
-    $order->load($orderId);
-
-    if (!$order) {
-      return MerchantResponse::printNotFoundOrderResponse(
-        $orderId,
-        $namespace
-      );
-    }
-
-    if (!in_array($transactionStatus, IndodanaConstant::getSuccessTransactionStatus())) {
-      return MerchantResponse::printInvalidTransactionStatusResponse(
-        $transactionStatus,
-        $orderId,
-        $namespace
-      );
-    }
-
-    $this->handleApprovedTransaction($order);
-
-    return MerchantResponse::printSuccessResponse($namespace);
-  }
-
-  private function handleApprovedTransaction(&$order) {
-    // Save transaction
-    // --------------------
-    $invoice = $order->prepareInvoice()
-       ->setTransactionId($order->getId())
-       ->addComment('Payment successfully processed by Indodana.')
-       ->register()
-       ->pay();
-
-    $transaction = Mage::getModel('core/resource_transaction')
-      ->addObject($invoice)
-      ->addObject($invoice->getOrder());
-
-    $transaction->save();
-
-    // Mark order as success
-    // --------------------
-    $statusIfSuccess = Mage::helper('indodanapayment')->getSuccessfulTransactionStatus();
-
-    $order->setStatus($statusIfSuccess);
-
-    $order->save();
-  }
-
-  public function confirmOrderAction()
-  {
-    // Disallow if not POST
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-      $this->norouteAction();
-
-      return;
-    }
-
-    $requestBody = IndodanaHelper::getRequestBody();
-    IndodanaLogger::log(IndodanaLogger::INFO, json_encode($requestBody));
-
-    $response = array(
-      'success'   => 'OK'
-    );
-
-    header('Content-Type: application/json');
-    echo json_encode($response);
-  }
-
-  public function successAction()
-  {
-    if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-
-      // I don't know what's this but I will comment out this line for this action to be working
-      // $this->_log($_GET);
-
-      Mage::getSingleton('checkout/session')->unsQuoteId();
-      Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/success', array('_secure' => false));
-
-    } else {
-      Mage_Core_Controller_Varien_Action::_redirect('');
-    }
-  }
-
-  public function cancelAction()
-  {
-    if (Mage::getSingleton('checkout/session')->getLastRealOrderId()) {
-      $order = Mage::getModel('sales/order')->loadByIncrementId(Mage::getSingleton('checkout/session')->getLastRealOrderId());
-      if ($order->getId()) {
-        $order->cancel()->setState(
-          Mage::helper('indodanapayment')->getFailedTransactionStatus(), 
-          true, 
-          'Indodana has declined the payment.'
-        )->save();
-      }
-    }
-
-    Mage_Core_Controller_Varien_Action::_redirect('');
-  }
-
   public function redirectAction()
   {
-    // Get order
-    $orderId = Mage::getSingleton('checkout/session')->getLastRealOrderId();
-    $order = Mage::getModel('sales/order')->loadByIncrementId($orderId);
+    $order = $this->getLatestOrder();
 
     $paymentOptions = Mage::helper('indodanapayment/transaction')->getInstallmentOptions($order);
 
@@ -204,7 +47,7 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
     $block = $this->getLayout()->createBlock(
       'Mage_Core_Block_Template',
       'indodanapayment',
-      ['template' => 'indodanapayment/redirect.phtml']
+      [ 'template' => 'indodanapayment/redirect.phtml' ]
     );
 
     return $block;
@@ -217,4 +60,213 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
     $this->renderLayout();
   }
 
+  /**
+   * Get latest order
+   *
+   * TODO: It's actually preferable to get order based on order id.
+   * But we will leave it like this for awhile.
+   *
+   * @return Order
+   */
+  private function getLatestOrder()
+  {
+    // Get latest order id from local session
+    $orderId = Mage::getSingleton('checkout/session')->getLastRealOrderId();
+
+    if ($orderId) {
+      $order = Mage::getModel('sales/order')->loadByIncrementId($orderId);
+
+      if ($order->getId()) {
+        return $order;
+      }
+    }
+
+    return null;
+  }
+
+  public function confirmOrderAction()
+  {
+    // Disallow any action for invalid request
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      return $this->norouteAction();
+    }
+
+    $namespace = '[MagentoV1-confirmOrderAction]';
+
+    $requestBody = IndodanaHelper::getRequestBody();
+
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($request_body)
+      )
+    );
+
+    $order = $this->getLatestOrder();
+
+    if ($order) {
+      $order
+        ->addStatusToHistory(
+          Mage::helper('indodanapayment')->getDefaultOrderPendingStatus(),
+          'Order has been placed on Indodana'
+        )
+        ->save();
+    }
+
+    MerchantResponse::printSuccessResponse($namespace);
+
+    return;
+  }
+
+  public function successAction()
+  {
+    // Redirect to home page for invalid request
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+      return Mage_Core_Controller_Varien_Action::_redirect('');
+    }
+
+    Mage::getSingleton('checkout/session')->unsQuoteId();
+
+    Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/success', array('_secure' => false));
+  }
+
+  public function cancelAction()
+  {
+    // Redirect to home page for invalid request
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+      return Mage_Core_Controller_Varien_Action::_redirect('');
+    }
+
+    $order = $this->getLatestOrder();
+
+    if ($order) {
+      $order
+        ->addStatusToHistory(
+          Mage::helper('indodanapayment')->getDefaultOrderFailedStatus(),
+          'Failed to complete order on Indodana'
+        )
+        ->save();
+    }
+
+    // TODO: If possible, redirect to Magento's cancel page instead
+    return Mage_Core_Controller_Varien_Action::_redirect('checkout/cart');
+  }
+
+  public function notifyAction()
+  {
+    // Disallow any action for invalid request
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      return $this->norouteAction();
+    }
+
+    // Log request headers
+    // -----
+    $namespace = '[MagentoV1-notifyAction]';
+
+    $requestHeaders = getallheaders();
+
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request headers: %s',
+        $namespace,
+        json_encode($requestHeaders)
+      )
+    );
+
+    // Check whether request authorization is valid
+    // -----
+    $authToken = isset($requestHeaders['Authorization']) ? $requestHeaders['Authorization'] : '';
+
+    $isValidAuthorization = Mage::helper('indodanapayment/transaction')
+      ->getIndodanaService()
+      ->isValidAuthToken($authToken);
+
+    if (!$isValidAuthorization) {
+      MerchantResponse::printInvalidRequestAuthResponse($namespace);
+
+      return;
+    }
+
+    // Log request body
+    // -----
+    $requestBody = IndodanaHelper::getRequestBody();
+
+    IndodanaLogger::log(
+      IndodanaLogger::INFO,
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($requestBody)
+      )
+    );
+
+    // Check whether request body is valid
+    // -----
+    if (!isset($requestBody['transactionStatus']) || !isset($requestBody['merchantOrderId'])) {
+      MerchantResponse::printInvalidRequestBodyResponse($namespace);
+
+      return;
+    }
+
+    $transactionStatus = $requestBody['transactionStatus'];
+    $orderId = $requestBody['merchantOrderId'];
+
+    $order = Mage::getModel('sales/order');
+    $order->load($orderId);
+
+    if (!$order) {
+      MerchantResponse::printNotFoundOrderResponse(
+        $orderId,
+        $namespace
+      );
+
+      return;
+    }
+
+    if (!in_array($transactionStatus, IndodanaConstant::getSuccessTransactionStatuses())) {
+      MerchantResponse::printInvalidTransactionStatusResponse(
+        $transactionStatus,
+        $orderId,
+        $namespace
+      );
+
+      return;
+    }
+
+    // Handle success order
+    // -----
+    $this->handleSuccessOrder($order);
+
+    MerchantResponse::printSuccessResponse($namespace);
+
+    return;
+  }
+
+  private function handleSuccessOrder(&$order) {
+    // Save invoice && transaction
+    // -----
+    $invoice = $order->prepareInvoice()
+       ->setTransactionId($order->getId())
+       ->addComment('Transaction is successfully processed by Indodana')
+       ->register()
+       ->pay();
+
+    $transaction = Mage::getModel('core/resource_transaction')
+      ->addObject($invoice)
+      ->addObject($invoice->getOrder());
+
+    $transaction->save();
+
+    // Set order as success
+    // -----
+    $order
+      ->addStatusToHistory(
+        Mage::helper('indodanapayment')->getDefaultOrderSuccessStatus(),
+        'Order on Indodana is successfully completed'
+      )
+      ->save();
+  }
 }

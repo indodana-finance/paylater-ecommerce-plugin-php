@@ -6,24 +6,16 @@ use IndodanaCommon\IndodanaService;
 use IndodanaCommon\IndodanaConstant;
 
 class ControllerPaymentIndodanaCheckout extends Controller {
-  private $errors = [];
   private $data = [];
-  private $labelKeyName = 'label';
-  private $inputKeyName = 'input';
-  private $errorKeyName = 'error';
-  private $indodanaCheckoutMapping = [];
-  private $indodanaCheckoutConfigKeys = [];
-  private $environmentMapping = [];
-  private $statusMapping = [];
+  private $errors = [];
+  private $label_key_name = 'label';
+  private $input_key_name = 'input';
+  private $error_key_name = 'error';
+  private $indodana_checkout_mapping = [];
+  private $indodana_checkout_config_keys = [];
+  private $environment_mapping = [];
+  private $status_mapping = [];
 
-  /* 
-      In OPENCART, every successful submit through the form will be redirected to the same page
-      with the value from the previous form sent as POST data.
-
-      We need to check if 
-      1. the received request contains the previous form's data (apply the data and redirect to home page)
-      2. doesn't contain the previous form's data (give user the form)
-   */
   public function index() 
   {
     $this->init();
@@ -32,7 +24,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
 
     // When merchant hit "Save" button
     if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validate()) {
-      $this->applyConfiguration();
+      $this->saveConfiguration();
       $this->redirectToExtensionPage();
     }
 
@@ -48,98 +40,98 @@ class ControllerPaymentIndodanaCheckout extends Controller {
 
   private function init()
   {
-    $labelKey = $this->labelKeyName;
-    $inputKey = $this->inputKeyName;
-    $errorKey = $this->errorKeyName;
+    $label_key = $this->label_key_name;
+    $input_key = $this->input_key_name;
+    $error_key = $this->error_key_name;
 
-    $this->indodanaCheckoutMapping = [
+    $this->indodana_checkout_mapping = [
       'storeName' => [
-        $labelKey => 'entry_store_name',
-        $inputKey => 'indodana_checkout_store_name',
-        $errorKey => 'error_store_name',
+        $label_key => 'entry_store_name',
+        $input_key => 'indodana_checkout_store_name',
+        $error_key => 'error_store_name',
       ],
       'storeUrl' => [
-        $labelKey => 'entry_store_url',
-        $inputKey => 'indodana_checkout_store_url',
-        $errorKey => 'error_store_url',
+        $label_key => 'entry_store_url',
+        $input_key => 'indodana_checkout_store_url',
+        $error_key => 'error_store_url',
       ],
       'storeEmail' => [
-        $labelKey => 'entry_store_email',
-        $inputKey => 'indodana_checkout_store_email',
-        $errorKey => 'error_store_email',
+        $label_key => 'entry_store_email',
+        $input_key => 'indodana_checkout_store_email',
+        $error_key => 'error_store_email',
       ],
       'storePhone' => [
-        $labelKey => 'entry_store_phone',
-        $inputKey => 'indodana_checkout_store_phone',
-        $errorKey => 'error_store_phone',
+        $label_key => 'entry_store_phone',
+        $input_key => 'indodana_checkout_store_phone',
+        $error_key => 'error_store_phone',
       ],
       'storeCountryCode' => [
-        $labelKey => 'entry_store_country_code',
-        $inputKey => 'indodana_checkout_store_country_code',
-        $errorKey => 'error_store_country_code',
+        $label_key => 'entry_store_country_code',
+        $input_key => 'indodana_checkout_store_country_code',
+        $error_key => 'error_store_country_code',
       ],
       'storeCity' => [
-        $labelKey => 'entry_store_city',
-        $inputKey => 'indodana_checkout_store_city',
-        $errorKey => 'error_store_city',
+        $label_key => 'entry_store_city',
+        $input_key => 'indodana_checkout_store_city',
+        $error_key => 'error_store_city',
       ],
       'storeAddress' => [
-        $labelKey => 'entry_store_address',
-        $inputKey => 'indodana_checkout_store_address',
-        $errorKey => 'error_store_address',
+        $label_key => 'entry_store_address',
+        $input_key => 'indodana_checkout_store_address',
+        $error_key => 'error_store_address',
       ],
       'storePostalCode' => [
-        $labelKey => 'entry_store_postal_code',
-        $inputKey => 'indodana_checkout_store_postal_code',
-        $errorKey => 'error_store_postal_code',
+        $label_key => 'entry_store_postal_code',
+        $input_key => 'indodana_checkout_store_postal_code',
+        $error_key => 'error_store_postal_code',
       ],
       'apiKey' => [
-        $labelKey => 'entry_api_key',
-        $inputKey => 'indodana_checkout_api_key',
-        $errorKey => 'error_api_key',
+        $label_key => 'entry_api_key',
+        $input_key => 'indodana_checkout_api_key',
+        $error_key => 'error_api_key',
       ],
       'apiSecret' => [
-        $labelKey => 'entry_api_secret',
-        $inputKey => 'indodana_checkout_api_secret',
-        $errorKey => 'error_api_secret',
+        $label_key => 'entry_api_secret',
+        $input_key => 'indodana_checkout_api_secret',
+        $error_key => 'error_api_secret',
       ],
       'environment' => [
-        $labelKey => 'entry_environment',
-        $inputKey => 'indodana_checkout_environment',
-        $errorKey => 'error_environment',
+        $label_key => 'entry_environment',
+        $input_key => 'indodana_checkout_environment',
+        $error_key => 'error_environment',
       ],
       'defaultOrderPendingStatus' => [
-        $labelKey => 'entry_default_order_pending_status',
-        $inputKey => 'indodana_checkout_default_order_pending_status_id',
-        $errorKey => 'error_default_order_pending_status',
+        $label_key => 'entry_default_order_pending_status',
+        $input_key => 'indodana_checkout_default_order_pending_status_id',
+        $error_key => 'error_default_order_pending_status',
       ],
       'defaultOrderSuccessStatus' => [
-        $labelKey => 'entry_default_order_success_status',
-        $inputKey => 'indodana_checkout_default_order_success_status_id',
-        $errorKey => 'error_default_order_success_status',
+        $label_key => 'entry_default_order_success_status',
+        $input_key => 'indodana_checkout_default_order_success_status_id',
+        $error_key => 'error_default_order_success_status',
       ],
       'defaultOrderFailedStatus' => [
-        $labelKey => 'entry_default_order_failed_status',
-        $inputKey => 'indodana_checkout_default_order_failed_status_id',
-        $errorKey => 'error_default_order_failed_status',
+        $label_key => 'entry_default_order_failed_status',
+        $input_key => 'indodana_checkout_default_order_failed_status_id',
+        $error_key => 'error_default_order_failed_status',
       ],
       'status' => [
-        $labelKey => 'entry_status',
-        $inputKey => 'indodana_checkout_status',
-        $errorKey => 'error_status',
+        $label_key => 'entry_status',
+        $input_key => 'indodana_checkout_status',
+        $error_key => 'error_status',
       ],
       'sortOrder' => [
-        $labelKey => 'entry_sort_order',
-        $inputKey => 'indodana_checkout_sort_order',
-        $errorKey => 'error_sort_order',
+        $label_key => 'entry_sort_order',
+        $input_key => 'indodana_checkout_sort_order',
+        $error_key => 'error_sort_order',
       ],
     ];
 
-    $this->indodanaCheckoutConfigKeys = array_keys($this->indodanaCheckoutMapping);
+    $this->indodana_checkout_config_keys = array_keys($this->indodana_checkout_mapping);
 
-    $this->environmentMapping = IndodanaConstant::getEnvironmentMapping();
+    $this->environment_mapping = IndodanaConstant::getEnvironmentMapping();
 
-    $this->statusMapping = IndodanaConstant::getStatusMapping();
+    $this->status_mapping = IndodanaConstant::getStatusMapping();
   }
 
   private function loadModel() 
@@ -153,24 +145,23 @@ class ControllerPaymentIndodanaCheckout extends Controller {
     $this->data['country_codes'] = IndodanaConstant::getCountryCodeMapping();
   }
 
-  /*
-      When user press EDIT or ADD, we need to show the previous data to the user
-      This function will get all the form's data that might have been saved before, and show it
+  /**
+   * Display form value from saved configuration if exist
    */
   private function applyFormValue() 
   {
-    foreach ($this->indodanaCheckoutConfigKeys as $configKey) {
-      $inputKey = $this->indodanaCheckoutMapping[$configKey][$this->inputKeyName];
+    foreach ($this->indodana_checkout_config_keys as $config_key) {
+      $input_key = $this->indodana_checkout_mapping[$config_key][$this->input_key_name];
 
-      if (isset($this->request->post[$inputKey])) {
-        $this->data[$inputKey] = $this->request->post[$inputKey];
+      if (isset($this->request->post[$input_key])) {
+        $this->data[$input_key] = $this->request->post[$input_key];
       } else {
-        $this->data[$inputKey] = $this->config->get($inputKey);
+        $this->data[$input_key] = $this->config->get($input_key);
       }
     }
   }
 
-  private function applyConfiguration() 
+  private function saveConfiguration() 
   {
     $this->model_setting_setting->editSetting('indodana_checkout', $this->request->post);
 
@@ -184,7 +175,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
 
   private function initializeLanguage() 
   {
-    $languageKeys = [
+    $language_keys = [
       'heading_title',
       'subheading_title',
       'button_save',
@@ -192,7 +183,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
       'text_success',
     ];
 
-    foreach($languageKeys as $key) {
+    foreach($language_keys as $key) {
       $this->data[$key] = $this->language->get($key);
     }
 
@@ -212,12 +203,12 @@ class ControllerPaymentIndodanaCheckout extends Controller {
   private function initializeForm()
   {
     // Label and placeholder
-    $frontendConfigMapping = IndodanaConstant::getFrontendConfigMapping();
+    $frontend_config_mapping = IndodanaConstant::getFrontendConfigMapping();
 
-    foreach ($this->indodanaCheckoutConfigKeys as $configKey) {
-      $labelKey = $this->indodanaCheckoutMapping[$configKey][$this->labelKeyName];
+    foreach ($this->indodana_checkout_config_keys as $config_key) {
+      $label_key = $this->indodana_checkout_mapping[$config_key][$this->label_key_name];
 
-      $this->data[$labelKey] = $frontendConfigMapping[$configKey];
+      $this->data[$label_key] = $frontend_config_mapping[$config_key];
     }
 
     // Environment Value
@@ -225,16 +216,16 @@ class ControllerPaymentIndodanaCheckout extends Controller {
     $this->data['environment_production'] = IndodanaConstant::PRODUCTION;
 
     // Environment Text
-    $this->data['text_environment_sandbox'] = $this->environmentMapping[IndodanaConstant::SANDBOX];
-    $this->data['text_environment_production'] = $this->environmentMapping[IndodanaConstant::PRODUCTION];
+    $this->data['text_environment_sandbox'] = $this->environment_mapping[IndodanaConstant::SANDBOX];
+    $this->data['text_environment_production'] = $this->environment_mapping[IndodanaConstant::PRODUCTION];
 
     // Status Value
     $this->data['status_disabled'] = IndodanaConstant::DISABLED;
     $this->data['status_enabled'] = IndodanaConstant::ENABLED;
 
     // Status Text
-    $this->data['text_status_disabled'] = $this->statusMapping[IndodanaConstant::DISABLED];
-    $this->data['text_status_enabled'] = $this->statusMapping[IndodanaConstant::ENABLED];
+    $this->data['text_status_disabled'] = $this->status_mapping[IndodanaConstant::DISABLED];
+    $this->data['text_status_enabled'] = $this->status_mapping[IndodanaConstant::ENABLED];
 
     // Action
     $this->data['form_action'] = $this->url->link('payment/indodana_checkout', 'token=' . $this->session->data['token']);
@@ -248,13 +239,13 @@ class ControllerPaymentIndodanaCheckout extends Controller {
 
   private function loadErrors() 
   {
-    foreach ($this->indodanaCheckoutConfigKeys as $configKey) {
-      $errorKey = $this->indodanaCheckoutMapping[$configKey][$this->errorKeyName];
+    foreach ($this->indodana_checkout_config_keys as $config_key) {
+      $error_key = $this->indodana_checkout_mapping[$config_key][$this->error_key_name];
 
-      if (isset($this->errors[$errorKey])) {
-        $this->data[$errorKey] = $this->errors[$errorKey];
+      if (isset($this->errors[$error_key])) {
+        $this->data[$error_key] = $this->errors[$error_key];
       } else {
-        $this->data[$errorKey] = '';
+        $this->data[$error_key] = '';
       }
     }
   }
@@ -267,24 +258,24 @@ class ControllerPaymentIndodanaCheckout extends Controller {
 
     $configuration = [];
 
-    foreach ($this->indodanaCheckoutConfigKeys as $configKey) {
-      $inputKey = $this->indodanaCheckoutMapping[$configKey][$this->inputKeyName];
+    foreach ($this->indodana_checkout_config_keys as $config_key) {
+      $input_key = $this->indodana_checkout_mapping[$config_key][$this->input_key_name];
 
-      $inputValue = isset($this->data[$inputKey]) ? $this->data[$inputKey] : null;
+      $input_value = isset($this->data[$input_key]) ? $this->data[$input_key] : null;
 
-      $configuration[$configKey] = $inputValue;
+      $configuration[$config_key] = $input_value;
 
-      if ($configKey === 'sortOrder') {
-        $configuration[$configKey] = (int) $configuration[$configKey];
+      if ($config_key === 'sortOrder') {
+        $configuration[$config_key] = (int) $configuration[$config_key];
       }
     }
 
-    $validationResult = IndodanaService::validateConfiguration($configuration);
+    $validation_result = IndodanaService::validateConfiguration($configuration);
 
-    foreach ($validationResult['errors'] as $validationErrorKey => $validationErrorValue) {
-      $errorKey = $this->indodanaCheckoutMapping[$validationErrorKey][$this->errorKeyName];
+    foreach ($validation_result['errors'] as $validation_error_key => $validation_error_value) {
+      $error_key = $this->indodana_checkout_mapping[$validation_error_key][$this->error_key_name];
 
-      $this->errors[$errorKey] = $validationErrorValue;
+      $this->errors[$error_key] = $validation_error_value;
     }
 
     return empty($this->errors);

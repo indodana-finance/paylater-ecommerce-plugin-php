@@ -9,14 +9,12 @@ class Indodana_Payment_Block_Form_Checkout extends Mage_Payment_Block_Form
         parent::_construct();
 
         $cart = Mage::getModel('checkout/cart')->getQuote();
-
         $paymentOptions = Mage::helper('indodanapayment/transaction')->getInstallmentOptions($cart);
 
         $lowestMonthlyInstallment = $this->getLowestMonthlyInstallment($paymentOptions);
-
         $offer = $this->generateOfferMessage($lowestMonthlyInstallment);
-
         $this->assign('offer', $offer);
+
         $this->setTemplate('indodanapayment/form/checkout.phtml');
     }
 

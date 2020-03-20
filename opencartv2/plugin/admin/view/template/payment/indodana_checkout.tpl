@@ -57,7 +57,7 @@
             <div class="col-sm-10">
               <select name="indodana_checkout_store_country_code" id="input-store-country-code" class="form-control">
                 <?php foreach ($country_codes as $country_code_id => $country_code_name) { ?>
-                <?php if ($country_code_id == $indodana_checkout_store_country_code) { ?>
+                <?php if ($country_code_id === $indodana_checkout_store_country_code) { ?>
                 <option value="<?php echo $country_code_id; ?>" selected="selected"><?php echo $country_code_name; ?></option>
                 <?php } else { ?>
                 <option value="<?php echo $country_code_id; ?>"><?php echo $country_code_name; ?></option>

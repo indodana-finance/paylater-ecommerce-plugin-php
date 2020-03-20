@@ -77,7 +77,7 @@ class IndodanaConstant
     return self::statusMapping;
   }
 
-  public static function getSuccessTransactionStatus()
+  public static function getSuccessTransactionStatuses()
   {
     return [ 'INITIATED', 'PAID' ];
   }

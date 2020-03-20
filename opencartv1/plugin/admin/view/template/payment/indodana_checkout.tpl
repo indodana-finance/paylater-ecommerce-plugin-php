@@ -1,8 +1,13 @@
 <?=$header; ?>
 <div id="content">
+  <div class="breadcrumb">
+    <?php foreach ($breadcrumbs as $breadcrumb): ?>
+    <?php echo $breadcrumb['separator']; ?><a href="<?php echo $breadcrumb['href']; ?>"><?php echo $breadcrumb['text']; ?></a>
+    <?php endforeach;; ?>
+  </div>
   <div class="box">
     <div class="heading">
-      <h1><img src="view/image/payment/indodana.png" alt="" /><?=$heading_title; ?></h1>
+      <h1><img src="view/image/payment.png" /><?=$heading_title; ?></h1>
       <div class="buttons">
         <a onclick="$('#form').submit();" class="button">
           <?=$text_button_save; ?>
@@ -15,95 +20,104 @@
     <div class="content">
       <form action="<?=$form_action; ?>" method="post" enctype="multipart/form-data" id="form">
         <table class="form">
-          <tr>
-            <td><h2>Indodana Paylater Configuration</h2></td>
-          </tr>
 
           <tr>
-            <td>Store Name</td>
+            <td><?=$entry_store_name; ?></td>
             <td>
-              <input type="text" name="indodana_store_name" value="<?=$indodana_store_name; ?>" size="30"/>
-              <?php if ($indodana_store_name_validation_error) { ?>
-                <span class="error"><?=$indodana_store_name_validation_error; ?></span>
+              <input type="text" name="indodana_checkout_store_name" value="<?=$indodana_checkout_store_name; ?>" size="30"/>
+              <?php if ($error_store_name) { ?>
+                <span class="error"><?=$error_store_name; ?></span>
               <?php } ?>
             </td>
           </tr>
 
           <tr>
-            <td>Store Url</td>
+            <td><?=$entry_store_url; ?></td>
             <td>
-              <input type="text" name="indodana_store_url" value="<?=$indodana_store_url; ?>" size="30"/>
-              <?php if ($indodana_store_url_validation_error) { ?>
-                <span class="error"><?=$indodana_store_name_validation_error; ?></span>
+              <input type="text" name="indodana_checkout_store_url" value="<?=$indodana_checkout_store_url; ?>" size="30"/>
+              <?php if ($error_store_url) { ?>
+                <span class="error"><?=$error_store_url; ?></span>
               <?php } ?>
             </td>
           </tr>
 
           <tr>
-            <td>Store Email</td>
+            <td><?=$entry_store_email; ?></td>
             <td>
-              <input type="text" name="indodana_store_email" value="<?=$indodana_store_email; ?>" size="30"/>
-              <?php if ($indodana_store_email_validation_error) { ?>
-                <span class="error"><?=$indodana_store_email_validation_error; ?></span>
+              <input type="text" name="indodana_checkout_store_email" value="<?=$indodana_checkout_store_email; ?>" size="30"/>
+              <?php if ($error_store_email) { ?>
+                <span class="error"><?=$error_store_email; ?></span>
               <?php } ?>
             </td>
           </tr>
 
           <tr>
-            <td>Store Phone</td>
+            <td><?=$entry_store_phone; ?></td>
             <td>
-              <input type="text" name="indodana_store_phone" value="<?=$indodana_store_phone; ?>" size="30"/>
-              <?php if ($indodana_store_phone_validation_error) { ?>
-                <span class="error"><?=$indodana_store_phone_validation_error; ?></span>
+              <input type="text" name="indodana_checkout_store_phone" value="<?=$indodana_checkout_store_phone; ?>" size="30"/>
+              <?php if ($error_store_phone) { ?>
+                <span class="error"><?=$error_store_phone; ?></span>
               <?php } ?>
             </td>
           </tr>
 
           <tr>
-            <td>Store Country Code</td>
+            <td><?=$entry_store_country_code; ?></td>
             <td>
-              <select name="indodana_store_country_code">
+              <select name="indodana_checkout_store_country_code">
                 <option value="">-- Select --</option>
-                <option
-                  value="ID"
-                  <?php if ($indodana_store_country_code === "ID") { ?>
-                  selected="selected"
-                  <?php } ?>
-                >ID</option>
+
+                <?php foreach ($country_codes as $country_code_id => $country_code_name) { ?>
+                <?php if ($country_code_id === $indodana_checkout_store_country_code) { ?>
+                <option value="<?php echo $country_code_id; ?>" selected="selected"><?php echo $country_code_name; ?></option>
+                <?php } else { ?>
+                <option value="<?php echo $country_code_id; ?>"><?php echo $country_code_name; ?></option>
+                <?php } ?>
+                <?php } ?>
               </select>
 
-              <?php if ($indodana_store_country_code_validation_error) { ?>
-                <span class="error"><?=$indodana_store_country_code_validation_error; ?></span>
+              <?php if ($error_store_country_code) { ?>
+                <span class="error"><?=$error_store_country_code; ?></span>
               <?php } ?>
             </td>
           </tr>
 
           <tr>
-            <td>Store City</td>
+            <td><?=$entry_store_city; ?></td>
             <td>
-              <input type="text" name="indodana_store_city" value="<?=$indodana_store_city; ?>" size="30"/>
-              <?php if ($indodana_store_city_validation_error) { ?>
-                <span class="error"><?=$indodana_store_city_validation_error; ?></span>
+              <input type="text" name="indodana_checkout_store_city" value="<?=$indodana_checkout_store_city; ?>" size="30"/>
+              <?php if ($error_store_city) { ?>
+                <span class="error"><?=$error_store_city; ?></span>
               <?php } ?>
             </td>
           </tr>
 
           <tr>
-            <td>Store Address</td>
+            <td><?=$entry_store_address; ?></td>
             <td>
-              <input type="text" name="indodana_store_address" value="<?=$indodana_store_address; ?>" size="30"/>
-              <?php if ($indodana_store_address_validation_error) { ?>
-                <span class="error"><?=$indodana_store_address_validation_error; ?></span>
+              <input type="text" name="indodana_checkout_store_address" value="<?=$indodana_checkout_store_address; ?>" size="30"/>
+              <?php if ($error_store_address) { ?>
+                <span class="error"><?=$error_store_address; ?></span>
               <?php } ?>
             </td>
           </tr>
 
           <tr>
-            <td>Store Postal Code</td>
+            <td><?=$entry_store_postal_code; ?></td>
             <td>
-              <input type="text" name="indodana_store_postal_code" value="<?=$indodana_store_postal_code; ?>" size="30"/>
-              <?php if ($indodana_store_postal_code_validation_error) { ?>
-                <span class="error"><?=$indodana_store_postal_code_validation_error; ?></span>
+              <input type="text" name="indodana_checkout_store_postal_code" value="<?=$indodana_checkout_store_postal_code; ?>" size="30"/>
+              <?php if ($error_store_postal_code) { ?>
+                <span class="error"><?=$error_store_postal_code; ?></span>
+              <?php } ?>
+            </td>
+          </tr>
+
+          <tr>
+            <td><?=$entry_api_key; ?></td>
+            <td>
+              <input type="text" name="indodana_checkout_api_key" value="<?=$indodana_checkout_api_key; ?>" size="30"/>
+              <?php if ($error_api_secret) { ?>
+                <span class="error"><?=$error_api_secret; ?></span>
               <?php } ?>
             </td>
           </tr>
@@ -112,24 +126,16 @@
             <td><?=$entry_api_secret; ?></td>
             <td>
               <input type="text" name="indodana_checkout_api_secret" value="<?=$indodana_checkout_api_secret; ?>" size="30"/>
-              <?php if ($indodana_checkout_api_secret_validation_error) { ?>
-                <span class="error"><?=$indodana_checkout_api_secret_validation_error; ?></span>
+              <?php if ($error_api_secret) { ?>
+                <span class="error"><?=$error_api_secret; ?></span>
               <?php } ?>
             </td>
           </tr>
-          <tr>
-            <td><?=$entry_api_key; ?></td>
-            <td>
-              <input type="text" name="indodana_checkout_api_key" value="<?=$indodana_checkout_api_key; ?>" size="30"/>
-              <?php if ($indodana_checkout_api_key_validation_error) { ?>
-                <span class="error"><?=$indodana_checkout_api_key_validation_error; ?></span>
-              <?php } ?>
-            </td>
-          </tr>
+
           <tr>
             <td><?=$entry_environment; ?></td>
             <td>
-              <?php if ($indodana_checkout_environment == $environment_production) { ?>
+              <?php if ($indodana_checkout_environment === $environment_production) { ?>
                 <label>
                   <input type="radio" name="indodana_checkout_environment" value="<?=$environment_sandbox; ?>"/>
                   <?=$text_environment_sandbox; ?>
@@ -150,8 +156,9 @@
               <?php } ?>
             </td>
           </tr>
+
           <tr>
-            <td><?=$entry_order_pending_status; ?></td>
+            <td><?=$entry_default_order_pending_status; ?></td>
             <td>
               <select name="indodana_checkout_default_order_pending_status_id">
                 <option
@@ -164,7 +171,7 @@
                 </option>
 
                 <?php foreach ($order_statuses as $order_status) { ?>
-                  <?php if ($order_status['order_status_id'] == $indodana_checkout_default_order_pending_status_id) { ?>
+                  <?php if ($order_status['order_status_id'] === $indodana_checkout_default_order_pending_status_id) { ?>
                     <option value="<?=$order_status['order_status_id']; ?>" selected="selected"><?=$order_status['name']; ?></option>
                   <?php } else { ?>
                     <option value="<?=$order_status['order_status_id']; ?>"><?=$order_status['name']; ?></option>
@@ -172,13 +179,14 @@
                 <?php } ?>
               </select>
 
-              <?php if ($indodana_checkout_default_order_pending_status_id_validation_error) { ?>
-                <span class="error"><?=$indodana_checkout_default_order_pending_status_id_validation_error; ?></span>
+              <?php if ($error_default_order_pending_status) { ?>
+                <span class="error"><?=$error_default_order_pending_status; ?></span>
               <?php } ?>
             </td>
           </tr>
+
           <tr>
-            <td><?=$entry_order_success_status; ?></td>
+            <td><?=$entry_default_order_success_status; ?></td>
             <td>
               <select name="indodana_checkout_default_order_success_status_id">
                 <option
@@ -191,7 +199,7 @@
                 </option>
 
                 <?php foreach ($order_statuses as $order_status) { ?>
-                  <?php if ($order_status['order_status_id'] == $indodana_checkout_default_order_success_status_id) { ?>
+                  <?php if ($order_status['order_status_id'] === $indodana_checkout_default_order_success_status_id) { ?>
                     <option value="<?=$order_status['order_status_id']; ?>" selected="selected"><?=$order_status['name']; ?></option>
                   <?php } else { ?>
                     <option value="<?=$order_status['order_status_id']; ?>"><?=$order_status['name']; ?></option>
@@ -199,13 +207,14 @@
                 <?php } ?>
               </select>
 
-              <?php if ($indodana_checkout_default_order_success_status_id_validation_error) { ?>
-                <span class="error"><?=$indodana_checkout_default_order_success_status_id_validation_error; ?></span>
+              <?php if ($error_default_order_success_status) { ?>
+                <span class="error"><?=$error_default_order_success_status; ?></span>
               <?php } ?>
             </td>
           </tr>
+
           <tr>
-            <td><?=$entry_order_failed_status; ?></td>
+            <td><?=$entry_default_order_failed_status; ?></td>
             <td>
               <select name="indodana_checkout_default_order_failed_status_id">
                 <option
@@ -218,7 +227,7 @@
                 </option>
 
                 <?php foreach ($order_statuses as $order_status) { ?>
-                  <?php if ($order_status['order_status_id'] == $indodana_checkout_default_order_failed_status_id) { ?>
+                  <?php if ($order_status['order_status_id'] === $indodana_checkout_default_order_failed_status_id) { ?>
                     <option value="<?=$order_status['order_status_id']; ?>" selected="selected"><?=$order_status['name']; ?></option>
                   <?php } else { ?>
                     <option value="<?=$order_status['order_status_id']; ?>"><?=$order_status['name']; ?></option>
@@ -226,39 +235,37 @@
                 <?php } ?>
               </select>
 
-              <?php if ($indodana_checkout_default_order_failed_status_id_validation_error) { ?>
-                <span class="error"><?=$indodana_checkout_default_order_failed_status_id_validation_error; ?></span>
+              <?php if ($error_default_order_failed_status) { ?>
+                <span class="error"><?=$error_default_order_failed_status; ?></span>
               <?php } ?>
             </td>
           </tr>
+
           <tr>
             <td><?=$entry_status; ?></td>
             <td><select name="indodana_checkout_status">
               <?php if ($indodana_checkout_status) { ?>
-                <option value="1" selected="selected"><?=$text_enabled; ?></option>
-                <option value="0"><?=$text_disabled; ?></option>
+                <option value="1" selected="selected"><?=$text_status_enabled; ?></option>
+                <option value="0"><?=$text_status_disabled; ?></option>
               <?php } else { ?>
-                <option value="1"><?=$text_enabled; ?></option>
-                <option value="0" selected="selected"><?=$text_disabled; ?></option>
+                <option value="1"><?=$text_status_enabled; ?></option>
+                <option value="0" selected="selected"><?=$text_status_disabled; ?></option>
               <?php } ?>
             </select></td>
           </tr>
+
           <tr>
             <td><?=$entry_sort_order; ?></td>
             <td>
               <input type="text" name="indodana_checkout_sort_order" value="<?=$indodana_checkout_sort_order; ?>" size="30"/>
-              <?php if ($indodana_checkout_sort_order_validation_error) { ?>
-                <span class="error"><?=$indodana_checkout_sort_order_validation_error; ?></span>
+              <?php if ($error_sort_order) { ?>
+                <span class="error"><?=$error_sort_order; ?></span>
               <?php } ?>
             </td>
           </tr>
+
         </table>
       </form>
-      <h2>Log</h2>
-      <textarea
-        wrap="off"
-        style="width: 98%; height: 300px; padding: 5px; border: 1px solid #CCCCCC; background: #FFFFFF; overflow: scroll;"
-      ><?= $log; ?></textarea>
     </div>
   </div>
 </div>

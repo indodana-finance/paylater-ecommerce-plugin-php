@@ -12,254 +12,6 @@ use IndodanaCommon\MerchantResponse;
 
 class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterface
 {
-  private static $country_code_options = [
-    '' => 'Please select',
-    'AFG' => 'AFG',
-    'ALA' => 'ALA',
-    'ALB' => 'ALB',
-    'DZA' => 'DZA',
-    'AND' => 'AND',
-    'AGO' => 'AGO',
-    'AIA' => 'AIA',
-    'ATA' => 'ATA',
-    'ATG' => 'ATG',
-    'ARG' => 'ARG',
-    'ARM' => 'ARM',
-    'ABW' => 'ABW',
-    'AUS' => 'AUS',
-    'AUT' => 'AUT',
-    'AZE' => 'AZE',
-    'BHS' => 'BHS',
-    'BHR' => 'BHR',
-    'BGD' => 'BGD',
-    'BRB' => 'BRB',
-    'BLR' => 'BLR',
-    'BEL' => 'BEL',
-    'PLW' => 'PLW',
-    'BLZ' => 'BLZ',
-    'BEN' => 'BEN',
-    'BMU' => 'BMU',
-    'BTN' => 'BTN',
-    'BOL' => 'BOL',
-    'BES' => 'BES',
-    'BIH' => 'BIH',
-    'BWA' => 'BWA',
-    'BVT' => 'BVT',
-    'BRA' => 'BRA',
-    'IOT' => 'IOT',
-    'VGB' => 'VGB',
-    'BRN' => 'BRN',
-    'BGR' => 'BGR',
-    'BFA' => 'BFA',
-    'BDI' => 'BDI',
-    'KHM' => 'KHM',
-    'CMR' => 'CMR',
-    'CAN' => 'CAN',
-    'CPV' => 'CPV',
-    'CYM' => 'CYM',
-    'CAF' => 'CAF',
-    'TCD' => 'TCD',
-    'CHL' => 'CHL',
-    'CHN' => 'CHN',
-    'CXR' => 'CXR',
-    'CCK' => 'CCK',
-    'COL' => 'COL',
-    'COM' => 'COM',
-    'COG' => 'COG',
-    'COD' => 'COD',
-    'COK' => 'COK',
-    'CRI' => 'CRI',
-    'HRV' => 'HRV',
-    'CUB' => 'CUB',
-    'CUW' => 'CUW',
-    'CYP' => 'CYP',
-    'CZE' => 'CZE',
-    'DNK' => 'DNK',
-    'DJI' => 'DJI',
-    'DMA' => 'DMA',
-    'DOM' => 'DOM',
-    'ECU' => 'ECU',
-    'EGY' => 'EGY',
-    'SLV' => 'SLV',
-    'GNQ' => 'GNQ',
-    'ERI' => 'ERI',
-    'EST' => 'EST',
-    'ETH' => 'ETH',
-    'FLK' => 'FLK',
-    'FRO' => 'FRO',
-    'FJI' => 'FJI',
-    'FIN' => 'FIN',
-    'FRA' => 'FRA',
-    'GUF' => 'GUF',
-    'PYF' => 'PYF',
-    'ATF' => 'ATF',
-    'GAB' => 'GAB',
-    'GMB' => 'GMB',
-    'GEO' => 'GEO',
-    'DEU' => 'DEU',
-    'GHA' => 'GHA',
-    'GIB' => 'GIB',
-    'GRC' => 'GRC',
-    'GRL' => 'GRL',
-    'GRD' => 'GRD',
-    'GLP' => 'GLP',
-    'GTM' => 'GTM',
-    'GGY' => 'GGY',
-    'GIN' => 'GIN',
-    'GNB' => 'GNB',
-    'GUY' => 'GUY',
-    'HTI' => 'HTI',
-    'HMD' => 'HMD',
-    'HND' => 'HND',
-    'HKG' => 'HKG',
-    'HUN' => 'HUN',
-    'ISL' => 'ISL',
-    'IND' => 'IND',
-    'IDN' => 'IDN',
-    'RIN' => 'RIN',
-    'IRQ' => 'IRQ',
-    'IRL' => 'IRL',
-    'IMN' => 'IMN',
-    'ISR' => 'ISR',
-    'ITA' => 'ITA',
-    'CIV' => 'CIV',
-    'JAM' => 'JAM',
-    'JPN' => 'JPN',
-    'JEY' => 'JEY',
-    'JOR' => 'JOR',
-    'KAZ' => 'KAZ',
-    'KEN' => 'KEN',
-    'KIR' => 'KIR',
-    'KWT' => 'KWT',
-    'KGZ' => 'KGZ',
-    'LAO' => 'LAO',
-    'LVA' => 'LVA',
-    'LBN' => 'LBN',
-    'LSO' => 'LSO',
-    'LBR' => 'LBR',
-    'LBY' => 'LBY',
-    'LIE' => 'LIE',
-    'LTU' => 'LTU',
-    'LUX' => 'LUX',
-    'MAC' => 'MAC',
-    'MKD' => 'MKD',
-    'MDG' => 'MDG',
-    'MWI' => 'MWI',
-    'MYS' => 'MYS',
-    'MDV' => 'MDV',
-    'MLI' => 'MLI',
-    'MLT' => 'MLT',
-    'MHL' => 'MHL',
-    'MTQ' => 'MTQ',
-    'MRT' => 'MRT',
-    'MUS' => 'MUS',
-    'MYT' => 'MYT',
-    'MEX' => 'MEX',
-    'FSM' => 'FSM',
-    'MDA' => 'MDA',
-    'MCO' => 'MCO',
-    'MNG' => 'MNG',
-    'MNE' => 'MNE',
-    'MSR' => 'MSR',
-    'MAR' => 'MAR',
-    'MOZ' => 'MOZ',
-    'MMR' => 'MMR',
-    'NAM' => 'NAM',
-    'NRU' => 'NRU',
-    'NPL' => 'NPL',
-    'NLD' => 'NLD',
-    'ANT' => 'ANT',
-    'NCL' => 'NCL',
-    'NZL' => 'NZL',
-    'NIC' => 'NIC',
-    'NER' => 'NER',
-    'NGA' => 'NGA',
-    'NIU' => 'NIU',
-    'NFK' => 'NFK',
-    'MNP' => 'MNP',
-    'NOR' => 'NOR',
-    'OMN' => 'OMN',
-    'PAK' => 'PAK',
-    'PSE' => 'PSE',
-    'PAN' => 'PAN',
-    'PNG' => 'PNG',
-    'PRY' => 'PRY',
-    'PER' => 'PER',
-    'PHL' => 'PHL',
-    'PCN' => 'PCN',
-    'POL' => 'POL',
-    'PRT' => 'PRT',
-    'QAT' => 'QAT',
-    'REU' => 'REU',
-    'SHN' => 'SHN',
-    'RUS' => 'RUS',
-    'EWA' => 'EWA',
-    'BLM' => 'BLM',
-    'SHN' => 'SHN',
-    'KNA' => 'KNA',
-    'LCA' => 'LCA',
-    'MAF' => 'MAF',
-    'SXM' => 'SXM',
-    'SPM' => 'SPM',
-    'VCT' => 'VCT',
-    'SMR' => 'SMR',
-    'STP' => 'STP',
-    'SAU' => 'SAU',
-    'SEN' => 'SEN',
-    'SRB' => 'SRB',
-    'SYC' => 'SYC',
-    'SLE' => 'SLE',
-    'SGP' => 'SGP',
-    'SVK' => 'SVK',
-    'SVN' => 'SVN',
-    'SLB' => 'SLB',
-    'SOM' => 'SOM',
-    'ZAF' => 'ZAF',
-    'SGS' => 'SGS',
-    'KOR' => 'KOR',
-    'SSD' => 'SSD',
-    'ESP' => 'ESP',
-    'LKA' => 'LKA',
-    'SDN' => 'SDN',
-    'SUR' => 'SUR',
-    'SJM' => 'SJM',
-    'SWZ' => 'SWZ',
-    'SWE' => 'SWE',
-    'CHE' => 'CHE',
-    'SYR' => 'SYR',
-    'TWN' => 'TWN',
-    'TJK' => 'TJK',
-    'TZA' => 'TZA',
-    'THA' => 'THA',
-    'TLS' => 'TLS',
-    'TGO' => 'TGO',
-    'TKL' => 'TKL',
-    'TON' => 'TON',
-    'TTO' => 'TTO',
-    'TUN' => 'TUN',
-    'TUR' => 'TUR',
-    'TKM' => 'TKM',
-    'TCA' => 'TCA',
-    'TUV' => 'TUV',
-    'UGA' => 'UGA',
-    'UKR' => 'UKR',
-    'ARE' => 'ARE',
-    'GBR' => 'GBR',
-    'USA' => 'USA',
-    'URY' => 'URY',
-    'UZB' => 'UZB',
-    'VUT' => 'VUT',
-    'VAT' => 'VAT',
-    'VEN' => 'VEN',
-    'VNM' => 'VNM',
-    'WLF' => 'WLF',
-    'ESH' => 'ESH',
-    'WSM' => 'WSM',
-    'YEM' => 'YEM',
-    'ZMB' => 'ZMB',
-    'ZWE' => 'ZWE',
-  ];
-
   private $indodana_service;
 
   public function __construct() {
@@ -268,7 +20,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     $this->has_fields = true;
 
     $this->method_title = __('Indodana Payment', 'indodana-method-title');
-    $this->method_description = __('Payment', 'indodana-method-description');
+    $this->method_description = __('Indodana Payment redirects your customer to Indodana during checkout.', 'indodana-method-description');
 
     $this->supports = array(
       'products'
@@ -302,169 +54,168 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     return $this->indodana_service;
   }
 
-  // Form on admin settings
+  /**
+   * Form on admin settings
+   */
   public function init_form_fields() {
+    $order_statuses = wc_get_order_statuses();
+
     $this->form_fields = array(
-      'enabled' => array(
-        'title'     => __('Enable', 'indodana-enable-input-title'),
-        'type'      => 'checkbox',
-        'label'     => __('Check to enable the plugins', 'indodana-enable-input-label'),
-        'default'   => 'no'
-      ),
-      'title' => array(
-        'title'       => 'Title',
-        'type'        => 'text',
-        'description' => 'This controls the title which the user sees during checkout.',
-        'default'     => 'Indodana Payment',
-        'desc_tip'    => true,
-      ),
-      'description' => array(
-        'title'       => 'Description',
-        'type'        => 'textarea',
-        'description' => 'This controls the description which the user sees during checkout.',
-        'default'     => 'Pay with your credit card via our super-cool payment gateway.',
-      ),
-      'environment' => array(
-        'title'         => __('Environment', 'indodana-environment-input-title'),
-        'type'          => 'select',
-        'description'   => __('Choose sandbox if you are testing this plugins', 'indodana-environment-input-label'),
-        'default'       => 'SANDBOX',
-        'options'       => array(
-          'SANDBOX'   => __('Sandbox', 'indodana-environment-value-sandbox'),
-          'PRODUCTION'    => __('Production', 'indodana-environment-value-production')
-        )
-      ),
+      'enabled' => [
+        'title'           => 'Enable',
+        'type'            => 'checkbox',
+        'label'           => 'Check to enable the plugins',
+        'default'         => 'no',
+        'config_name'     => 'status',
+      ],
+      'title' => [
+        'title'           => 'Title',
+        'type'            => 'text',
+        'description'     => 'This controls the title which the user sees during checkout.',
+        'desc_tip'        => true,
+        'default'         => 'Indodana Payment',
+      ],
+      'description' => [
+        'title'           => 'Description',
+        'type'            => 'textarea',
+        'description'     => 'This controls the description which the user sees during checkout.',
+        'desc_tip'        => true,
+        'default'         => 'Pay with your credit card via our super-cool payment gateway',
+      ],
+      'environment' => [
+        'title'           => 'Environment',
+        'type'            => 'select',
+        'description'     => 'Choose "Sandbox" if you are testing this plugins',
+        'default'         => IndodanaConstant::SANDBOX,
+        'options'         => IndodanaConstant::getEnvironmentMapping(),
+        'config_name'     => 'environment',
+      ],
       'store_name' => [
-        'title'             => __('Store Name*', 'indodana-store-name-input-title'),
-        'type'              => 'text',
-        'validator'        => Validator::notOptional(),
-        'validationMessage' => 'Store Name is required',
+        'title'           => 'Store Name',
+        'type'            => 'text',
+        'config_name'     => 'storeName',
       ],
       'store_url' => [
-        'title'             => __('Store Url*', 'indodana-store-url-input-title'),
-        'type'              => 'text',
-        'validator'        => Validator::notOptional(),
-        'validationMessage' => 'Store Url is required',
+        'title'           => 'Store URL',
+        'type'            => 'text',
+        'config_name'     => 'storeUrl',
       ],
       'store_email' => [
-        'title'             => __('Store Email*', 'indodana-store-email-input-title'),
-        'type'              => 'text',
-        'validator'        => Validator::notOptional()->email(),
-        'validationMessage' => 'Store Email is required and must be a valid email',
+        'title'           => 'Store Email',
+        'type'            => 'text',
+        'config_name'     => 'storeEmail',
       ],
-      'store_phone_number' => [
-        'title'         => __('Store Phone Number*', 'indodana-store-phone-number-input-title'),
-        'type'          => 'text',
-        'validator'        => Validator::notOptional()->numeric(),
-        'validationMessage' => 'Store Phone Number is required and must be numeric',
+      'store_phone' => [
+        'title'           => 'Store Phone',
+        'type'            => 'text',
+        'config_name'     => 'storePhone',
       ],
       'store_country_code' => [
-        'title'         => __('Store Country Code*', 'indodana-store-country-code-input-title'),
-        'type'          => 'select',
-        'validator'        => Validator::notOptional(),
-        'validationMessage' => 'Store Country Code is required',
-        'options' => self::$country_code_options,
+        'title'           => 'Store Country Code',
+        'type'            => 'select',
+        'options'         => IndodanaConstant::getCountryCodeMapping(),
+        'config_name'     => 'storeCountryCode',
       ],
       'store_city' => [
-        'title'         => __('Store City*', 'indodana-store-city-input-title'),
-        'type'          => 'text',
-        'validator'        => Validator::notOptional(),
-        'validationMessage' => 'Store City is required',
+        'title'           => 'Store City',
+        'type'            => 'text',
+        'config_name'     => 'storeCity',
       ],
       'store_address' => [
-        'title'         => __('Store Address*', 'indodana-store-address-input-title'),
-        'type'          => 'textarea',
-        'validator'        => Validator::notOptional(),
-        'validationMessage' => 'Store Address is required',
+        'title'           => 'Store Address',
+        'type'            => 'textarea',
+        'config_name'     => 'storeAddress',
       ],
       'store_postal_code' => [
-        'title'         => __('Store Postal Code*', 'indodana-postal-code-input-title'),
-        'type'          => 'text',
-        'validator'        => Validator::notOptional()->length(null, 5),
-        'validationMessage' => 'Store Postal Code is required and must have length 5',
+        'title'           => 'Store Postal Code',
+        'type'            => 'text',
+        'config_name'     => 'storePostalCode',
       ],
-      'api_key' => array(
-        'title'         => __('Api Key*', 'indodana-api-key-input-title'),
-        'type'          => 'text',
-        'description'   => __('Enter Api Key provided by Indodana', 'indodana-api-key-input-label'),
-        'validator'        => Validator::notOptional(),
-        'validationMessage' => 'API Key is required',
-      ),
-      'api_secret' => array(
-        'title'         => __('Api Secret*', 'indodana-api-secret-input-title'),
-        'type'          => 'text',
-        'description'   => __('Enter Api Secret provided by Indodana', 'indodana-api-secret-input-label'),
-        'validator'        => Validator::notOptional(),
-        'validationMessage' => 'API Secret is required',
-      ),
-      'use_billing_address_for_shipping_address' => array(
-        'title'             => __('Use Billing Address for Shipping Address*', 'indodana-use-billing-address-for-shipping-address-input-title'),
-        'type'              => 'select',
-        'default'           => 'no',
-        'options'           => array(
-          'no'    => __('No', 'indodana-use-billing-address-for-shipping-address-value-no'),
-          'yes'   => __('Yes', 'indodana-use-billing-address-for-shipping-address-value-no')
-        )
-      )
+      'api_key' => [
+        'title'           => 'API Key',
+        'type'            => 'text',
+        'description'     => 'Enter API Key provided by Indodana',
+        'config_name'     => 'apiKey',
+      ],
+      'api_secret' => [
+        'title'           => 'API Secret',
+        'type'            => 'text',
+        'description'     => 'Enter API Secret provided by Indodana',
+        'config_name'     => 'apiSecret',
+      ],
+      'default_order_pending_status' => [
+        'title'           => 'Default Order Pending Status',
+        'type'            => 'select',
+        'options'         => $order_statuses,
+        'config_name'     => 'defaultOrderPendingStatus',
+      ],
+      'default_order_success_status' => [
+        'title'           => 'Default Order Success Status',
+        'type'            => 'select',
+        'options'         => $order_statuses,
+        'config_name'     => 'defaultOrderSuccessStatus',
+      ],
+      'default_order_failed_status' => [
+        'title'           => 'Default Order Failed Status',
+        'type'            => 'select',
+        'options'         => $order_statuses,
+        'config_name'     => 'defaultOrderFailedStatus',
+      ],
     );
   }
 
-  public function validate_field($key, $value) {
-    $field = $this->form_fields[$key];
+  /**
+	 * Processes and saves options.
+   *
+   * Override from `wp-content/plugins/woocommerce/includes/abstracts/abstract-wc-settings-api.php` with minor tweaks.
+   * This function is used to validate form on Indodana configuration
+   *
+	 * @return bool was anything saved?
+   */
+  public function process_admin_options()
+  {
+    $this->init_settings();
 
-    if (!isset($field['validator'])) {
-      return $value;
+		$post_data = $this->get_post_data();
+
+    // Validate configuration form data
+    // -----
+    $configuration = [];
+
+    foreach ($this->get_form_fields() as $key => $field) {
+      // We won't validate these fields
+      if (!in_array($key, [ 'enabled', 'title', 'description' ])) {
+        $configuration[$field['config_name']] = $this->get_field_value( $key, $field, $post_data );
+      }
+
+			if ('title' !== $this->get_field_type( $field )) {
+        $this->settings[ $key ] = $this->get_field_value( $key, $field, $post_data );
+      }
     }
 
-    $validationResult = $field['validator']($value);
+    $validation_result = IndodanaService::validateConfiguration($configuration);
+    $validation_errors = $validation_result['errors'];
 
-    if (!$validationResult) {
-      WC_Admin_Settings::add_error($field['validationMessage']);
+    if (!empty($validation_errors)) {
+      foreach ($validation_errors as $key => $field) {
+        WC_Admin_Settings::add_error($field);
+      }
+
+      return false;
     }
 
-    return $value;
+    // Save configuration
+    // -----
+    return update_option(
+      $this->get_option_key(),
+      apply_filters(
+        'woocommerce_settings_api_sanitized_fields_' . $this->id,
+        $this->settings
+      ),
+      'yes'
+    );
   }
-
-  public function validate_store_name_field($key, $value) {
-    return $this->validate_field($key, $value);
-  }
-
-  public function validate_store_url_field($key, $value) {
-    return $this->validate_field($key, $value);
-  }
-
-  public function validate_store_email_field($key, $value) {
-    return $this->validate_field($key, $value);
-  }
-
-  public function validate_store_phone_number_field($key, $value) {
-    return $this->validate_field($key, $value);
-  }
-
-  public function validate_store_country_code_field($key, $value) {
-    return $this->validate_field($key, $value);
-  }
-
-  public function validate_store_city_field($key, $value) {
-    return $this->validate_field($key, $value);
-  }
-
-  public function validate_store_address_field($key, $value) {
-    return $this->validate_field($key, $value);
-  }
-
-  public function validate_store_postal_code_field($key, $value) {
-    return $this->validate_field($key, $value);
-  }
-
-  public function validate_api_key_field($key, $value) {
-    return $this->validate_field($key, $value);
-  }
-
-  public function validate_api_secret_field($key, $value) {
-    return $this->validate_field($key, $value);
-  }
-
+ 
   public function getTotalAmount($cart) 
   {
     return (float) $cart->total;
@@ -489,7 +240,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
   {
     $items = $cart->get_cart();
 
-    $cartItems = [];
+    $cart_items = [];
 
     foreach($items as $item) {
       $product = $item['data'];
@@ -502,7 +253,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       // Type might not exists
       $type = $product->get_type() ?? '';
 
-      $cartItems[] = [
+      $cart_items[] = [
         'id' => (string) $product->get_id(),
         'name' => $product->get_title(),
         'price' => (float) $product->get_price(),
@@ -513,7 +264,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       ];
     }
 
-    return $cartItems;
+    return $cart_items;
   }
 
   public function getCustomerDetails($order)
@@ -541,10 +292,6 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
 
   public function getShippingAddress($order)
   {
-    if (strtolower($this->get_option('use_billing_address_for_shipping_address')) === 'yes') {
-      return $this->getBillingAddress($order);
-    }
-
     return [
       'firstName'   => $order->get_shipping_first_name(),
       'lastName'    => $order->get_shipping_last_name(),
@@ -557,14 +304,14 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
   }
 
   public function getSeller() {
-    $store_name = $this->get_option('store_name');
+    $seller_name = $this->get_option('store_name');
 
     return [
-      'name'    => $store_name,
+      'name'    => $seller_name,
       'email'   => $this->get_option('store_email'),
       'url'     => $this->get_option('store_url'),
       'address' => [
-        'firstName'   => $store_name,
+        'firstName'   => $seller_name,
         'phone'       => $this->get_option('store_phone_number'),
         'address'     => $this->get_option('store_address'),
         'city'        => $this->get_option('store_city'),
@@ -598,9 +345,15 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
   }
 
   public function process_payment($order_id) {
+    $namespace = '[Woocommerce-process_payment]';
+
     IndodanaLogger::log(
       IndodanaLogger::INFO,
-      sprintf('[process_payment] POST data %s', print_r($_POST, true))
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($_POST)
+      )
     );
 
     $cart = WC()->cart;
@@ -655,6 +408,8 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       'backToStoreUrl'          => $back_to_store_url
     ]);
 
+    $order->update_status($this->get_option('default_order_pending_status'));
+
     WC()->cart->empty_cart();
 
     return [
@@ -666,7 +421,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
   public function indodana_callback() {
     // Approve notification url
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-      $this->handle_approved_transaction();
+      $this->handle_notify_action();
 
       exit();
     }
@@ -680,20 +435,38 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       $order_id = $_GET['order_id'];
 
       switch ($method) {
+        // Cancellation redirect url
         case 'cancel': {
-          $this->handle_redirect_cancellation($order_id); // Cancellation redirect url
+          $this->handle_cancel_action($order_id);
           break;
         }
+        // Back to store url
         case 'complete': {
-          $this->handle_redirect_completion($order_id); // Back to store url
+          $this->handle_complete_action($order_id);
           break;
         }
       }
     }
   }
 
-  private function handle_approved_transaction() {
-    $namespace = '[Woocommerce-handle_approved_transaction]';
+  private function handle_cancel_action($order_id) {
+    $order = wc_get_order($order_id);
+
+    $order->update_status($this->get_option('default_order_failed_status'));
+
+    wp_redirect($order->get_cancel_order_url());
+  }
+
+  private function handle_complete_action($order_id) {
+    $order = wc_get_order($order_id);
+
+    wp_redirect($order->get_checkout_order_received_url());
+  }
+
+  private function handle_notify_action() {
+    // Log request headers
+    // -----
+    $namespace = '[Woocommerce-handle_notify_action]';
 
     $request_headers = getallheaders();
 
@@ -706,14 +479,20 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       )
     );
 
+    // Check whether request authorization is valid
+    // -----
     $auth_token = isset($request_headers['Authorization']) ? $request_headers['Authorization'] : '';
 
     $is_valid_authorization = $this->get_indodana_service()->isValidAuthToken($auth_token);
 
     if (!$is_valid_authorization) {
-      return MerchantResponse::printInvalidRequestAuthResponse($namespace);
+      MerchantResponse::printInvalidRequestAuthResponse($namespace);
+
+      return;
     }
 
+    // Log request body
+    // -----
     $request_body = IndodanaHelper::getRequestBody();
 
     IndodanaLogger::log(
@@ -725,43 +504,46 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       )
     );
 
+    // Check whether request body is valid
+    // -----
     if (!isset($request_body['transactionStatus']) || !isset($request_body['merchantOrderId'])) {
-      return MerchantResponse::printInvalidRequestBodyResponse($namespace);
+      MerchantResponse::printInvalidRequestBodyResponse($namespace);
+
+      return;
     }
 
     $transaction_status = $request_body['transactionStatus'];
     $order_id = $request_body['merchantOrderId'];
+
     $order = wc_get_order($order_id);
 
     if (!$order) {
-      return MerchantResponse::printNotFoundOrderResponse(
+      MerchantResponse::printNotFoundOrderResponse(
         $order_id,
         $namespace
       );
+
+      return;
     }
 
-    if (!in_array($transaction_status, IndodanaConstant::getSuccessTransactionStatus())) {
-      return MerchantResponse::printInvalidTransactionStatusResponse(
+    if (!in_array($transaction_status, IndodanaConstant::getSuccessTransactionStatuses())) {
+      MerchantResponse::printInvalidTransactionStatusResponse(
         $transaction_status,
         $order_id,
         $namespace
       );
+
+      return;
     }
+
+    // Handle success order
+    // -----
+    $order->update_status($this->get_option('default_order_success_status'));
 
     $order->payment_complete();
 
-    return MerchantResponse::printSuccessResponse($namespace);
-  }
+    MerchantResponse::printSuccessResponse($namespace);
 
-  private function handle_redirect_cancellation($order_id) {
-    $order = new WC_Order($order_id);
-
-    wp_redirect($order->get_checkout_payment_url(false));
-  }
-
-  private function handle_redirect_completion($order_id) {
-    $order = new WC_Order($order_id);
-
-    wp_redirect($order->get_checkout_order_received_url());
+    return;
   }
 }

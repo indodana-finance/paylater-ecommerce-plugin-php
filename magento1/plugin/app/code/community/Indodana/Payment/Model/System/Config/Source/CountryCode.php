@@ -4,15 +4,15 @@ require_once Mage::getBaseDir('lib') . '/Indodana/Payment/autoload.php';
 
 use IndodanaCommon\IndodanaConstant;
 
-class Indodana_Payment_Model_System_Config_Source_Environment
+class Indodana_Payment_Model_System_Config_Source_CountryCode
 {
   public function toOptionArray()
   {
-    $environmentMapping = IndodanaConstant::getEnvironmentMapping();
+    $countryCodeMapping = IndodanaConstant::getCountryCodeMapping();
 
     $options = [];
 
-    foreach ( $environmentMapping as $key => $value ) {
+    foreach ( $countryCodeMapping as $key => $value ) {
       $options[] = [ 'value' => $key, 'label' => $value ];
     }
 
