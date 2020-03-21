@@ -312,7 +312,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       'url'     => $this->get_option('store_url'),
       'address' => [
         'firstName'   => $seller_name,
-        'phone'       => $this->get_option('store_phone_number'),
+        'phone'       => $this->get_option('store_phone'),
         'address'     => $this->get_option('store_address'),
         'city'        => $this->get_option('store_city'),
         'postalCode'  => $this->get_option('store_postal_code'),
