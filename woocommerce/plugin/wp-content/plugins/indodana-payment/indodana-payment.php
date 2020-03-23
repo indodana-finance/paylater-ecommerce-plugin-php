@@ -5,7 +5,7 @@
  * Description: "Paylater" service registered on OJK.
  * Author: Indodana
  * Author URI: https://indodana.com
- * Version: 1.2.0
+ * Version: 1.3.2
  */
 
 add_filter( 'woocommerce_payment_gateways', 'indodana_add_payment_gateway_class' );
