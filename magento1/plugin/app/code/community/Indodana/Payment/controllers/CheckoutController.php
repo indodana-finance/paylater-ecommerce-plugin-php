@@ -95,8 +95,7 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
 
     $requestBody = IndodanaHelper::getRequestBody();
 
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
+    IndodanaLogger::info(
       sprintf(
         '%s Request body: %s',
         $namespace,
@@ -167,8 +166,7 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
 
     $requestHeaders = getallheaders();
 
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
+    IndodanaLogger::info(
       sprintf(
         '%s Request headers: %s',
         $namespace,
@@ -194,8 +192,7 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
     // -----
     $requestBody = IndodanaHelper::getRequestBody();
 
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
+    IndodanaLogger::info(
       sprintf(
         '%s Request body: %s',
         $namespace,

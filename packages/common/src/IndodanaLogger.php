@@ -2,11 +2,33 @@
 
 namespace IndodanaCommon;
 
+use Exception;
+
 class IndodanaLogger
 {
-  const ERROR = 1;
-  const WARNING = 2;
-  const INFO = 3;
+  private static function validateLogDirConstant()
+  {
+    $logDirConstant = 'INDODANA_LOG_DIR';
+
+    if (!defined($logDirConstant)) {
+      throw new Exception("\"${logDirConstant}\" is not configured");
+    }
+  }
+
+  private static function createLogMessage($message)
+  {
+    if (($time = $_SERVER['REQUEST_TIME']) === '') {
+      $time = time();
+    }
+
+    if (($requestUri = $_SERVER['REQUEST_URI']) === '') {
+      $requestUri = 'REQUEST_URI_UNKNOWN';
+    }
+
+    $date = date("Y-m-d H:i:s", $time);
+   
+    return "[INDODANA][${date}][${requestUri}]${message}" . PHP_EOL;
+  }
 
   private static function write($message, $filePath)
   {
@@ -25,47 +47,36 @@ class IndodanaLogger
     fclose($fd);
   }
 
-  private static function writeInfoLog($message)
+  public static function info($message)
   {
+    self::validateLogDirConstant();
+
+    $message = self::createLogMessage($message);
+
     $logFilePath = INDODANA_LOG_DIR . 'info.log';
+
     self::write($message, $logFilePath);
   }
 
-  private static function writeWarningLog($message) 
+  public static function warning($message)
   {
+    self::validateLogDirConstant();
+
+    $message = self::createLogMessage($message);
+
     $logFilePath = INDODANA_LOG_DIR . 'warning.log';
+
     self::write($message, $logFilePath);
   }
 
-  private static function writeErrorLog($message)
+  public static function error($message)
   {
+    self::validateLogDirConstant();
+
+    $message = self::createLogMessage($message);
+
     $logFilePath = INDODANA_LOG_DIR . 'error.log';
+
     self::write($message, $logFilePath);
-  }
-
-  public static function log($logType, $message)
-  {
-    if (($time = $_SERVER['REQUEST_TIME']) == '') {
-      $time = time();
-    }
-
-    if (($requestUri = $_SERVER['REQUEST_URI']) == '') {
-      $requestUri = "REQUEST_URI_UNKNOWN";
-    }
-
-    $date = date("Y-m-d H:i:s", $time);
-    $message = '[INDODANA][' . $date . ']' . '[' . $requestUri . ']' . $message . PHP_EOL;
-
-    switch($logType) {
-    case self::INFO:
-      self::writeInfoLog($message);
-      break;
-    case self::WARNING:
-      self::writeWarningLog($message);
-      break;
-    case self::ERROR:
-      self::writeErrorLog($message);
-      break;
-    }
   }
 }

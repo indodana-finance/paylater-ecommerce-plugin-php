@@ -8,8 +8,7 @@ class MerchantResponse
 {
   private static function printResponse($response, $namespace)
   {
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
+    IndodanaLogger::info(
       sprintf(
         '%s Response: %s',
         $namespace,

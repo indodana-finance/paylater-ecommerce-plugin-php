@@ -27,8 +27,7 @@ class IndodanaHelper
     try {
       return $fun();
     } catch (IndodanaCommonException $ex) {
-      IndodanaLogger::log(
-        IndodanaLogger::ERROR,
+      IndodanaLogger::error(
         sprintf(
           '%sCommon Exception: %s',
           $contextNamespace,
@@ -38,8 +37,7 @@ class IndodanaHelper
 
       $errorHandler();
     } catch (IndodanaRequestException $ex) {
-      IndodanaLogger::log(
-        IndodanaLogger::ERROR,
+      IndodanaLogger::error(
         sprintf(
           '%sRequest Exception: %s',
           $contextNamespace,
@@ -49,8 +47,7 @@ class IndodanaHelper
 
       $errorHandler();
     } catch (IndodanaSdkException $ex) {
-      IndodanaLogger::log(
-        IndodanaLogger::ERROR,
+      IndodanaLogger::error(
         sprintf(
           '%sSdk Exception: %s',
           $contextNamespace,

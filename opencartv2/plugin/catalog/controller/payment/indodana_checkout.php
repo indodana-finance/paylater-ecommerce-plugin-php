@@ -307,8 +307,7 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
 
     $request_body = IndodanaHelper::getRequestBody();
 
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
+    IndodanaLogger::info(
       sprintf(
         '%s Request body: %s',
         $namespace,
@@ -352,8 +351,7 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
 
     $request_headers = getallheaders();
 
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
+    IndodanaLogger::info(
       sprintf(
         '%s Request headers: %s',
         $namespace,
@@ -377,8 +375,7 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     // -----
     $request_body = IndodanaHelper::getRequestBody();
 
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
+    IndodanaLogger::info(
       sprintf(
         '%s Request body: %s',
         $namespace,

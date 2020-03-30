@@ -347,8 +347,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
   public function process_payment($order_id) {
     $namespace = '[Woocommerce-process_payment]';
 
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
+    IndodanaLogger::info(
       sprintf(
         '%s Request body: %s',
         $namespace,
@@ -470,8 +469,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
 
     $request_headers = getallheaders();
 
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
+    IndodanaLogger::info(
       sprintf(
         '%s Request headers: %s',
         $namespace,
@@ -495,8 +493,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     // -----
     $request_body = IndodanaHelper::getRequestBody();
 
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
+    IndodanaLogger::info(
       sprintf(
         '%s Request body: %s',
         $namespace,

@@ -28,8 +28,7 @@ class IndodanaService
 
     IndodanaHelper::wrapIndodanaException(
       function() use ($config, $namespace) {
-        IndodanaLogger::log(
-          IndodanaLogger::INFO,
+        IndodanaLogger::info(
           sprintf(
             '%s Config: %s',
             $namespace,
@@ -246,8 +245,7 @@ class IndodanaService
 
     return IndodanaHelper::wrapIndodanaException(
       function() use ($input, $namespace) {
-        IndodanaLogger::log(
-          IndodanaLogger::INFO,
+        IndodanaLogger::info(
           sprintf(
             '%s Input: %s',
             $namespace,
@@ -269,8 +267,7 @@ class IndodanaService
           'items' => $items
         ];
 
-        IndodanaLogger::log(
-          IndodanaLogger::INFO,
+        IndodanaLogger::info(
           sprintf(
             '%s Payload: %s',
             $namespace,
@@ -327,8 +324,7 @@ class IndodanaService
 
   private function generateCheckoutPayload(array $input = [], $namespace = '')
   {
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
+    IndodanaLogger::info(
       sprintf(
         '%s Input: %s',
         $namespace,
@@ -375,8 +371,7 @@ class IndodanaService
     IndodanaHelper::setIfExists($payload, $input, 'cancellationRedirectUrl');
     IndodanaHelper::setIfExists($payload, $input, 'backToStoreUrl');
 
-    IndodanaLogger::log(
-      IndodanaLogger::INFO,
+    IndodanaLogger::info(
       sprintf(
         '%s Payload: %s',
         $namespace,
