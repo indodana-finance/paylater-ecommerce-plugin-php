@@ -20,7 +20,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
   {
     $this->init();
     $this->loadModel();
-    $this->applyFormValue();
+    $this->loadFormData();
 
     // When merchant hit "Save" button
     if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validate()) {
@@ -29,7 +29,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
     }
 
     $this->initializeLanguage();
-    $this->initializeForm();
+    $this->initializeFormUI();
     $this->initializeErrors();
 
     $this->loadErrors();
@@ -114,17 +114,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
         $label_key => 'entry_default_order_failed_status',
         $input_key => 'indodana_checkout_default_order_failed_status_id',
         $error_key => 'error_default_order_failed_status',
-      ],
-      'status' => [
-        $label_key => 'entry_status',
-        $input_key => 'indodana_checkout_status',
-        $error_key => 'error_status',
-      ],
-      'sortOrder' => [
-        $label_key => 'entry_sort_order',
-        $input_key => 'indodana_checkout_sort_order',
-        $error_key => 'error_sort_order',
-      ],
+      ]
     ];
 
     $this->indodana_checkout_config_keys = array_keys($this->indodana_checkout_mapping);
@@ -145,20 +135,29 @@ class ControllerPaymentIndodanaCheckout extends Controller {
     $this->data['country_codes'] = IndodanaConstant::getCountryCodeMapping();
   }
 
+  private function applyFormDataByInputKey($input_key)
+  {
+    if (isset($this->request->post[$input_key])) {
+      $this->data[$input_key] = $this->request->post[$input_key];
+    } else {
+      $this->data[$input_key] = $this->config->get($input_key);
+    }
+  }
   /**
    * Display form value from saved configuration if exist
    */
-  private function applyFormValue() 
+  private function loadFormData() 
   {
+    // For IndodanaCommon specific
     foreach ($this->indodana_checkout_config_keys as $config_key) {
       $input_key = $this->indodana_checkout_mapping[$config_key][$this->input_key_name];
 
-      if (isset($this->request->post[$input_key])) {
-        $this->data[$input_key] = $this->request->post[$input_key];
-      } else {
-        $this->data[$input_key] = $this->config->get($input_key);
-      }
+      $this->applyFormDataByInputKey($input_key);
     }
+
+    // For Opencart specific
+    $this->applyFormDataByInputKey('indodana_checkout_status');
+    $this->applyFormDataByInputKey('indodana_checkout_sort_order');
   }
 
   private function saveConfiguration() 
@@ -181,6 +180,8 @@ class ControllerPaymentIndodanaCheckout extends Controller {
       'button_save',
       'button_cancel',
       'text_success',
+      'entry_status',
+      'entry_sort_order'
     ];
 
     foreach($language_keys as $key) {
@@ -200,7 +201,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
 		$this->data['header'] = $this->load->controller('common/header');
   }
 
-  private function initializeForm()
+  private function initializeFormUI()
   {
     // Label and placeholder
     $frontend_config_mapping = IndodanaConstant::getFrontendConfigMapping();
@@ -237,17 +238,31 @@ class ControllerPaymentIndodanaCheckout extends Controller {
     $this->data['errors'] = $this->errors;
   }
 
+  private function applyDataByErrorKey($error_key)
+  {
+    if (isset($this->errors[$error_key])) {
+      $this->data[$error_key] = $this->errors[$error_key];
+    } else {
+      $this->data[$error_key] = '';
+    }
+  }
+
   private function loadErrors() 
   {
+    // For IndodanaCommon specific
     foreach ($this->indodana_checkout_config_keys as $config_key) {
       $error_key = $this->indodana_checkout_mapping[$config_key][$this->error_key_name];
 
-      if (isset($this->errors[$error_key])) {
-        $this->data[$error_key] = $this->errors[$error_key];
-      } else {
-        $this->data[$error_key] = '';
-      }
+      $this->applyDataByErrorKey($error_key);
     }
+
+    // For Opencart specific
+    $this->applyDataByErrorKey('error_sort_order');
+  }
+
+  private function getDataValueByInputKey($input_key)
+  {
+    return isset($this->data[$input_key]) ? $this->data[$input_key] : null;
   }
 
   private function validate() 
@@ -256,6 +271,8 @@ class ControllerPaymentIndodanaCheckout extends Controller {
       $this->errors['error_permission'] = $this->language->get('error_permission');
     }
 
+    // For IndodanaCommon specific
+    // ----------
     $configuration = [];
 
     foreach ($this->indodana_checkout_config_keys as $config_key) {
@@ -276,6 +293,14 @@ class ControllerPaymentIndodanaCheckout extends Controller {
       $error_key = $this->indodana_checkout_mapping[$validation_error_key][$this->error_key_name];
 
       $this->errors[$error_key] = $validation_error_value;
+    }
+
+    // For Opencart specific
+    // ----------
+    $sort_order = $this->getDataValueByInputKey('indodana_checkout_sort_order');
+
+    if (!ctype_digit($sort_order)) {
+      $this->errors['error_sort_order'] = 'Sort Order must not be empty, non-decimal and greater than or equal to 1';
     }
 
     return empty($this->errors);

@@ -203,9 +203,6 @@
                 <option value="0" selected="selected"><?php echo $text_status_disabled; ?></option>
                 <?php } ?>
               </select>
-              <?php if ($error_status) { ?>
-              <div class="text-danger"><?php echo $error_status; ?></div>
-              <?php } ?>
             </div>
           </div>
           <div class="form-group">

@@ -28,9 +28,7 @@ class IndodanaConstant
     'environment'               => 'Environment',
     'defaultOrderPendingStatus' => 'Default Order Pending Status',
     'defaultOrderSuccessStatus' => 'Default Order Success Status',
-    'defaultOrderFailedStatus'  => 'Default Order Failed Status',
-    'status'                    => 'Status',
-    'sortOrder'                 => 'Sort Order',
+    'defaultOrderFailedStatus'  => 'Default Order Failed Status'
   ];
 
   const environmentMapping = [
