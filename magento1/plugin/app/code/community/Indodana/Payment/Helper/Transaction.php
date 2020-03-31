@@ -1,20 +1,20 @@
 <?php
 
 use IndodanaCommon\IndodanaInterface;
-use IndodanaCommon\IndodanaService;
+use IndodanaCommon\IndodanaCommon;
 
 class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract implements IndodanaInterface
 {
-  private $indodanaService;
+  private $indodanaCommon;
 
-  public function getIndodanaService()
+  public function getIndodanaCommon()
   {
-    if (!isset($this->indodanaService)) {
+    if (!isset($this->indodanaCommon)) {
       $apiKey = Mage::helper('indodanapayment')->getApiKey();
       $apiSecret = Mage::helper('indodanapayment')->getApiSecret();
       $environment = Mage::helper('indodanapayment')->getEnvironment();
 
-      $this->indodanaService = new IndodanaService([
+      $this->indodanaCommon = new IndodanaCommon([
         'apiKey'        => $apiKey,
         'apiSecret'     => $apiSecret,
         'environment'   => $environment,
@@ -22,7 +22,7 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract impl
       ]);
     }
 
-    return $this->indodanaService;
+    return $this->indodanaCommon;
   }
 
   public function getTotalAmount($order)
@@ -67,12 +67,12 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract impl
     return $totalTaxAmount;
   }
 
-  public function getItems($order)
+  public function getProducts($order)
   {
-    // We only need parent items
+    // We only need parent products
     $orderItems = $order->getAllVisibleItems();
 
-    $items = [];
+    $products = [];
 
     foreach($orderItems as $orderItem) {
       $product = $orderItem->getProduct();
@@ -85,7 +85,7 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract impl
         $quantity = $orderItem->getQtyToInvoice();
       }
 
-      $items[] = [
+      $products[] = [
         'id'        => $product->getId(),
         'name'      => $product->getName(),
         'price'     => (float) $product->getPrice(),
@@ -96,7 +96,7 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract impl
       ];
     }
 
-    return $items;
+    return $products;
   }
 
   public function getCustomerDetails($order)
@@ -179,12 +179,12 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract impl
 
   public function getInstallmentOptions($order)
   {
-    return $this->getIndodanaService()->getInstallmentOptions([
+    return $this->getIndodanaCommon()->getInstallmentOptions([
       'totalAmount'    => $this->getTotalAmount($order),
       'discountAmount' => $this->getTotalDiscountAmount($order),
       'shippingAmount' => $this->getTotalShippingAmount($order),
       'taxAmount'      => $this->getTotalTaxAmount($order),
-      'items'          => $this->getItems($order)
+      'products'       => $this->getProducts($order)
     ]);
   }
 
@@ -199,13 +199,13 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract impl
     // $cancellationRedirectUrl = 'https://example.com/indodanapayment/checkout/cancel';
     // $backToStoreUrl = 'https://example.com/indodanapayment/checkout/success';
 
-    return $this->getIndodanaService()->getCheckoutPayload([
+    return $this->getIndodanaCommon()->getCheckoutPayload([
       'merchantOrderId'         => $order->getId(),
       'totalAmount'             => $this->getTotalAmount($order),
       'discountAmount'          => $this->getTotalDiscountAmount($order),
       'shippingAmount'          => $this->getTotalShippingAmount($order),
       'taxAmount'               => $this->getTotalTaxAmount($order),
-      'items'                   => $this->getItems($order),
+      'products'                => $this->getProducts($order),
       'customerDetails'         => $this->getCustomerDetails($order),
       'billingAddress'          => $this->getBillingAddress($order),
       'shippingAddress'         => $this->getShippingAddress($order),

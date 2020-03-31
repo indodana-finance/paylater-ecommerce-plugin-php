@@ -4,9 +4,7 @@ require_once Mage::getBaseDir('lib') . '/Indodana/Payment/autoload.php';
 
 use IndodanaCommon\IndodanaHelper;
 use IndodanaCommon\IndodanaConstant;
-use IndodanaCommon\IndodanaInterface;
 use IndodanaCommon\IndodanaLogger;
-use IndodanaCommon\IndodanaService;
 use IndodanaCommon\MerchantResponse;
 
 class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Action
@@ -20,9 +18,9 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
     $orderData = Mage::helper('indodanapayment/transaction')->getOrderData($order);
 
     $jsonOrderData = json_encode($orderData);
-    $indodanaBaseUrl = Mage::helper('indodanapayment/transaction')->getIndodanaService()->getBaseUrl();
+    $indodanaBaseUrl = Mage::helper('indodanapayment/transaction')->getIndodanaCommon()->getBaseUrl();
     $merchantConfirmPaymentUrl = Mage::getUrl('indodanapayment/checkout/confirmOrder');
-    $authorization = Mage::helper('indodanapayment/transaction')->getIndodanaService()->getAuthToken();
+    $authorization = Mage::helper('indodanapayment/transaction')->getIndodanaCommon()->getAuthToken();
 
     // Magento 1 use JavaScript on indodanapayment/redirect.phtml to perform checkout
     // UI for this action is defined as "block"
@@ -179,7 +177,7 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
     $authToken = isset($requestHeaders['Authorization']) ? $requestHeaders['Authorization'] : '';
 
     $isValidAuthorization = Mage::helper('indodanapayment/transaction')
-      ->getIndodanaService()
+      ->getIndodanaCommon()
       ->isValidAuthToken($authToken);
 
     if (!$isValidAuthorization) {

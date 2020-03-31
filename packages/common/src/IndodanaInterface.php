@@ -14,7 +14,7 @@ interface IndodanaInterface
 
   public function getTotalTaxAmount($order);
 
-  public function getItems($order);
+  public function getProducts($order);
 
   // Others
   // ------------------------------

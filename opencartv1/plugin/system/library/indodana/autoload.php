@@ -6,9 +6,9 @@ require_once(__DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'a
 define('INDODANA_LOG_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR);
 
 // Initialize Sentry
-use IndodanaCommon\IndodanaService;
+use IndodanaCommon\IndodanaCommon;
 
-$sentryDsn = IndodanaService::getSentryDsn('OPENCARTV1');
+$sentryDsn = IndodanaCommon::getSentryDsn('OPENCARTV1');
 
 $client = new Raven_Client($sentryDsn);
 $error_handler = new Raven_ErrorHandler($client);

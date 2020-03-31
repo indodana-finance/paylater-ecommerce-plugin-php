@@ -8,8 +8,8 @@ define('INDODANA_PLUGIN_ROOT_DIR', __DIR__ . DIRECTORY_SEPARATOR);
 define('INDODANA_LOG_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR);
 
 // Initialize Sentry
-use IndodanaCommon\IndodanaService;
+use IndodanaCommon\IndodanaCommon;
 
-$sentryDsn = IndodanaService::getSentryDsn('WOOCOMMERCE');
+$sentryDsn = IndodanaCommon::getSentryDsn('WOOCOMMERCE');
 
 Sentry\init(['dsn' => $sentryDsn ]);

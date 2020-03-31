@@ -6,12 +6,12 @@ use IndodanaCommon\IndodanaHelper;
 use IndodanaCommon\IndodanaConstant;
 use IndodanaCommon\IndodanaInterface;
 use IndodanaCommon\IndodanaLogger;
-use IndodanaCommon\IndodanaService;
+use IndodanaCommon\IndodanaCommon;
 use IndodanaCommon\MerchantResponse;
 
 class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaInterface
 {
-  private $indodana_service;
+  private $indodana_common;
   private $default_currency;
 
   /**
@@ -23,10 +23,10 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     return html_entity_decode($html_entity, ENT_QUOTES, 'UTF-8');
   }
 
-  private function getIndodanaService()
+  private function getIndodanaCommon()
   {
-    if (!isset($this->indodana_service)) {
-      $this->indodana_service = new IndodanaService([
+    if (!isset($this->indodana_common)) {
+      $this->indodana_common = new IndodanaCommon([
         'apiKey'        => $this->config->get('indodana_checkout_api_key'),
         'apiSecret'     => $this->config->get('indodana_checkout_api_secret'),
         'environment'   => $this->config->get('indodana_checkout_environment'),
@@ -34,7 +34,7 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
       ]);
     }
 
-    return $this->indodana_service;
+    return $this->indodana_common;
   }
 
   private function getDefaultCurrency()
@@ -90,9 +90,9 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     );
   }
 
-  public function getItems($order)
+  public function getProducts($order)
   {
-    $items = [];
+    $products = [];
 
     $order_id = $order['order_id'];
 
@@ -128,7 +128,7 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
         $type = $category['name'];
       }
 
-      $items[] = [
+      $products[] = [
         'id'        => self::decode($product_id),
         'name'      => self::decode($order_product['name']),
         'price'     => (float) self::decode($order_product['price']),
@@ -139,7 +139,7 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
       ];
     }
 
-    return $items;
+    return $products;
   }
 
   public function getCustomerDetails($order) {
@@ -206,14 +206,13 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     $this->loadLanguage();
 
     $order = $this->model_checkout_order->getOrder($this->session->data['order_id']);
-    $indodana_service = $this->getIndodanaService();
 
-    $payment_options = $indodana_service->getInstallmentOptions([
+    $payment_options = $this->getIndodanaCommon()->getInstallmentOptions([
       'totalAmount'    => $this->getTotalAmount($order),
       'discountAmount' => $this->getTotalDiscountAmount($order),
       'shippingAmount' => $this->getTotalShippingAmount($order),
       'taxAmount'      => $this->getTotalTaxAmount($order),
-      'items'          => $this->getItems($order)
+      'products'       => $this->getProducts($order)
     ]);
 
     $this->formatPaymentsToDefaultCurrency($payment_options);
@@ -227,13 +226,13 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     // $cancellation_redirect_url = 'https://example.com/index.php?route=payment/indodana_checkout/cancel';
     // $back_to_store_url = 'https://example.com/index.php?route=checkout/success';
 
-    $order_data = $indodana_service->getCheckoutPayload([
+    $order_data = $this->getIndodanaCommon()->getCheckoutPayload([
       'merchantOrderId'         => $order['order_id'],
       'totalAmount'             => $this->getTotalAmount($order),
       'discountAmount'          => $this->getTotalDiscountAmount($order),
       'shippingAmount'          => $this->getTotalShippingAmount($order),
       'taxAmount'               => $this->getTotalTaxAmount($order),
-      'items'                   => $this->getItems($order),
+      'products'                => $this->getProducts($order),
       'customerDetails'         => $this->getCustomerDetails($order),
       'billingAddress'          => $this->getBillingAddress($order),
       'shippingAddress'         => $this->getShippingAddress($order),
@@ -244,8 +243,8 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
 
     $this->data['orderData'] = json_encode($order_data);
     $this->data['paymentOptions'] = $payment_options;
-    $this->data['authorization'] = $this->getIndodanaService()->getAuthToken();
-    $this->data['indodanaBaseUrl'] = $indodana_service->getBaseUrl();
+    $this->data['authorization'] = $this->getIndodanaCommon()->getAuthToken();
+    $this->data['indodanaBaseUrl'] = $this->getIndodanaCommon()->getBaseUrl();
     $this->data['merchantConfirmPaymentUrl'] = $this->url->link('payment/indodana_checkout/confirmOrder');
 
     $this->template = $this->config->get('config_template') . '/template/payment/indodana_checkout_payment.tpl';
@@ -350,7 +349,7 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     // -----
     $auth_token = isset($request_headers['Authorization']) ? $request_headers['Authorization'] : '';
 
-    $is_valid_authorization = $this->getIndodanaService()->isValidAuthToken($auth_token);
+    $is_valid_authorization = $this->getIndodanaCommon()->isValidAuthToken($auth_token);
 
     if (!$is_valid_authorization) {
       MerchantResponse::printInvalidRequestAuthResponse($namespace);

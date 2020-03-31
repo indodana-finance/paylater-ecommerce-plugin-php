@@ -2,7 +2,7 @@
 
 require_once DIR_SYSTEM . 'library/indodana/autoload.php';
 
-use IndodanaCommon\IndodanaService;
+use IndodanaCommon\IndodanaCommon;
 use IndodanaCommon\IndodanaConstant;
 
 class ControllerPaymentIndodanaCheckout extends Controller {
@@ -287,7 +287,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
       }
     }
 
-    $validation_result = IndodanaService::validateConfiguration($configuration);
+    $validation_result = IndodanaCommon::validateConfiguration($configuration);
 
     foreach ($validation_result['errors'] as $validation_error_key => $validation_error_value) {
       $error_key = $this->indodana_checkout_mapping[$validation_error_key][$this->error_key_name];

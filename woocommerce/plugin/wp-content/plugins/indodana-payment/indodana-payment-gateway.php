@@ -7,12 +7,12 @@ use IndodanaCommon\IndodanaConstant;
 use IndodanaCommon\IndodanaInterface;
 use IndodanaCommon\IndodanaHelper;
 use IndodanaCommon\IndodanaLogger;
-use IndodanaCommon\IndodanaService;
+use IndodanaCommon\IndodanaCommon;
 use IndodanaCommon\MerchantResponse;
 
 class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterface
 {
-  private $indodana_service;
+  private $indodana_common;
 
   public function __construct() {
     $this->id = 'indodana';
@@ -34,16 +34,16 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
   }
 
   /**
-   * Getter for indodana service
+   * Getter for indodana common
    *
-   * We decide to "lazily" load indodana service because `get_option` might cause bug if we load this "eagerly"
+   * We decide to "lazily" load indodana common because `get_option` might cause bug if we load this "eagerly"
    *
-   * @return IndodanaService
+   * @return IndodanaCommon
    */
-  private function get_indodana_service()
+  private function get_indodana_common()
   {
-    if (!isset($this->indodana_service)) {
-      $this->indodana_service = new IndodanaService([
+    if (!isset($this->indodana_common)) {
+      $this->indodana_common = new IndodanaCommon([
         'apiKey'      => $this->get_option('api_key'),
         'apiSecret'   => $this->get_option('api_secret'),
         'environment' => $this->get_option('environment'),
@@ -51,7 +51,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       ]);
     }
 
-    return $this->indodana_service;
+    return $this->indodana_common;
   }
 
   /**
@@ -193,7 +193,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       }
     }
 
-    $validation_result = IndodanaService::validateConfiguration($configuration);
+    $validation_result = IndodanaCommon::validateConfiguration($configuration);
     $validation_errors = $validation_result['errors'];
 
     if (!empty($validation_errors)) {
@@ -236,14 +236,14 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     return (float) $cart->get_total_tax();
   }
 
-  public function getItems($cart)
+  public function getProducts($cart)
   {
-    $items = $cart->get_cart();
+    $cart_items = $cart->get_cart();
 
-    $cart_items = [];
+    $products = [];
 
-    foreach($items as $item) {
-      $product = $item['data'];
+    foreach($cart_items as $cart_item) {
+      $product = $cart_item['data'];
 
       // Image might not exists
       $image_url = !empty($product->get_image_id()) ?
@@ -253,18 +253,18 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       // Type might not exists
       $type = $product->get_type() ?? '';
 
-      $cart_items[] = [
+      $products[] = [
         'id' => (string) $product->get_id(),
         'name' => $product->get_title(),
         'price' => (float) $product->get_price(),
         'url' => get_permalink($product->get_id()),
         'imageUrl' => $image_url,
         'type' => $type,
-        'quantity' => (int) $item['quantity'],
+        'quantity' => (int) $cart_item['quantity'],
       ];
     }
 
-    return $cart_items;
+    return $products;
   }
 
   public function getCustomerDetails($order)
@@ -326,12 +326,12 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
 
     $cart = WC()->cart;
 
-    $payment_options = $this->get_indodana_service()->getInstallmentOptions([
+    $payment_options = $this->get_indodana_common()->getInstallmentOptions([
       'totalAmount'    => $this->getTotalAmount($cart),
       'discountAmount' => $this->getTotalDiscountAmount($cart),
       'shippingAmount' => $this->getTotalShippingAmount($cart),
       'taxAmount'      => $this->getTotalTaxAmount($cart),
-      'items'          => $this->getItems($cart)
+      'products'       => $this->getProducts($cart)
     ]);
 
     $data = [];
@@ -391,13 +391,13 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       // 'order_id'  => $order_id
     // ), 'https://example.com');
 
-    $checkout_url = $this->get_indodana_service()->checkout([
+    $checkout_url = $this->get_indodana_common()->checkout([
       'merchantOrderId'         => $order_id,
       'totalAmount'             => $this->getTotalAmount($cart),
       'discountAmount'          => $this->getTotalDiscountAmount($cart),
       'shippingAmount'          => $this->getTotalShippingAmount($cart),
       'taxAmount'               => $this->getTotalTaxAmount($cart),
-      'items'                   => $this->getItems($cart),
+      'products'                => $this->getProducts($cart),
       'customerDetails'         => $this->getCustomerDetails($order),
       'billingAddress'          => $this->getBillingAddress($order),
       'shippingAddress'         => $this->getShippingAddress($order),
@@ -481,7 +481,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     // -----
     $auth_token = isset($request_headers['Authorization']) ? $request_headers['Authorization'] : '';
 
-    $is_valid_authorization = $this->get_indodana_service()->isValidAuthToken($auth_token);
+    $is_valid_authorization = $this->get_indodana_common()->isValidAuthToken($auth_token);
 
     if (!$is_valid_authorization) {
       MerchantResponse::printInvalidRequestAuthResponse($namespace);
