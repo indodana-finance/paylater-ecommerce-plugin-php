@@ -23,6 +23,7 @@ class Seller
     }
 
     $this->id = md5($input['url']);
+
     $this->payload = array_merge($input, [
       'id' => $this->id
     ]);

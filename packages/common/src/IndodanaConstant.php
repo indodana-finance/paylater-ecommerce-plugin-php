@@ -4,6 +4,9 @@ namespace IndodanaCommon;
 
 use Indodana\Indodana;
 
+/**
+ * @codeCoverageIgnore We wouldn't unit test constant value
+ */
 class IndodanaConstant
 {
   const SANDBOX = Indodana::SANDBOX_ENVIRONMENT;

@@ -22,38 +22,30 @@ class IndodanaHelper
     $errorHandler,
     $namespace = ''
   ) {
-    $contextNamespace = "${namespace} ";
-
     try {
       return $fun();
     } catch (IndodanaCommonException $ex) {
-      IndodanaLogger::error(
-        sprintf(
-          '%sCommon Exception: %s',
-          $contextNamespace,
-          json_encode($ex->getMessage())
-        )
-      );
+      IndodanaLogger::error(sprintf(
+        '%s Common Exception: %s',
+        $namespace,
+        $ex->getMessage()
+      ));
 
       $errorHandler();
     } catch (IndodanaRequestException $ex) {
-      IndodanaLogger::error(
-        sprintf(
-          '%sRequest Exception: %s',
-          $contextNamespace,
-          json_encode($ex->getErrorMessage())
-        )
-      );
+      IndodanaLogger::error(sprintf(
+        '%s Request Exception: %s',
+        $namespace,
+        json_encode($ex->getErrorMessage())
+      ));
 
       $errorHandler();
     } catch (IndodanaSdkException $ex) {
-      IndodanaLogger::error(
-        sprintf(
-          '%sSdk Exception: %s',
-          $contextNamespace,
-          json_encode($ex->getMessage())
-        )
-      );
+      IndodanaLogger::error(sprintf(
+        '%s Sdk Exception: %s',
+        $namespace,
+        $ex->getMessage()
+      ));
 
       $errorHandler();
     }

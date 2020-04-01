@@ -32,7 +32,7 @@ class IndodanaLogger
 
   private static function write($message, $filePath)
   {
-    $fd = @fopen($filePath, 'a');
+    $fd = fopen($filePath, 'a');
 
     if (!is_writable($filePath)) {
       throw new Exception('Unable to write to ' . $filePath);

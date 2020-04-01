@@ -8,6 +8,9 @@ use IndodanaCommon\Seller;
 
 class Checkout
 {
+  // Not all CMS make postal code as required. Therefore this is the default value if postal code is not supplied
+  const DEFAULT_POSTAL_CODE = '00000';
+
   private $payload;
 
   public function __construct(array $input = [], Seller $seller)
@@ -58,7 +61,7 @@ class Checkout
     $clonedAddress = $address;
 
     // Set postalCode default value
-    $clonedAddress['postalCode'] = '00000';
+    $clonedAddress['postalCode'] = self::DEFAULT_POSTAL_CODE;
 
     return $clonedAddress;
   }

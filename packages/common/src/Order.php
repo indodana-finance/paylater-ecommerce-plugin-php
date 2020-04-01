@@ -5,11 +5,17 @@ namespace IndodanaCommon;
 use Respect\Validation\Validator;
 use Indodana\RespectValidation\RespectValidationHelper;
 use IndodanaCommon\Exceptions\IndodanaCommonException;
+use IndodanaCommon\Seller;
 
 Validator::with('IndodanaCommon\\Validation\\Rules');
 
 class Order
 {
+  const DEFAULT_ITEM_PARENT_TYPE = 'SELLER';
+  const SHIPPING_ITEM_ID = 'shippingfee';
+  const TAX_ITEM_ID = 'taxfee';
+  const DISCOUNT_ITEM_ID = 'discount';
+
   private $amount;
   private $items;
 
@@ -40,7 +46,7 @@ class Order
 
   private function getShippingFee($shippingAmount) {
     return [
-      'id' => 'shippingfee',
+      'id' => self::SHIPPING_ITEM_ID,
       'url' => '',
       'name' => 'Shipping Fee',
       'price' => (float) abs($shippingAmount),
@@ -51,7 +57,7 @@ class Order
 
   private function getTaxFee($taxAmount) {
     return [
-      'id' => 'taxfee',
+      'id' => self::TAX_ITEM_ID,
       'url' => '',
       'name' => 'Tax Fee',
       'price' => (float) abs($taxAmount),
@@ -62,6 +68,7 @@ class Order
 
   private function getDiscount($discountAmount) {
     return [
+      'id' => self::DISCOUNT_ITEM_ID,
       'id' => 'discount',
       'url' => '',
       'name' => 'Discount',
@@ -90,7 +97,7 @@ class Order
 
     // Add seller id for each item
     foreach($items as &$item) {
-      $item['parentType'] = 'SELLER';
+      $item['parentType'] = self::DEFAULT_ITEM_PARENT_TYPE;
       $item['parentId'] = $seller->getId();
     }
 
