@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
 
   common-tests:
-    name: Run IndodanaCommon tests
+    name: Run Indodana Common tests
 
     runs-on: ${{ matrix.operating-systems }}
 

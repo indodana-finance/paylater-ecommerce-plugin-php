@@ -1,5 +1,6 @@
 {
   "name": "indodana/indodana-paylater-ecommerce-common",
+  "description": "Indodana Common provides common functionalities that can be used on all plugins",
   "autoload": {
     "psr-4": {
       "IndodanaCommon\\":"src/"
