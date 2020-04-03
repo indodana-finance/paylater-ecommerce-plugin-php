@@ -31,21 +31,26 @@ jobs:
     steps:
       - name: Checkout to project
         uses: actions/checkout@v2
+        with:
+          path: main
 
       - name: Checkout to bcl
         uses: actions/checkout@v2
         with:
           repository: cermati/bcl
-          path: bclrepo
+          path: bcl
 
       - name: Install bcl globally
         run: |
           ls
-          ls $GITHUB_WORKSPACE
-          ./bclrepo/cli setup install
+          cd bcl
+          ./cli setup install
+          export PATH="/home/runner/.local/bin:$PATH"
 
       - name: Setup bcl on the project
         run: |
+          echo $PATH
+          export PATH="/home/runner/.local/bin:$PATH"
           echo $GITHUB_WORKSPACE
           ./bclrepo/cli package install
 
