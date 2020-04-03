@@ -64,6 +64,12 @@ jobs:
           key: ${{ steps.cache-env.outputs.key }}
           restore-keys: ${{ steps.cache-env.outputs.key }}
 
+      - name: Setup BCL
+        run: |
+          git clone git@github.com:cermati/bcl.git
+          bcl/cli setup install
+          bcl package install
+
       - name: Validate composer.json and composer.lock
         working-directory: ${{ env.plugin-directory }}
         run: composer validate
