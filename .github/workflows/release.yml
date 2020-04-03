@@ -42,7 +42,7 @@ jobs:
 
       - name: Setup bcl on the project
         run: |
-          export PATH="/home/runner/.local/bin:$PATH"
+          ls $HOME/.local/bin/bcl
           bcl package install
 
       - name: Prepare release for MagentoV1
