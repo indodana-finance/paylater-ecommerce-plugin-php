@@ -47,7 +47,7 @@ jobs:
         run: |
           echo $GITHUB_WORKSPACE
           ls $GITHUB_WORKSPACE/bcl
-          ${{ bcl-directory}}/cli package install
+          ${{ env.bcl-directory}}/cli package install
 
       - name: Prepare release for MagentoV1
         if: startsWith(${{ github.ref }}:10, 'MagentoV1-')
