@@ -74,7 +74,7 @@ jobs:
 
       - name: Build plugin
         working-directory: ${{ env.plugin-directory }}
-        run: ${{ env.build-command }}
+        run: sudo ${{ env.build-command }}
 
       - name: Zip a release
         run: |
