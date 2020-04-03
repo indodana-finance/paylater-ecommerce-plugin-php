@@ -36,8 +36,6 @@ jobs:
 
       - name: Install bcl globally
         run: | 
-          $GITHUB_WORKSPACE
-
         ./cli setup install
 
       - name: Checkout to project
