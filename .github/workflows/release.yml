@@ -45,7 +45,6 @@ jobs:
 
       - name: Setup bcl on the project
         run: |
-          echo ${{ env.bcl-directory }}
           echo $GITHUB_WORKSPACE
           ls $GITHUB_WORKSPACE/bcl
           ${{ bcl-directory}}/cli package install
