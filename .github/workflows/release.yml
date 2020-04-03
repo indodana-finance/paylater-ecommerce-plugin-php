@@ -49,10 +49,15 @@ jobs:
 
       - name: Setup bcl on the project
         run: |
+          echo '----------'
+          ls $HOME/.local/bin
+          echo '----------'
+          ls $HOME/.local/bin/bcl
+          echo '----------'
           echo $PATH
           export PATH="/home/runner/.local/bin:$PATH"
           echo $GITHUB_WORKSPACE
-          ./bclrepo/cli package install
+          bcl package install
 
       - name: Prepare release for MagentoV1
         if: startsWith(${{ github.ref }}:10, 'MagentoV1-')
