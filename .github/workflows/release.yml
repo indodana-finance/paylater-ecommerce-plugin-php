@@ -33,7 +33,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: cermati/bcl
-          token: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Install bcl
         run: ./cli setup install
