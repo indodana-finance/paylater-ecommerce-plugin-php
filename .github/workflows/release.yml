@@ -1,0 +1,87 @@
+name: Create Release
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'WoocommerceV3-*'
+      - 'OpencartV1-*'
+      - 'OpencartV2-*'
+      - 'MagentoV1-*'
+
+jobs:
+
+  magento-v1-release:
+    name: Create Release
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-systems:
+          - ubuntu-latest
+        php-versions:
+          - '5.6'
+
+    env:
+      extensions: curl, json, mbstring, xdebug
+      key: cache-v1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Prepare release for MagentoV1
+        if: startsWith(GITHUB_REF:10, 'MagentoV1-')
+        env:
+          extensions: curl, json, mbstring, xdebug
+          php-versions: 5.6
+          key: cache-magentov1-v1
+          plugin-directory: ./magento1
+          build-command: make magento1-build
+          release-name: release
+
+      # Install & cache environments
+      # https://github.com/marketplace/actions/setup-php-action#cache-extensions
+      - name: Setup cache environment
+        id: cache-env
+        uses: shivammathur/cache-extensions@v1
+        with:
+          php-version: ${{ env.php-versions }}
+          extensions: ${{ env.extensions }}
+          key: ${{ env.key }}
+
+      - name: Cache extensions
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.cache-env.outputs.dir }}
+          key: ${{ steps.cache-env.outputs.key }}
+          restore-keys: ${{ steps.cache-env.outputs.key }}
+
+      - name: Validate composer.json and composer.lock
+        working-directory: ${{ env.plugin-directory }}
+        run: composer validate
+
+      - name: Install dependencies
+        working-directory: ${{ env.plugin-directory }}
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Build plugin
+        run: ${{ build-command }}
+
+      - name: Zip a release
+        run: |
+          zip --junk-paths ./releases/${{ env.release-name }}.zip ./build/magento1/dev/magento1/plugin
+
+      - name: Publish a release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          files: ./releases/${{ env.release-name }}.zip
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
