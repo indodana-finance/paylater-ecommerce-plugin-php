@@ -29,8 +29,20 @@ jobs:
       # key: cache-v1
 
     steps:
-      - name: Checkout code
+      - name: Checkout to bcl
         uses: actions/checkout@v2
+        with:
+          repository: cermati/bcl
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Install bcl
+        run: ./cli setup install
+
+      - name: Checkout to project
+        uses: actions/checkout@v2
+
+      - name: Setup bcl on the project
+        run: bcl package install
 
       - name: Prepare release for MagentoV1
         if: startsWith(${{ github.ref }}:10, 'MagentoV1-')
@@ -64,14 +76,14 @@ jobs:
           key: ${{ steps.cache-env.outputs.key }}
           restore-keys: ${{ steps.cache-env.outputs.key }}
 
-      - name: Install BCL
-        run: |
-          cd ~
-          git clone https://github.com/cermati/bcl.git
-          bcl/cli setup install
+      # - name: Install BCL
+        # run: |
+          # cd ~
+          # git clone https://github.com/cermati/bcl.git
+          # bcl/cli setup install
 
-      - name: Setup BCL on the project
-        run: bcl package install
+      # - name: Setup BCL on the project
+        # run: bcl package install
 
       - name: Validate composer.json and composer.lock
         working-directory: ${{ env.plugin-directory }}
