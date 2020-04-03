@@ -38,7 +38,7 @@ jobs:
         run: |
           ./cli setup install
           echo $GITHUB_WORKSPACE
-          echo '::set-env name=bcl-directory::$(echo $GITHUB_WORKSPACE)'
+          echo '::set-env name=bcl-directory::$GITHUB_WORKSPACE'
 
       - name: Checkout to project
         uses: actions/checkout@v2
