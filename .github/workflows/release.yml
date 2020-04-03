@@ -38,7 +38,7 @@ jobs:
           echo '::set-env name=php-versions::5.6'
           echo '::set-env name=key::cache-magentov1-v1'
           echo '::set-env name=plugin-directory::./magento1'
-          echo '::set-env name=build-command::./magento1'
+          echo '::set-env name=build-command::make magento1-build'
         # env:
           # extensions: curl, json, mbstring, xdebug
           # php-versions: 5.6
