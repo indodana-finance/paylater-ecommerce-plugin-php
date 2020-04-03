@@ -35,8 +35,7 @@ jobs:
           repository: cermati/bcl
 
       - name: Install bcl globally
-        run: | 
-        ./cli setup install
+        run: ./cli setup install
 
       - name: Checkout to project
         uses: actions/checkout@v2
