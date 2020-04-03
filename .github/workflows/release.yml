@@ -45,10 +45,11 @@ jobs:
         run: |
           cd repo/bcl
           ./cli setup install
-          export PATH="/home/runner/.local/bin:$PATH"
 
       - name: Setup bcl on the project
-        run: bcl package install
+        run: |
+          export PATH="/home/runner/.local/bin:$PATH"
+          bcl package install
 
       - name: Prepare release for MagentoV1
         if: startsWith(${{ github.ref }}:10, 'MagentoV1-')
