@@ -35,13 +35,15 @@ jobs:
           repository: cermati/bcl
 
       - name: Install bcl globally
-        run: ./cli setup install
+        run: |
+          ./cli setup install
+          export PATH="/home/runner/.local/bin:$PATH"
 
       - name: Checkout to project
         uses: actions/checkout@v2
 
       - name: Setup bcl on the project
-        run: $HOME/.local/bin/bcl package install
+        run: bcl package install
 
       - name: Prepare release for MagentoV1
         if: startsWith(${{ github.ref }}:10, 'MagentoV1-')
