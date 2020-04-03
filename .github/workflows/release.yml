@@ -37,9 +37,8 @@ jobs:
 
       - name: Install bcl globally
         run: |
-          $GITHUB_WORKSPACE/bclrepo/cli setup install
-          echo $GITHUB_WORKSPACE
-          echo '::set-env name=bcl-directory::$GITHUB_WORKSPACE'
+          ./bclrepo/cli setup install
+          ls $GITHUB_WORKSPACE
 
       - name: Checkout to project
         uses: actions/checkout@v2
@@ -47,8 +46,7 @@ jobs:
       - name: Setup bcl on the project
         run: |
           echo $GITHUB_WORKSPACE
-          ls $GITHUB_WORKSPACE/bcl
-          $GITHUB_WORKSPACE/bclrepo/cli package install
+          ./bclrepo/cli package install
 
       - name: Prepare release for MagentoV1
         if: startsWith(${{ github.ref }}:10, 'MagentoV1-')
