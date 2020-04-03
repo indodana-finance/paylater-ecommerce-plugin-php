@@ -37,7 +37,7 @@ jobs:
 
       - name: Install bcl globally
         run: |
-          ./cli setup install
+          $GITHUB_WORKSPACE/bclrepo/cli setup install
           echo $GITHUB_WORKSPACE
           echo '::set-env name=bcl-directory::$GITHUB_WORKSPACE'
 
