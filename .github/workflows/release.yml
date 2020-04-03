@@ -29,35 +29,26 @@ jobs:
       # key: cache-v1
 
     steps:
-      - name: Checkout to project
+      - name: Checkout the project
         uses: actions/checkout@v2
-        with:
-          path: main
 
-      - name: Checkout to bcl
+      # This project requires https://github.com/cermati/bcl to be installed globally
+      # Therefore, we need to setup so that `bcl` command can be executed
+      # Any external repositories will be placed under `repo` directory
+      - name: Checkout bcl
         uses: actions/checkout@v2
         with:
           repository: cermati/bcl
-          path: bcl
+          path: repo/bcl
 
-      - name: Install bcl globally
+      - name: Setup bcl globally
         run: |
-          ls
-          cd bcl
+          cd repo/bcl
           ./cli setup install
           export PATH="/home/runner/.local/bin:$PATH"
 
       - name: Setup bcl on the project
-        run: |
-          echo '----------'
-          ls $HOME/.local/bin
-          echo '----------'
-          ls $HOME/.local/bin/bcl
-          echo '----------'
-          echo $PATH
-          export PATH="/home/runner/.local/bin:$PATH"
-          echo $GITHUB_WORKSPACE
-          bcl package install
+        run: bcl package install
 
       - name: Prepare release for MagentoV1
         if: startsWith(${{ github.ref }}:10, 'MagentoV1-')
