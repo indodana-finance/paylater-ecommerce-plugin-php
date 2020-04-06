@@ -27,15 +27,6 @@ build_plugin() {
   # Copy composer vendor dir to target plugin dir
   cp -Lr "$TARGET_DIR/vendor" "$TARGET_DIR/plugin/$AUTOLOAD_DIR"
 
-  echo '--------------------------------------'
-  ls $TARGET_DIR
-
-  echo '--------------------------------------'
-  ls $TARGET_DIR/upload
-
-  echo '--------------------------------------'
-  ls $TARGET_DIR/plugin
-
   # Copy target plugin dir to CMS upload dir
   # Note: CMS upload dir might not exist on CI build
   [ -d $TARGET_DIR/upload ] && cp -Lr $TARGET_DIR/plugin/* $TARGET_DIR/upload
