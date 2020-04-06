@@ -107,8 +107,7 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-suggest
 
       - name: Build plugin
-        working-directory: ${{ env.plugin-directory }}
-        run: sudo ${{ env.build-command }}
+        run: ${{ env.build-command }}
 
       - name: Zip a release
         run: |
