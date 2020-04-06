@@ -4,9 +4,9 @@ on:
   push:
     # Sequence of patterns matched against refs/tags
     tags:
-      - 'WoocommerceV3-*'
       - 'OpencartV1-*'
       - 'OpencartV2-*'
+      - 'WoocommerceV3-*'
       - 'MagentoV1-*'
 
 jobs:
@@ -21,42 +21,12 @@ jobs:
       matrix:
         operating-systems:
           - ubuntu-latest
-        php-versions:
-          - '5.6'
-
-    env:
-      extensions: curl, json, mbstring, xdebug
-      # key: cache-v1
 
     steps:
       - name: Checkout the project
         uses: actions/checkout@v2
 
-      # This project requires https://github.com/cermati/bcl to be installed globally
-      # Therefore, we need to setup so that `bcl` command can be executed
-      # Any external repositories will be placed under `repo` directory
-      # - name: Checkout bcl
-        # uses: actions/checkout@v2
-        # with:
-          # repository: cermati/bcl
-          # path: repo/bcl
-
-      # - name: Setup bcl globally
-        # run: |
-          # cd repo/bcl
-          # ./cli setup install
-
-      # We'll not changing any ~/.bashrc or ~/.zshrc to add new PATH for `bcl`. Therefore, we will add manually
-      # The reason why PATH is added here instead of previous step is because according to GitHub Actions official
-      # documentation:
-      #   Each `run` keyword represents a new process and shell in the runner environment
-      # Reference: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-      # - name: Setup bcl on the project
-        # run: |
-          # export PATH="/home/runner/.local/bin:$PATH"
-          # bcl package install
-
-      # Only if tag starts with MagentoV1-
+      # Use semantic versioning. Example output: 1.0.0
       - name: Get package version
         id: tagVersion
         uses: olegtarasov/get-tag@v2
@@ -64,6 +34,7 @@ jobs:
           tagRegex: "^(OpencartV1|OpencartV2|WoocommerceV3|MagentoV1)-(.*)"
           tagRegexGroup: 2
 
+      # Example output: 1_0_0
       - name: Get underscored package version
         id: underscoredTagVersion
         uses: frabert/replace-string-action@v1.1
@@ -72,22 +43,51 @@ jobs:
           string: ${{ steps.tagVersion.outputs.tag }}
           replace-with: '_'
 
+      # We differentiate plugin release based on prefix
+      # Different plugin will set different environment variables to be reused on steps hereafter
+      - name: Prepare release for OpencartV1
+        if: startsWith(${{ github.ref }}:10, 'OpencartV1-')
+        run: |
+          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
+          echo '::set-env name=release-name::opencart_v1-${{ steps.underscoredTagVersion.outputs.replaced }}'
+          echo '::set-env name=php-versions::5.6'
+          echo '::set-env name=key::cache-opencartv1-v1'
+          echo '::set-env name=source-directory::opencartv1'
+          echo '::set-env name=target-directory::.build/opencartv1'
+          echo '::set-env name=build-command::make opencartv1-build'
+
+      - name: Prepare release for OpencartV2
+        if: startsWith(${{ github.ref }}:10, 'OpencartV2-')
+        run: |
+          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
+          echo '::set-env name=release-name::opencart_v2-${{ steps.underscoredTagVersion.outputs.replaced }}'
+          echo '::set-env name=php-versions::5.6'
+          echo '::set-env name=key::cache-opencartv2-v1'
+          echo '::set-env name=source-directory::opencartv2'
+          echo '::set-env name=target-directory::.build/opencartv2'
+          echo '::set-env name=build-command::make opencartv2-build'
+
       - name: Prepare release for MagentoV1
         if: startsWith(${{ github.ref }}:10, 'MagentoV1-')
         run: |
+          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
           echo '::set-env name=release-name::magento_v1-${{ steps.underscoredTagVersion.outputs.replaced }}'
           echo '::set-env name=php-versions::5.6'
           echo '::set-env name=key::cache-magentov1-v1'
           echo '::set-env name=source-directory::magento1'
           echo '::set-env name=target-directory::.build/magento1'
           echo '::set-env name=build-command::make magento1-build'
-        # env:
-          # extensions: curl, json, mbstring, xdebug
-          # php-versions: 5.6
-          # key: cache-magentov1-v1
-          # source-directory: ./magento1
-          # build-command: make magento1-build
-          # release-name: release
+
+      - name: Prepare release for OpencartV2
+        if: startsWith(${{ github.ref }}:10, 'OpencartV2-')
+        run: |
+          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
+          echo '::set-env name=release-name::opencart_v2-${{ steps.underscoredTagVersion.outputs.replaced }}'
+          echo '::set-env name=php-versions::5.6'
+          echo '::set-env name=key::cache-opencartv2-v1'
+          echo '::set-env name=source-directory::opencartv2'
+          echo '::set-env name=target-directory::.build/opencartv2'
+          echo '::set-env name=build-command::make opencartv2-build'
 
       # Install & cache environments
       # https://github.com/marketplace/actions/setup-php-action#cache-extensions
@@ -106,45 +106,25 @@ jobs:
           key: ${{ steps.cache-env.outputs.key }}
           restore-keys: ${{ steps.cache-env.outputs.key }}
 
-      # - name: Install BCL
-        # run: |
-          # cd ~
-          # git clone https://github.com/cermati/bcl.git
-          # bcl/cli setup install
-
-      # - name: Setup BCL on the project
-        # run: bcl package install
-
-      - name: Validate composer.json and composer.lock
+      - name: Validate plugin composer.json and composer.lock
         working-directory: ${{ env.source-directory }}
         run: composer validate
 
-      - name: Install dependencies
+      - name: Install plugin dependencies
         working-directory: ${{ env.source-directory }}
         run: composer install --prefer-dist --no-progress --no-suggest
 
-      - name: Build plugin
+      - name: Build the plugin
         run: ${{ env.build-command }}
 
-      - name: Zip a release
+      - name: Zip the plugin
         run: |
-          cd .build/magento1
+          cd ${{ env.target-directory }}
           zip -r ${{ env.release-name }}.zip plugin
 
-      - name: Publish Release
+      - name: Create the release
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ env.target-directory }}/${{ env.release-name }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # - name: Publish a release
-        # id: create_release
-        # uses: actions/create-release@v1
-        # env:
-          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-        # with:
-          # files: ${{ env.target-directory }}/${{ env.release-name }}.zip
-          # tag_name: ${{ github.ref }}
-          # release_name: Release ${{ github.ref }}
-          # draft: false
-          # prerelease: false
