@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/bin/sh
 
-source ./build
+. ./build
 
-build-plugin "woocommerce" "wp-content/plugins/indodana-payment/library/Indodana/Payment"
+build_plugin "woocommerce" "wp-content/plugins/indodana-payment/library/Indodana/Payment"

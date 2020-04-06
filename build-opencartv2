@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/bin/sh
 
-source ./build
+. ./build
 
-build-plugin "opencartv2" "system/library/indodana"
+build_plugin "opencartv2" "system/library/indodana"

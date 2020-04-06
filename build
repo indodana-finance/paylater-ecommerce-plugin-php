@@ -1,29 +1,28 @@
-#!/bin/bash
+#!/bin/sh
 
-# build-plugin opencartv1 system/library/indodana
-build-plugin() {
-  local -r RED='\033[0;31m'
-  local -r GREEN='\033[0;32m'
-  local -r YELLOW='\033[1;33m'
-  local -r NC='\033[0m' # No Color
+build_plugin() {
+  local RED='\033[0;31m'
+  local GREEN='\033[0;32m'
+  local YELLOW='\033[1;33m'
+  local NC='\033[0m' # No Color
 
-  local -r PLUGIN_NAME=$1
-  local -r AUTOLOAD_DIR=$2
+  local PLUGIN_NAME=$1
+  local AUTOLOAD_DIR=$2
 
-  local -r SOURCE_DIR=$PLUGIN_NAME
-  local -r TARGET_DIR=".build/$PLUGIN_NAME"
+  local SOURCE_DIR=$PLUGIN_NAME
+  local TARGET_DIR=".build/$PLUGIN_NAME"
 
   # Create target if not exist
   mkdir -p $TARGET_DIR
 
   # Replace plugin on target
-  echo -e "${GREEN}[BUILD]${NC} Cleaning old files... ${YELLOW}(~15 seconds)${NC}"
+  echo "${GREEN}[BUILD]${NC} Cleaning old files... ${YELLOW}(~15 seconds)${NC}"
   rm -rf $TARGET_DIR
 
   # Copy plugin from source to target
   cp -Lr "$SOURCE_DIR" "$TARGET_DIR"
 
-  echo -e "${GREEN}[BUILD]${NC} Copying ${SOURCE_DIR} to ${TARGET_DIR} directory... ${YELLOW}(~30 seconds)${NC}"
+  echo "${GREEN}[BUILD]${NC} Copying ${SOURCE_DIR} to ${TARGET_DIR} directory... ${YELLOW}(~30 seconds)${NC}"
 
   # Copy composer vendor dir to target plugin dir
   cp -Lr "$TARGET_DIR/vendor" "$TARGET_DIR/plugin/$AUTOLOAD_DIR"
@@ -31,5 +30,3 @@ build-plugin() {
   # Copy target plugin dir to CMS upload dir
   cp -Lr $TARGET_DIR/plugin/* $TARGET_DIR/upload
 }
-
-export -f build-plugin

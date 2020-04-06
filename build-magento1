@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/bin/sh
 
-source ./build
+. ./build
 
-build-plugin "magento1" "lib/Indodana/Payment"
+build_plugin "magento1" "lib/Indodana/Payment"
