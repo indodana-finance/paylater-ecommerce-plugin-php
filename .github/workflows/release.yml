@@ -57,9 +57,22 @@ jobs:
           # bcl package install
 
       # Only if tag starts with MagentoV1-
+      - id: tagVersion
+        uses: olegtarasov/get-tag@v2
+        with:
+          tagRegex: "^(OpencartV1|OpencartV2|WoocommerceV3|MagentoV1)-(.*)"
+
+      - id: underscoredTagVersion
+        uses: frabert/replace-string-action@v1.1
+        with:
+          pattern: '/\./g'
+          string: ${{ steps.tagVersion.outputs.tag }}
+          replace-with: '_'
+
       - name: Prepare release for MagentoV1
         if: startsWith(${{ github.ref }}:10, 'MagentoV1-')
         run: |
+          echo '::set-env name=release-name::magento_v1-${{ steps.underscoredTagVersion.outputs.replaced }}'
           echo '::set-env name=php-versions::5.6'
           echo '::set-env name=key::cache-magentov1-v1'
           echo '::set-env name=plugin-directory::./magento1'
