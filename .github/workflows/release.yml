@@ -46,11 +46,17 @@ jobs:
           cd repo/bcl
           ./cli setup install
 
+      # We'll not changing any ~/.bashrc or ~/.zshrc to add new PATH for `bcl`. Therefore, we will add manually
+      # The reason why PATH is added here instead of previous step is because according to GitHub Actions official
+      # documentation:
+      #   Each `run` keyword represents a new process and shell in the runner environment
+      # Reference: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsrun
       - name: Setup bcl on the project
         run: |
           export PATH="/home/runner/.local/bin:$PATH"
           bcl package install
 
+      # Only if tag starts with MagentoV1-
       - name: Prepare release for MagentoV1
         if: startsWith(${{ github.ref }}:10, 'MagentoV1-')
         run: |
