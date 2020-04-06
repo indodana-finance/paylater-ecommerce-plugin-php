@@ -84,7 +84,7 @@ jobs:
         run: |
           PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
           echo '::set-env name=extensions::curl, json, mbstring, xdebug'
-          echo '::set-env name=release-name::magento_v1-${PACKAGE_VERSION//\./_}'
+          echo "::set-env name=release-name::magento_v1-${PACKAGE_VERSION//\./_}"
           echo '::set-env name=php-versions::5.6'
           echo '::set-env name=key::cache-magentov1-v2'
           echo '::set-env name=source-directory::magento1'
