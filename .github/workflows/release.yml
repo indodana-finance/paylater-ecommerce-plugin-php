@@ -111,7 +111,7 @@ jobs:
 
       - name: Zip a release
         run: |
-          zip --junk-paths ./releases/${{ env.release-name }}.zip ./build/magento1/dev/magento1/plugin
+          zip --junk-paths ./releases/${{ env.release-name }}.zip ./build/magento1/plugin
 
       - name: Publish a release
         id: create_release
