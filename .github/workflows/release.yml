@@ -46,7 +46,7 @@ jobs:
       # We differentiate plugin release based on prefix
       # Different plugin will set different environment variables to be reused on steps hereafter
       - name: Prepare release for OpencartV1
-        if: startsWith(${{ github.ref }}:10, 'OpencartV1-')
+        if: startsWith(github.ref, 'refs/tags/OpencartV1-')
         run: |
           echo '::set-env name=extensions::curl, json, mbstring, xdebug'
           echo '::set-env name=release-name::opencart_v1-${{ steps.underscoredTagVersion.outputs.replaced }}'
@@ -57,7 +57,7 @@ jobs:
           echo '::set-env name=build-command::make opencartv1-build'
 
       - name: Prepare release for OpencartV2
-        if: startsWith(${{ github.ref }}:10, 'OpencartV2-')
+        if: startsWith(github.ref, 'refs/tags/OpencartV2-')
         run: |
           echo '::set-env name=extensions::curl, json, mbstring, xdebug'
           echo '::set-env name=release-name::opencart_v2-${{ steps.underscoredTagVersion.outputs.replaced }}'
@@ -68,7 +68,7 @@ jobs:
           echo '::set-env name=build-command::make opencartv2-build'
 
       - name: Prepare release for MagentoV1
-        if: startsWith(${{ github.ref }}:10, 'MagentoV1-')
+        if: startsWith(github.ref, 'refs/tags/MagentoV1-')
         run: |
           echo '::set-env name=extensions::curl, json, mbstring, xdebug'
           echo '::set-env name=release-name::magento_v1-${{ steps.underscoredTagVersion.outputs.replaced }}'
@@ -78,16 +78,16 @@ jobs:
           echo '::set-env name=target-directory::.build/magento1'
           echo '::set-env name=build-command::make magento1-build'
 
-      - name: Prepare release for OpencartV2
-        if: startsWith(${{ github.ref }}:10, 'OpencartV2-')
+      - name: Prepare release for WoocommerceV3
+        if: startsWith(github.ref, 'refs/tags/WoocommerceV3-')
         run: |
           echo '::set-env name=extensions::curl, json, mbstring, xdebug'
-          echo '::set-env name=release-name::opencart_v2-${{ steps.underscoredTagVersion.outputs.replaced }}'
+          echo '::set-env name=release-name::woocommerce_v3-${{ steps.underscoredTagVersion.outputs.replaced }}'
           echo '::set-env name=php-versions::5.6'
-          echo '::set-env name=key::cache-opencartv2-v1'
-          echo '::set-env name=source-directory::opencartv2'
-          echo '::set-env name=target-directory::.build/opencartv2'
-          echo '::set-env name=build-command::make opencartv2-build'
+          echo '::set-env name=key::cache-woocommercev3-v1'
+          echo '::set-env name=source-directory::woocommerce'
+          echo '::set-env name=target-directory::.build/woocommerce'
+          echo '::set-env name=build-command::make woocommerce-build'
 
       # Install & cache environments
       # https://github.com/marketplace/actions/setup-php-action#cache-extensions
