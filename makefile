@@ -1,13 +1,13 @@
 # Opencart v1
 # ----------------------------------
-opencartv1_build_dir=.build/opencartv1/dev/opencartv1/upload
+opencartv1_build_dir=.build/opencartv1/upload
 opencartv1_dir = ./opencartv1
 
 opencartv1-install-dependencies:
 	cd ./opencartv1/ && composer install
 
 opencartv1-build:
-	./cli/svctl build opencartv1 dev
+	./build-opencartv1
 
 opencartv1-test:
 	$(opencartv1_dir)/vendor/bin/
@@ -23,14 +23,14 @@ opencartv1-log-tail:
 # Opencart v2
 # ----------------------------------
 
-opencartv2_build_dir=.build/opencartv2/dev/opencartv2/upload
+opencartv2_build_dir=.build/opencartv2/upload
 opencartv2_dir = ./opencartv2
 
 opencartv2-install-dependencies:
 	cd ./opencartv2/ && composer install
 
 opencartv2-build:
-	./cli/svctl build opencartv2 dev
+	./build-opencartv2
 
 opencartv2-test:
 	$(opencartv2_dir)/vendor/bin/
@@ -45,14 +45,14 @@ opencartv2-log-tail:
 
 # Woocommerce
 # ----------------------------------
-woocommerce_build_dir=.build/woocommerce/dev/woocommerce/upload
+woocommerce_build_dir=.build/woocommerce/upload
 woocommerce_dir = ./woocommerce
 
 woocommerce-install-dependencies:
 	cd ./woocommerce/ && composer install
 
 woocommerce-build:
-	./cli/svctl build woocommerce dev
+	./build-woocommerce
 
 woocommerce-test:
 	$(woocommerce)/vendor/bin/
@@ -67,14 +67,14 @@ woocommerce-log-tail:
 
 # Magento 1
 # ----------------------------------
-magento1_build_dir=.build/magento1/dev/magento1/upload
+magento1_build_dir=.build/magento1/upload
 magento1_dir = ./magento1
 
 magento1-install-dependencies:
 	cd ./magento1/ && composer install
 
 magento1-build:
-	./cli/svctl build magento1 dev
+	./build-magento1
 
 magento1-test:
 	$(magento1_dir)/vendor/bin/
@@ -87,4 +87,3 @@ magento1-log-tail:
 
 
 
-.PHONEY: opencart-v1-install-dependencies opencart-v1-build opencart-v1-serve opencart-v1-log-tail

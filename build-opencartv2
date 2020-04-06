@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source ./build
+
+build-plugin "opencartv2" "system/library/indodana"
