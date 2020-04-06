@@ -37,11 +37,12 @@ jobs:
       # Example output: 1_0_0
       - name: Get underscored package version
         id: underscoredTagVersion
-        uses: frabert/replace-string-action@v1.1
+        uses: frabert/replace-string-action@master
         with:
-          pattern: /\./g
+          pattern: '\\.'
           string: '${{ steps.tagVersion.outputs.tag }}'
           replace-with: '_'
+          flags: 'g'
 
       # We differentiate plugin release based on prefix
       # Different plugin will set different environment variables to be reused on steps hereafter
@@ -51,7 +52,7 @@ jobs:
           echo '::set-env name=extensions::curl, json, mbstring, xdebug'
           echo '::set-env name=release-name::opencart_v1-${{ steps.underscoredTagVersion.outputs.replaced }}'
           echo '::set-env name=php-versions::5.6'
-          echo '::set-env name=key::cache-opencartv1-v1'
+          echo '::set-env name=key::cache-opencartv1-v2'
           echo '::set-env name=source-directory::opencartv1'
           echo '::set-env name=target-directory::.build/opencartv1'
           echo '::set-env name=build-command::make opencartv1-build'
@@ -62,7 +63,7 @@ jobs:
           echo '::set-env name=extensions::curl, json, mbstring, xdebug'
           echo '::set-env name=release-name::opencart_v2-${{ steps.underscoredTagVersion.outputs.replaced }}'
           echo '::set-env name=php-versions::5.6'
-          echo '::set-env name=key::cache-opencartv2-v1'
+          echo '::set-env name=key::cache-opencartv2-v2'
           echo '::set-env name=source-directory::opencartv2'
           echo '::set-env name=target-directory::.build/opencartv2'
           echo '::set-env name=build-command::make opencartv2-build'
@@ -73,7 +74,7 @@ jobs:
           echo '::set-env name=extensions::curl, json, mbstring, xdebug'
           echo '::set-env name=release-name::woocommerce_v3-${{ steps.underscoredTagVersion.outputs.replaced }}'
           echo '::set-env name=php-versions::7.2'
-          echo '::set-env name=key::cache-woocommercev3-v1'
+          echo '::set-env name=key::cache-woocommercev3-v2'
           echo '::set-env name=source-directory::woocommerce'
           echo '::set-env name=target-directory::.build/woocommerce'
           echo '::set-env name=build-command::make woocommerce-build'
@@ -84,7 +85,7 @@ jobs:
           echo '::set-env name=extensions::curl, json, mbstring, xdebug'
           echo '::set-env name=release-name::magento_v1-${{ steps.underscoredTagVersion.outputs.replaced }}'
           echo '::set-env name=php-versions::5.6'
-          echo '::set-env name=key::cache-magentov1-v1'
+          echo '::set-env name=key::cache-magentov1-v2'
           echo '::set-env name=source-directory::magento1'
           echo '::set-env name=target-directory::.build/magento1'
           echo '::set-env name=build-command::make magento1-build'
