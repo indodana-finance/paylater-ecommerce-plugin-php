@@ -29,5 +29,7 @@ build_plugin() {
 
   # Copy target plugin dir to CMS upload dir
   # Note: CMS upload dir might not exist on CI build
-  [ -d $TARGET_DIR/upload ] && cp -Lr $TARGET_DIR/plugin/* $TARGET_DIR/upload
+  if [ -d $$TARGET_DIR/upload ]; then
+    cp -Lr $TARGET_DIR/plugin/* $TARGET_DIR/upload
+  fi
 }
