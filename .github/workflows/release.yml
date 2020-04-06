@@ -39,10 +39,9 @@ jobs:
         id: underscoredTagVersion
         uses: frabert/replace-string-action@v1.1
         with:
-          pattern: '\\.'
+          pattern: /\./g
           string: '${{ steps.tagVersion.outputs.tag }}'
           replace-with: '_'
-          flags: 'g'
 
       # We differentiate plugin release based on prefix
       # Different plugin will set different environment variables to be reused on steps hereafter
