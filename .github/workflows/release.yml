@@ -61,6 +61,7 @@ jobs:
         uses: olegtarasov/get-tag@v2
         with:
           tagRegex: "^(OpencartV1|OpencartV2|WoocommerceV3|MagentoV1)-(.*)"
+          tagRegexGroup: 2
 
       - id: underscoredTagVersion
         uses: frabert/replace-string-action@v1.1
@@ -75,13 +76,14 @@ jobs:
           echo '::set-env name=release-name::magento_v1-${{ steps.underscoredTagVersion.outputs.replaced }}'
           echo '::set-env name=php-versions::5.6'
           echo '::set-env name=key::cache-magentov1-v1'
-          echo '::set-env name=plugin-directory::./magento1'
+          echo '::set-env name=source-directory::magento1'
+          echo '::set-env name=target-directory::.build/magento1'
           echo '::set-env name=build-command::make magento1-build'
         # env:
           # extensions: curl, json, mbstring, xdebug
           # php-versions: 5.6
           # key: cache-magentov1-v1
-          # plugin-directory: ./magento1
+          # source-directory: ./magento1
           # build-command: make magento1-build
           # release-name: release
 
@@ -112,11 +114,11 @@ jobs:
         # run: bcl package install
 
       - name: Validate composer.json and composer.lock
-        working-directory: ${{ env.plugin-directory }}
+        working-directory: ${{ env.source-directory }}
         run: composer validate
 
       - name: Install dependencies
-        working-directory: ${{ env.plugin-directory }}
+        working-directory: ${{ env.source-directory }}
         run: composer install --prefer-dist --no-progress --no-suggest
 
       - name: Build plugin
@@ -124,7 +126,8 @@ jobs:
 
       - name: Zip a release
         run: |
-          zip --junk-paths ./releases/${{ env.release-name }}.zip ./build/magento1/plugin
+          cd .build/magento1
+          zip -r ${{ env.release-name }}.zip plugin
 
       - name: Publish a release
         id: create_release
@@ -132,7 +135,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          files: ./releases/${{ env.release-name }}.zip
+          files: ${{ env.target-directory }}/${{ env.release-name }}.zip
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
           draft: false
