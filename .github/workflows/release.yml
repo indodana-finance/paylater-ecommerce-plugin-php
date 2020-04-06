@@ -40,7 +40,7 @@ jobs:
         uses: frabert/replace-string-action@v1.1
         with:
           pattern: '\\.'
-          string: ${{ steps.tagVersion.outputs.tag }}
+          string: '${{ steps.tagVersion.outputs.tag }}'
           replace-with: '_'
           flags: 'g'
 
@@ -73,7 +73,7 @@ jobs:
         run: |
           echo '::set-env name=extensions::curl, json, mbstring, xdebug'
           echo '::set-env name=release-name::woocommerce_v3-${{ steps.underscoredTagVersion.outputs.replaced }}'
-          echo '::set-env name=php-versions::5.6'
+          echo '::set-env name=php-versions::7.2'
           echo '::set-env name=key::cache-woocommercev3-v1'
           echo '::set-env name=source-directory::woocommerce'
           echo '::set-env name=target-directory::.build/woocommerce'
