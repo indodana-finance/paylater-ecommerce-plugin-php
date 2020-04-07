@@ -1,0 +1,125 @@
+name: Release
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'OpencartV1-*'
+      - 'OpencartV2-*'
+      - 'WoocommerceV3-*'
+      - 'MagentoV1-*'
+
+jobs:
+
+  release:
+    name: Release
+
+    runs-on: ${{ matrix.operating-systems }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-systems:
+          - ubuntu-latest
+
+    steps:
+      - name: Checkout the project
+        uses: actions/checkout@v2
+
+      # Use semantic versioning. Example output: 1.0.0
+      - name: Get package version
+        id: packageVersion
+        uses: olegtarasov/get-tag@v2
+        with:
+          tagRegex: "^(OpencartV1|OpencartV2|WoocommerceV3|MagentoV1)-(.*)"
+          tagRegexGroup: 2
+
+      # We differentiate plugin release based on prefix
+      # Different plugin will set different environment variables to be reused on steps hereafter
+      - name: Prepare release for OpencartV1
+        if: startsWith(github.ref, 'refs/tags/OpencartV1-')
+        run: |
+          PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
+          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
+          echo "::set-env name=release-name::opencart_v1-${PACKAGE_VERSION//\./_}"
+          echo '::set-env name=php-versions::5.6'
+          echo '::set-env name=key::cache-opencartv1-v2'
+          echo '::set-env name=source-directory::opencartv1'
+          echo '::set-env name=target-directory::.build/opencartv1'
+          echo '::set-env name=build-command::make opencartv1-build'
+
+      - name: Prepare release for OpencartV2
+        if: startsWith(github.ref, 'refs/tags/OpencartV2-')
+        run: |
+          PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
+          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
+          echo "::set-env name=release-name::opencart_v2-${PACKAGE_VERSION//\./_}"
+          echo '::set-env name=php-versions::5.6'
+          echo '::set-env name=key::cache-opencartv2-v2'
+          echo '::set-env name=source-directory::opencartv2'
+          echo '::set-env name=target-directory::.build/opencartv2'
+          echo '::set-env name=build-command::make opencartv2-build'
+
+      - name: Prepare release for WoocommerceV3
+        if: startsWith(github.ref, 'refs/tags/WoocommerceV3-')
+        run: |
+          PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
+          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
+          echo "::set-env name=release-name::woocommerce_v3-${PACKAGE_VERSION//\./_}"
+          echo '::set-env name=php-versions::7.2'
+          echo '::set-env name=key::cache-woocommercev3-v2'
+          echo '::set-env name=source-directory::woocommerce'
+          echo '::set-env name=target-directory::.build/woocommerce'
+          echo '::set-env name=build-command::make woocommerce-build'
+
+      - name: Prepare release for MagentoV1
+        if: startsWith(github.ref, 'refs/tags/MagentoV1-')
+        run: |
+          PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
+          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
+          echo "::set-env name=release-name::magento_v1-${PACKAGE_VERSION//\./_}"
+          echo '::set-env name=php-versions::5.6'
+          echo '::set-env name=key::cache-magentov1-v2'
+          echo '::set-env name=source-directory::magento1'
+          echo '::set-env name=target-directory::.build/magento1'
+          echo '::set-env name=build-command::make magento1-build'
+
+      # Install & cache environments
+      # https://github.com/marketplace/actions/setup-php-action#cache-extensions
+      - name: Setup cache environment
+        id: cache-env
+        uses: shivammathur/cache-extensions@v1
+        with:
+          php-version: ${{ env.php-versions }}
+          extensions: ${{ env.extensions }}
+          key: ${{ env.key }}
+
+      - name: Cache extensions
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.cache-env.outputs.dir }}
+          key: ${{ steps.cache-env.outputs.key }}
+          restore-keys: ${{ steps.cache-env.outputs.key }}
+
+      - name: Validate plugin composer.json and composer.lock
+        working-directory: ${{ env.source-directory }}
+        run: composer validate
+
+      - name: Install plugin dependencies
+        working-directory: ${{ env.source-directory }}
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Build the plugin
+        run: ${{ env.build-command }}
+
+      - name: Zip the plugin
+        run: |
+          cd ${{ env.target-directory }}
+          zip -r ${{ env.release-name }}.zip plugin
+
+      - name: Create the release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.target-directory }}/${{ env.release-name }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
