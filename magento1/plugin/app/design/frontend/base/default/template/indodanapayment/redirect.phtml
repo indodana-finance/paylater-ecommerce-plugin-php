@@ -51,7 +51,7 @@
     var baseUrl = document.getElementById('indodanaBaseUrl').value;
     data.paymentType = paymentOptionId;
     
-    return axios.post(`${baseUrl}/merchant/v1/checkout_url`, data, {
+    return axios.post(`${baseUrl}/v1/checkout_url`, data, {
       headers: {
         'Content-type': 'application/json',
         'Accept': 'application/json',
