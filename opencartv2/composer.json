@@ -8,7 +8,7 @@
     },
     {
       "name": "Steven Yang",
-      "email": "syang@indodana.com"
+      "email": "stv.yang10@gmail.com"
     }
   ],
   "repositories": [
@@ -20,7 +20,6 @@
       }
     }
   ],
-  "minimum-stability": "RC",
   "require": {
     "indodana/indodana-paylater-ecommerce-common": "@dev",
     "sentry/sentry": "~1.11.0"

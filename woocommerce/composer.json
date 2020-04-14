@@ -7,12 +7,12 @@
       "email": "dev@indodana.com"
     },
     {
-      "name": "Sendy Halim",
-      "email": "sendyhalim93@gmail.com"
+      "name": "Steven Yang",
+      "email": "stv.yang10@gmail.com"
     },
     {
-      "name": "Steven Yang",
-      "email": "syang@indodana.com"
+      "name": "Sendy Halim",
+      "email": "sendyhalim93@gmail.com"
     }
   ],
   "repositories": [
@@ -24,10 +24,8 @@
       }
     }
   ],
-  "minimum-stability": "RC",
   "require": {
     "indodana/indodana-paylater-ecommerce-common": "@dev",
-    "respect/validation": "^1.1",
-    "sentry/sdk": "^2.1"
+    "sentry/sdk": "~2.1.0"
   }
 }
