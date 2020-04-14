@@ -70,7 +70,7 @@ function redirectToCheckoutUrl(paymentOptionId, paymentData) {
   var baseUrl = $('#indodanaBaseUrl').val();
   data.paymentType = paymentOptionId;
   $.ajax({
-    url: `${baseUrl}/merchant/v1/checkout_url`,
+    url: `${baseUrl}/v1/checkout_url`,
     type: 'post',
     data: JSON.stringify(data),
     headers: {

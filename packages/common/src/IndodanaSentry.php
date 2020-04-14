@@ -11,7 +11,7 @@ class IndodanaSentry
   public function getSentryDsn($pluginName)
   {
     $response = IndodanaHttpClient::get(
-      Indodana::PRODUCTION_BASE_URL . '/public/v1/merchant-plugin/sentry',
+      'https://api.indodana.com/chermes/public/v1/merchant-plugin/sentry',
       [],
       [ 'pluginName' => $pluginName ]
     );

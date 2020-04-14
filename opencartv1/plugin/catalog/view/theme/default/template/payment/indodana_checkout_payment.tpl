@@ -69,7 +69,7 @@ function redirectToCheckoutUrl(paymentOptionId, paymentData) {
   console.log(baseUrl);
   data.paymentType = paymentOptionId;
   $.ajax({
-    url: `${baseUrl}/merchant/v1/checkout_url`,
+    url: `${baseUrl}/v1/checkout_url`,
     type: 'post',
     data: JSON.stringify(data),
     headers: {

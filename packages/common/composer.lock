@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "59380ac132572ee1473cca80423e6d14",
+    "content-hash": "32a41107421e3164ee918f5578e576b4",
     "packages": [
         {
             "name": "indodana/indodana-paylater-sdk",
-            "version": "1.0.0-RC1",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/indodana/indodana-paylater-sdk-php.git",
-                "reference": "b38d612fe3c91c27ff36ae04ecf3a1bfb2d3ae53"
+                "reference": "0662e45a46a1ef868895e18bbaf5bc2867ef0563"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/indodana/indodana-paylater-sdk-php/zipball/b38d612fe3c91c27ff36ae04ecf3a1bfb2d3ae53",
-                "reference": "b38d612fe3c91c27ff36ae04ecf3a1bfb2d3ae53",
+                "url": "https://api.github.com/repos/indodana/indodana-paylater-sdk-php/zipball/0662e45a46a1ef868895e18bbaf5bc2867ef0563",
+                "reference": "0662e45a46a1ef868895e18bbaf5bc2867ef0563",
                 "shasum": ""
             },
             "require": {
@@ -42,7 +42,7 @@
                 }
             ],
             "description": "Indodana Paylater SDK for PHP that provides merchant integration functionalities",
-            "time": "2020-03-10T08:05:30+00:00"
+            "time": "2020-03-19T11:29:15+00:00"
         },
         {
             "name": "respect/validation",
@@ -109,16 +109,16 @@
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.14.0",
+            "version": "v1.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "34094cfa9abe1f0f14f48f490772db7a775559f2"
+                "reference": "81ffd3a9c6d707be22e3012b827de1c9775fc5ac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/34094cfa9abe1f0f14f48f490772db7a775559f2",
-                "reference": "34094cfa9abe1f0f14f48f490772db7a775559f2",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/81ffd3a9c6d707be22e3012b827de1c9775fc5ac",
+                "reference": "81ffd3a9c6d707be22e3012b827de1c9775fc5ac",
                 "shasum": ""
             },
             "require": {
@@ -130,7 +130,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.14-dev"
+                    "dev-master": "1.15-dev"
                 }
             },
             "autoload": {
@@ -164,7 +164,7 @@
                 "portable",
                 "shim"
             ],
-            "time": "2020-01-13T11:15:53+00:00"
+            "time": "2020-03-09T19:04:49+00:00"
         }
     ],
     "packages-dev": [
@@ -1724,16 +1724,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v3.4.38",
+            "version": "v3.4.39",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "bc63e15160866e8730a1f738541b194c401f72bf"
+                "reference": "e701b47e11749970f63803879c4febb520f07b6c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/bc63e15160866e8730a1f738541b194c401f72bf",
-                "reference": "bc63e15160866e8730a1f738541b194c401f72bf",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/e701b47e11749970f63803879c4febb520f07b6c",
+                "reference": "e701b47e11749970f63803879c4febb520f07b6c",
                 "shasum": ""
             },
             "require": {
@@ -1779,7 +1779,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2020-01-16T19:04:26+00:00"
+            "time": "2020-03-25T12:02:26+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -1832,9 +1832,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "indodana/indodana-paylater-sdk": 5
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
