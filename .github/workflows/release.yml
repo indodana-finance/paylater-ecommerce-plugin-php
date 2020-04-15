@@ -7,6 +7,7 @@ on:
       - 'OpencartV1-*'
       - 'OpencartV2-*'
       - 'WoocommerceV3-*'
+      - 'WoocommerceV4-*'
       - 'MagentoV1-*'
 
 jobs:
@@ -31,7 +32,7 @@ jobs:
         id: packageVersion
         uses: olegtarasov/get-tag@v2
         with:
-          tagRegex: "^(OpencartV1|OpencartV2|WoocommerceV3|MagentoV1)-(.*)"
+          tagRegex: "^(OpencartV1|OpencartV2|WoocommerceV3|WoocommerceV4|MagentoV1)-(.*)"
           tagRegexGroup: 2
 
       # We differentiate plugin release based on prefix
@@ -71,6 +72,18 @@ jobs:
           echo '::set-env name=source-directory::woocommerce'
           echo '::set-env name=target-directory::.build/woocommerce'
           echo '::set-env name=build-command::make woocommerce-build'
+
+      - name: Prepare release for WoocommerceV4
+        if: startsWith(github.ref, 'refs/tags/WoocommerceV4-')
+        run: |
+          PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
+          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
+          echo "::set-env name=release-name::woocommerce_v4-${PACKAGE_VERSION//\./_}"
+          echo '::set-env name=php-versions::7.2'
+          echo '::set-env name=key::cache-woocommercev4-v2'
+          echo '::set-env name=source-directory::woocommercev4'
+          echo '::set-env name=target-directory::.build/woocommercev4'
+          echo '::set-env name=build-command::make woocommercev4-build'
 
       - name: Prepare release for MagentoV1
         if: startsWith(github.ref, 'refs/tags/MagentoV1-')
