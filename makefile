@@ -65,6 +65,22 @@ woocommerce-log-tail:
 
 
 
+# Woocommerce V4
+# ----------------------------------
+woocommercev4_build_dir=.build/woocommercev4/upload
+woocommercev4_dir = ./woocommercev4
+
+woocommercev4-install-dependencies:
+	cd ./woocommercev4/ && composer install
+
+woocommercev4-build:
+	./build-woocommercev4
+
+woocommercev4-serve: woocommercev4-build
+	php7.2 -S localhost:6204 -t $(woocommercev4_build_dir)
+
+
+
 # Magento 1
 # ----------------------------------
 magento1_build_dir=.build/magento1/upload

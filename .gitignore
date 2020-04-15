@@ -33,6 +33,7 @@ vendor/
 /opencartv3/upload/
 /prestashop/upload/
 /woocommerce/upload/
+/woocommercev4/upload/
 
 # INDODANA COMMON
 /packages/common/.coverage/
