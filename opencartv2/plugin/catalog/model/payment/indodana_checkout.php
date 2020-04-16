@@ -1,5 +1,9 @@
 <?php
 
+require_once DIR_SYSTEM . 'library/indodana/autoload.php';
+
+use IndodanaCommon\IndodanaConstant;
+
 class ModelPaymentIndodanaCheckout extends Model {
   const MINIMIM_ORDER_AMOUNT = 10000;
 
@@ -11,9 +15,10 @@ class ModelPaymentIndodanaCheckout extends Model {
       return null;
     }
 
+    $logoUrl = IndodanaConstant::LOGO_URL;
     $method_data = array(
       'code'        => 'indodana_checkout',
-      'title'       => '<img src="https://afpi.or.id/fm/Members/indodana_logo_4500-x-1000.png" height="25" width="112">&nbsp&nbsp',
+      'title'       => "<img src='${logoUrl}' height='25' width='112'>",
       'terms'       => '',
       'sort_order'  => $this->config->get('indodana_checkout_sort_order')
     );

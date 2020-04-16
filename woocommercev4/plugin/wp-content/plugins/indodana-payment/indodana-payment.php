@@ -8,6 +8,8 @@
  * Version: 1.0.0
  */
 
+use IndodanaCommon\IndodanaConstant;
+
 add_filter( 'woocommerce_payment_gateways', 'indodana_add_payment_gateway_class' );
 function indodana_add_payment_gateway_class( $gateways ) {
   $gateways[] = 'WC_Indodana_Gateway';
@@ -16,7 +18,9 @@ function indodana_add_payment_gateway_class( $gateways ) {
 
 add_filter('woocommerce_available_payment_gateways', 'indodana_add_available_payment_gateways');
 function indodana_add_available_payment_gateways($available_gateways) {
-  $available_gateways['indodana']->title = '<a onclick="window.open(\'http://indodana.com\');"><img src="https://afpi.or.id/fm/Members/indodana_logo_4500-x-1000.png" alt="Indodana Payments" title="Indodana Payments"/></a>';
+  $logoUrl = IndodanaConstant::LOGO_URL;
+
+  $available_gateways['indodana']->title = "<a onclick='window.open(\"http://indodana.com\");'><img src='${logoUrl}' alt='Indodana Payments' title='Indodana Payments' /></a>";
 
   return $available_gateways;
 }
