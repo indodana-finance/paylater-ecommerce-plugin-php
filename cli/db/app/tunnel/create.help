@@ -1,3 +1,0 @@
-This commands create SSH tunnel instance using configuration given in [Environemnt].yml. It will also check if a tunnel instance exist already. If it is, then the comamnd will exit gracefully. The command will infer the location of target database using the json file in {DB_DIRECTORY} For example, if the deployment type specified in [Environemnt].yml is "apsara". The command will try to search for apsara_db.json in {DB_DIRECTORY}
-
-Becasue this command depends on other part to run beforehand, IT IS NOT RECOMMENDED to run this command separately.

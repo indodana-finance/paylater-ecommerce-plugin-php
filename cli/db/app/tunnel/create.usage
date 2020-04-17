@@ -1,4 +1,0 @@
-DB_NAME DB_TYPE ENV
-    DB_NAME:    Name of the database that exist in blueprints
-    DB_TYPE:    Database instance, mysql | postgres
-    ENV:        Environment type

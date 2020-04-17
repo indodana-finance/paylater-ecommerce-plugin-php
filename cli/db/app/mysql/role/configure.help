@@ -1,3 +1,0 @@
-This command will configure a role to vault. The configuration process is as follow:
-1. The command will read the creation statement of role specified in blueprints config file
-2. The command will then propagate this creation statement to mysql-database-plugin in vault

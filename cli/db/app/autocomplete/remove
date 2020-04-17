@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-PRJ_NAME="db"
-SUFFIX="ctl"
-
-if [[ -f "$HOME/.bash_completion.d/$PRJ_NAME$SUFFIX" ]]; then
-    rm "$HOME/.bash_completion.d/$PRJ_NAME$SUFFIX"
-fi

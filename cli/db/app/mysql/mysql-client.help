@@ -1,1 +1,0 @@
-This command will create a connection to mysql instances as specified by configuration file in [Environment].yml. It will also create SSH tunnel if it is specified by config. Mysql connection will be instantiated with the user found after using get-credential command. The user will have access as specified by his/her role from the [ROLE] arguments.
