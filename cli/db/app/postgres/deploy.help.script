@@ -1,9 +1,0 @@
-#!/bin/bash
-function db-deploy-help {
-    echo -e "${YELLOW}Format:${NC} ${GREEN}./dbctl ${NC}postgres deploy {${YELLOW}BLUEPRINT${NC}:according blueprint} {${YELLOW}ENVIRONMENT${NC}:dev|stg|prod}"
-    echo -e "${YELLOW}Example:${NC} ${GREEN}./dbctl ${NC}postgres${NC} deploy template_database dev"
-    echo -e "         ${GREEN}./dbctl${NC} postgres${NC} deploy template_database stg"
-    echo -e "         ${GREEN}./dbctl${NC} postgres${NC} deploy template_database prod"
-}
-
-db-deploy-help

@@ -1,4 +1,0 @@
-- hosts: "localhost"
-  roles:
-  - role: "database/common"
-  - role: "database/role/configure"

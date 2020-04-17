@@ -1,5 +1,0 @@
-
-CREATE USER "{{name}}"@'%' IDENTIFIED BY '{{password}}';
-GRANT INSERT, SELECT, DELETE, UPDATE, ALTER, CREATE, DROP, CREATE TEMPORARY TABLES ON magento1.* TO "{{name}}"@'%';
-CREATE USER "{{name}}"@'localhost' IDENTIFIED BY '{{password}}';
-GRANT INSERT, SELECT, DELETE, UPDATE, ALTER, CREATE, DROP, CREATE TEMPORARY TABLES ON magento1.* TO "{{name}}"@'localhost';
