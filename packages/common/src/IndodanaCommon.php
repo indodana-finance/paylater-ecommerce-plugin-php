@@ -36,7 +36,15 @@ class IndodanaCommon
 
         IndodanaHelper::setIfExists($indodanaConfig, $config, 'apiKey');
         IndodanaHelper::setIfExists($indodanaConfig, $config, 'apiSecret');
-        IndodanaHelper::setIfExists($indodanaConfig, $config, 'environment');
+        if (isset($config['environment'])) {
+          $indodanaConfig['environment'] = strtoupper($config['environment']);
+        }
+
+        IndodanaLogger::info(sprintf(
+          '%s Indodana Config: %s',
+          $namespace,
+          print_r($indodanaConfig, true)
+        ));
 
         $indodana = new Indodana($indodanaConfig);
 
