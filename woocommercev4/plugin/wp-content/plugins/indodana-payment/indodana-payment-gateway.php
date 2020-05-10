@@ -19,11 +19,13 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
 
   public function __construct() {
     $this->id = 'indodana';
-    $this->icon = '';
+    $this->title = __($this->get_option('title'), 'indodana-title');
+    $this->description = __($this->get_option('description'), 'indodana-description');
+    $this->icon = __(IndodanaConstant::LOGO_URL, 'indodana-icon');
     $this->has_fields = true;
 
-    $this->method_title = __('Indodana Payment', 'indodana-method-title');
-    $this->method_description = __('Indodana Payment redirects your customer to Indodana during checkout.', 'indodana-method-description');
+    $this->method_title = __('Indodana PayLater', 'indodana-method-title');
+    $this->method_description = __('Indodana PayLater redirects customers to Indodana during checkout.', 'indodana-method-description');
 
     $this->supports = array(
       'products'
@@ -76,14 +78,14 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
         'type'            => 'text',
         'description'     => 'This controls the title which the user sees during checkout.',
         'desc_tip'        => true,
-        'default'         => 'Indodana Payment',
+        'default'         => 'Indodana PayLater',
       ],
       'description' => [
         'title'           => 'Description',
         'type'            => 'textarea',
         'description'     => 'This controls the description which the user sees during checkout.',
         'desc_tip'        => true,
-        'default'         => 'Pay with your credit card via our super-cool payment gateway',
+        'default'         => 'Pay with installment via our PayLater product.',
       ],
       'environment' => [
         'title'           => 'Environment',

@@ -16,15 +16,6 @@ function indodana_add_payment_gateway_class( $gateways ) {
   return $gateways;
 }
 
-add_filter('woocommerce_available_payment_gateways', 'indodana_add_available_payment_gateways');
-function indodana_add_available_payment_gateways($available_gateways) {
-  $logoUrl = IndodanaConstant::LOGO_URL;
-
-  $available_gateways['indodana']->title = "<a onclick='window.open(\"http://indodana.com\");'><img src='${logoUrl}' alt='Indodana Payments' title='Indodana Payments' /></a>";
-
-  return $available_gateways;
-}
-
 add_action( 'plugins_loaded', 'indodana_init_payment_gateway_class' );
 function indodana_init_payment_gateway_class() {
   if (!class_exists('WC_Payment_Gateway')) {
