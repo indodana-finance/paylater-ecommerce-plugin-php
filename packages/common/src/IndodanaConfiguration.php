@@ -14,7 +14,7 @@ class IndodanaConfiguration
   {
     $validator = Validator::create()
       ->key('storeName', Validator::stringType()->notEmpty())
-      ->key('storeUrl', Validator::domain()->notEmpty())
+      ->key('storeUrl', Validator::url()->notEmpty())
       ->key('storeEmail', Validator::email()->notEmpty())
       ->key('storePhone', Validator::stringType()->notEmpty()) // Respect doesn't have validation for Indonesia phone
       ->key('storeCountryCode', Validator::in(IndodanaConstant::getCountryCodes()))
