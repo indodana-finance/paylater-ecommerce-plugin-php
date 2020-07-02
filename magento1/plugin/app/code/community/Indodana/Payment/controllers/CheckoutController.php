@@ -162,7 +162,7 @@ class Indodana_Payment_CheckoutController extends Mage_Core_Controller_Front_Act
     // -----
     $namespace = '[MagentoV1-notifyAction]';
 
-    $requestHeaders = getallheaders();
+    $requestHeaders = IndodanaHelper::getRequestHeaders();
 
     IndodanaLogger::info(
       sprintf(

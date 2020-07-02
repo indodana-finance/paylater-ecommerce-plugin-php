@@ -348,7 +348,7 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     // -----
     $namespace = '[OpencartV2-notify]';
 
-    $request_headers = getallheaders();
+    $request_headers = IndodanaHelper::getRequestHeaders();
 
     IndodanaLogger::info(
       sprintf(

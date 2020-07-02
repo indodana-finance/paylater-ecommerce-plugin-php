@@ -489,7 +489,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     // -----
     $namespace = '[Woocommerce-handle_notify_action]';
 
-    $request_headers = getallheaders();
+    $request_headers = IndodanaHelper::getRequestHeaders();
 
     IndodanaLogger::info(
       sprintf(
