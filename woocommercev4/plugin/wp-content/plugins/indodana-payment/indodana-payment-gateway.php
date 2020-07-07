@@ -501,7 +501,7 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
 
     // Check whether request authorization is valid
     // -----
-    $auth_token = isset($request_headers['Authorization']) ? $request_headers['Authorization'] : '';
+    $auth_token = IndodanaHelper::getAuthToken($request_headers, $namespace);
 
     $is_valid_authorization = $this->get_indodana_common()->isValidAuthToken($auth_token);
 
