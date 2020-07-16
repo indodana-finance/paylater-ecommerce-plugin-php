@@ -348,7 +348,7 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     // -----
     $namespace = '[OpencartV2-notify]';
 
-    $request_headers = getallheaders();
+    $request_headers = IndodanaHelper::getRequestHeaders();
 
     IndodanaLogger::info(
       sprintf(
@@ -360,7 +360,7 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
 
     // Check whether request authorization is valid
     // -----
-    $auth_token = isset($request_headers['Authorization']) ? $request_headers['Authorization'] : '';
+    $auth_token = IndodanaHelper::getAuthToken($request_headers, $namespace);
 
     $is_valid_authorization = $this->getIndodanaCommon()->isValidAuthToken($auth_token);
 
