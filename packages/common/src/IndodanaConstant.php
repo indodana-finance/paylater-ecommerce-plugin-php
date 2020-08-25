@@ -17,7 +17,7 @@ class IndodanaConstant
   const DISABLED = 'DISABLED';
   const ENABLED = 'ENABLED';
 
-  const INITIATED = 'INITIATED';
+  const DEFAULT_ITEM_CATEGORY = 'others';
 
   const frontendConfigMapping = [
     'storeName'                 => 'Store Name',

@@ -5,6 +5,7 @@ namespace IndodanaCommon;
 use Respect\Validation\Validator;
 use Indodana\RespectValidation\RespectValidationHelper;
 use IndodanaCommon\Exceptions\IndodanaCommonException;
+use IndodanaCommon\IndodanaConstant;
 use IndodanaCommon\Seller;
 
 Validator::with('IndodanaCommon\\Validation\\Rules');
@@ -51,6 +52,7 @@ class Order
       'name' => 'Shipping Fee',
       'price' => (float) abs($shippingAmount),
       'type' => '',
+      'category' => IndodanaConstant::DEFAULT_ITEM_CATEGORY,
       'quantity' => 1
     ];
   }
@@ -62,6 +64,7 @@ class Order
       'name' => 'Tax Fee',
       'price' => (float) abs($taxAmount),
       'type' => '',
+      'category' => IndodanaConstant::DEFAULT_ITEM_CATEGORY,
       'quantity' => 1
     ];
   }
@@ -69,11 +72,11 @@ class Order
   private function getDiscount($discountAmount) {
     return [
       'id' => self::DISCOUNT_ITEM_ID,
-      'id' => 'discount',
       'url' => '',
       'name' => 'Discount',
       'price' => (float) abs($discountAmount),
       'type' => '',
+      'category' => IndodanaConstant::DEFAULT_ITEM_CATEGORY,
       'quantity' => 1
     ];
   }
