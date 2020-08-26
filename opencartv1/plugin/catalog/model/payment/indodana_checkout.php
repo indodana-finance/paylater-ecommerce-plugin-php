@@ -18,7 +18,7 @@ class ModelPaymentIndodanaCheckout extends Model {
     $logoUrl = IndodanaConstant::LOGO_URL;
     $method_data = array(
       'code'     => 'indodana_checkout',
-      'title'       => "<img src='${logoUrl}' height='25' width='112'>",
+      'title'       => "<img src='${logoUrl}'>",
       'sort_order' => $this->config->get('indodana_checkout_sort_order')
     );
 
