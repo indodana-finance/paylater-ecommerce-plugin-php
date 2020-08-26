@@ -262,6 +262,8 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
         'url' => get_permalink($product->get_id()),
         'imageUrl' => $image_url,
         'type' => $type,
+        // We will use DEFAULT_ITEM_CATEGORY atm until we found a way to get specific plugin category mapping
+        'category'  => IndodanaConstant::DEFAULT_ITEM_CATEGORY,
         'quantity' => (int) $cart_item['quantity'],
       ];
     }

@@ -2,6 +2,7 @@
 
 use IndodanaCommon\IndodanaInterface;
 use IndodanaCommon\IndodanaCommon;
+use IndodanaCommon\IndodanaConstant;
 
 class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract implements IndodanaInterface
 {
@@ -92,6 +93,8 @@ class Indodana_Payment_Helper_Transaction extends Mage_Core_Helper_Abstract impl
         'url'       => $product->getProductUrl(),
         'imageUrl'  => '', // TODO: Search how to do this
         'type'      => '', // TODO: Search how to do this
+        // We will use DEFAULT_ITEM_CATEGORY atm until we found a way to get specific plugin category mapping
+        'category'  => IndodanaConstant::DEFAULT_ITEM_CATEGORY,
         'quantity'  => $quantity
       ];
     }

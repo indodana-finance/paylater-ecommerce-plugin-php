@@ -135,6 +135,8 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
         'url'       => self::decode($url),
         'imageUrl'  => self::decode($image_url),
         'type'      => self::decode($type),
+        // We will use DEFAULT_ITEM_CATEGORY atm until we found a way to get specific plugin category mapping
+        'category'  => IndodanaConstant::DEFAULT_ITEM_CATEGORY,
         'quantity'  => (int) self::decode($order_product['quantity']),
       ];
     }
