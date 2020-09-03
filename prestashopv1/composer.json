@@ -1,0 +1,31 @@
+{
+  "name": "indodana/indodana-paylater-prestashopv1",
+  "description": "Indodana Paylater module for Prestashop 1.7",
+  "type": "prestashop-module",
+  "authors": [
+    {
+      "name": "Indodana",
+      "email": "dev@indodana.com"
+    },
+    {
+      "name": "Anzar Syahid",
+      "email": "zarchp@gmail.com"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../packages/common",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
+  "require": {
+    "indodana/indodana-paylater-ecommerce-common": "@dev",
+    "sentry/sdk": "~2.1.0"
+  },
+  "config": {
+    "prepend-autoloader": false
+  }
+}
