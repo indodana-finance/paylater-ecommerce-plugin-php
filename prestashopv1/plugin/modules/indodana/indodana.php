@@ -41,7 +41,7 @@ class Indodana extends PaymentModule
     {
         $this->name = 'indodana';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.0';
+        $this->version = '0.1.0';
         $this->author = 'Indodana';
         $this->need_instance = 0;
 
