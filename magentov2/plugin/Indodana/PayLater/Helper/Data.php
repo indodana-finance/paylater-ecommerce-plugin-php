@@ -1,0 +1,91 @@
+<?php
+
+namespace Indodana\PayLater\Helper;
+
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Payment\Gateway\ConfigInterface;
+
+
+class Data extends AbstractHelper
+{
+  protected $_scopeConfig;
+
+  public function __construct(\Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig)
+  {
+          $this->_scopeConfig = $scopeConfig;
+  }
+  public function getStoreID()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/store_id', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getStoreName()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/store_name', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getStoreUrl()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/store_url', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getStoreEmail()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/store_email', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getStorePhone()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/store_phone', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getStoreCountryCode()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/store_country_code', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getStoreCity()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/store_city', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getStoreAddress()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/store_address', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getStorePostalCode()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/store_postal_code', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getApiKey()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/api_key', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getApiSecret()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/api_secret', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getEnvironment()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/environment', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getDefaultOrderPendingStatus()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/default_order_pending_status', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getDefaultOrderSuccessStatus()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/default_order_success_status', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+
+  public function getDefaultOrderFailedStatus()
+  {
+    return $this->_scopeConfig->getValue('payment/sample_gateway/default_order_failed_status', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+  }
+}
