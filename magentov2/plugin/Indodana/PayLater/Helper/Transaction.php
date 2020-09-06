@@ -1,25 +1,35 @@
 <?php
 
-namespaceIndodana\PayLater\Helper;
 
-use Indodana\Indodana;
+namespace Indodana\PayLater\Helper;
+
+//require_once Mage::getBaseDir('lib') . '/Indodana/PayLater/autoload.php';
+//use Indodana\Indodana;
+use IndodanaCommon\IndodanaInterface;
+use IndodanaCommon\IndodanaCommon;
+use IndodanaCommon\IndodanaConstant;
+
 use Magento\Framework\App\Helper\AbstractHelper;
-
+use \Magento\Framework\App\Filesystem\DirectoryList;
 class Transaction extends AbstractHelper //implements IndodanaInterface
 {
   private $indodanaCommon;
   protected $_helper;
   protected $_customer;
   protected $_urlInterface;
+  protected $_dir;
   public function __construct(
     Data $helper,
     \Magento\Customer\Api\CustomerRepositoryInterface $customerRepositoryInterface,
-    \Magento\Framework\UrlInterface $urlInterface
+    \Magento\Framework\UrlInterface $urlInterface,
+    \Magento\Framework\App\Filesystem\DirectoryList $directoryList
     )
   {
           $this->_helper = $helper;
           $this->_customer= $customerRepositoryInterface;
           $this->_urlInterface = $urlInterface;
+          $this->_dir = $directoryList;
+          require_once($this->_dir->getPath(DirectoryList::APP). '/code/Indodana/PayLater/autoload.php' );
   }
 
   public function getIndodanaCommon()
@@ -29,18 +39,13 @@ class Transaction extends AbstractHelper //implements IndodanaInterface
       $apiSecret = $this->_helper->getApiSecret();
       $environment = $this->_helper->getEnvironment();
 
-      // $this->indodanaCommon = new IndodanaCommon([
-      //   'apiKey'        => $apiKey,
-      //   'apiSecret'     => $apiSecret,
-      //   'environment'   => $environment,
-      //   'seller'        => $this->getSeller()
-      // ]);
+      $this->indodanaCommon = new IndodanaCommon([
+        'apiKey'        => $apiKey,
+        'apiSecret'     => $apiSecret,
+        'environment'   => $environment,
+        'seller'        => $this->getSeller()
+      ]);
 
-      $this->indodanaCommon = new Indodana([
-        'apiKey' => $apiKey,//'indosystem_magento_2_x',
-        'apiSecret' => $apiSecret, 'indosystem_magento_2_x_secret',
-        'environment' => $environment // Optional. Possible value: 'SANDBOX', 'PRODUCTION'. If not set, will default to 'SANDBOX'
-    ]);
 
     }
 
@@ -138,7 +143,7 @@ class Transaction extends AbstractHelper //implements IndodanaInterface
         'type'      => '', // TODO: Search how to do this
         'quantity'  => $quantity,
         'category' =>  IndodanaConstant::DEFAULT_ITEM_CATEGORY,//'baby',//$cat->getName(),
-        'parentId' => $this->_helper->getStoreID// '5e96ac2c-e123-11ea-9c01-00163e014000'
+        'parentId' => $this->_helper->getStoreID()// '5e96ac2c-e123-11ea-9c01-00163e014000'
       ];
     }
 
@@ -215,7 +220,7 @@ class Transaction extends AbstractHelper //implements IndodanaInterface
     $sellerName = $this->_helper->getStoreName();
 
     return [
-      'id'      =>  $this->_helper->getStoreID,//'5e96ac2c-e123-11ea-9c01-00163e014000',//$sellerName,
+      'id'      =>  $this->_helper->getStoreID(),//'5e96ac2c-e123-11ea-9c01-00163e014000',//$sellerName,
       'name'    => $sellerName,
       'email'   => $this->_helper->getStoreEmail(),
       'url'     => $this->_helper->getStoreUrl(),

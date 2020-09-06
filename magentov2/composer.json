@@ -1,0 +1,27 @@
+{
+  "name": "indodana/indodana-paylater-magento2",
+  "description": "Indodana Paylater plugin for Magento v2",
+  "authors": [
+    {
+      "name": "Indodana",
+      "email": "dev@indodana.com"
+    },
+    {
+      "name": "Dian Febrianto",
+      "email": "dian.febrianto@gmail.com"
+    }
+    ],
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../packages/common",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
+  "require": {
+    "indodana/indodana-paylater-ecommerce-common": "@dev",
+    "sentry/sentry": "~1.11.0"
+  }
+}

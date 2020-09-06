@@ -5,7 +5,7 @@ namespace Indodana\PayLater\Controller\Index;
 use Indodana\PayLater\Helper\Transaction;
 
 
-class Paymentoptions extends \Magento\Framework\App\Action\Action
+class paymentoptions extends \Magento\Framework\App\Action\Action
 {
    protected $_resultFactory;
    protected $_transaction;
@@ -35,8 +35,8 @@ class Paymentoptions extends \Magento\Framework\App\Action\Action
         return $result->setData(
             [
                 'success' => true,
-                'message' => __('Your message here'),
-                'Installment' => $Installment,
+                'message' => __('Your message here'),//,
+                'Installment' => $Installment
             ]
             );    
     }
