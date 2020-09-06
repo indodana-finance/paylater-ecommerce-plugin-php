@@ -31,61 +31,61 @@ require_once(_PS_MODULE_DIR_ . 'indodana' . DIRECTORY_SEPARATOR . 'tools' . DIRE
 
 class IndodanaRedirectModuleFrontController extends ModuleFrontController
 {
+  /**
+   * Do whatever you have to before redirecting the customer on the website of your payment processor.
+   */
+  public function postProcess()
+  {
     /**
-     * Do whatever you have to before redirecting the customer on the website of your payment processor.
+     * Oops, an error occured.
      */
-    public function postProcess()
-    {
-        /*
-         * Oops, an error occured.
-         */
-        if (Tools::getValue('action') == 'error') {
-            return $this->displayError('An error occurred while trying to redirect the customer');
-        }
-
-        $cart = $this->context->cart;
-
-        $installmentOptions = IndodanaTools::getIndodanaCommon()->getInstallmentOptions([
-            'totalAmount' => IndodanaTools::getTotal($cart),
-            'discountAmount' => IndodanaTools::getDiscount($cart),
-            'shippingAmount' => IndodanaTools::getShippingFee($cart),
-            'taxAmount' => IndodanaTools::getTax($cart),
-            'products' => IndodanaTools::getProducts($cart)
-        ]);
-
-        $this->context->smarty->assign([
-            'moduleName' => $this->module->name,
-            'displayName' => $this->module->displayName,
-            'cartId' => Context::getContext()->cart->id,
-            'secureKey' => Context::getContext()->customer->secure_key,
-            'nbProducts' => $cart->nbProducts(),
-            'custCurrency' => $cart->id_currency,
-            'currencies' => $this->module->getCurrency((int)$cart->id_currency),
-            'installmentOptions' => $installmentOptions,
-            'total' => $cart->getOrderTotal(true, Cart::BOTH),
-            'this_path' => $this->module->getPathUri(),
-            'this_path_bw' => $this->module->getPathUri(),
-        ]);
-
-        return $this->setTemplate('redirect.tpl');
+    if (Tools::getValue('action') == 'error') {
+      return $this->displayError('An error occurred while trying to redirect the customer');
     }
 
-    protected function displayError($message, $description = false)
-    {
-        /**
-         * Create the breadcrumb for your ModuleFrontController.
-         */
-        $this->context->smarty->assign(
-            'path',
-            '<a href="' . $this->context->link->getPageLink('order', null, null, 'step=3') . '">' . $this->module->l('Payment') . '</a>
+    $cart = $this->context->cart;
+
+    $installmentOptions = IndodanaTools::getIndodanaCommon()->getInstallmentOptions([
+      'totalAmount' => IndodanaTools::getTotal($cart),
+      'discountAmount' => IndodanaTools::getDiscount($cart),
+      'shippingAmount' => IndodanaTools::getShippingFee($cart),
+      'taxAmount' => IndodanaTools::getTax($cart),
+      'products' => IndodanaTools::getProducts($cart)
+    ]);
+
+    $this->context->smarty->assign([
+      'moduleName' => $this->module->name,
+      'displayName' => $this->module->displayName,
+      'cartId' => Context::getContext()->cart->id,
+      'secureKey' => Context::getContext()->customer->secure_key,
+      'nbProducts' => $cart->nbProducts(),
+      'custCurrency' => $cart->id_currency,
+      'currencies' => $this->module->getCurrency((int)$cart->id_currency),
+      'installmentOptions' => $installmentOptions,
+      'total' => $cart->getOrderTotal(true, Cart::BOTH),
+      'this_path' => $this->module->getPathUri(),
+      'this_path_bw' => $this->module->getPathUri(),
+    ]);
+
+    return $this->setTemplate('redirect.tpl');
+  }
+
+  protected function displayError($message, $description = false)
+  {
+    /**
+     * Create the breadcrumb for your ModuleFrontController.
+     */
+    $this->context->smarty->assign(
+      'path',
+      '<a href="' . $this->context->link->getPageLink('order', null, null, 'step=3') . '">' . $this->module->l('Payment') . '</a>
 			<span class="navigation-pipe">&gt;</span>' . $this->module->l('Error')
-        );
+    );
 
-        /**
-         * Set error message and description for the template.
-         */
-        array_push($this->errors, $this->module->l($message), $description);
+    /**
+     * Set error message and description for the template.
+     */
+    array_push($this->errors, $this->module->l($message), $description);
 
-        return $this->setTemplate('error.tpl');
-    }
+    return $this->setTemplate('error.tpl');
+  }
 }

@@ -43,34 +43,34 @@
 		<div class="box cheque-box">
 			<h3 class="page-subheading">{l s="`$displayName` payment" mod="`$moduleName`"}</h3>
 			<p class="cheque-indent">
-                <strong class="dark">
-					{* <img src="{$this_path_bw}logo.png" alt="{l s='Bank wire' mod="`$moduleName`"}" style="float:left; margin: 0px 10px 5px 0px;" /> *}
-                    {l s="Pay with installment via our Paylater product." mod="`$moduleName`"}
-                </strong>
-            </p>
+        <strong class="dark">
+          {* <img src="{$this_path_bw}logo.png" alt="{l s='Bank wire' mod="`$moduleName`"}" style="float:left; margin: 0px 10px 5px 0px;" /> *}
+          {l s="Pay with installment via our Paylater product." mod="`$moduleName`"}
+        </strong>
+      </p>
 			{foreach from=$installmentOptions item=option}
 				<div class="form-check">
-				<input
-					class="form-check-input"
-					type="radio"
-					name="indodana_selection"
-					id="indodana_selection_{$option.id}"
-					value="{$option.id}"
-					style="margin-left: 0;"
-					required>
-				<label class="form-check-label" for="indodana_selection_{$option.id}" style="padding-left: 1.5rem;">
-					{$option.paymentType}
-					&emsp;|&emsp;
-					{$currencies.0.sign}{$option.monthlyInstallment|number_format:2:".":","}/bulan
-				</label>
+          <input
+            class="form-check-input"
+            type="radio"
+            name="indodana_selection"
+            id="indodana_selection_{$option.id}"
+            value="{$option.id}"
+            style="margin-left: 0;"
+            required>
+          <label class="form-check-label" for="indodana_selection_{$option.id}" style="padding-left: 1.5rem;">
+            {$option.paymentType}
+            &emsp;|&emsp;
+            {$currencies.0.sign}{$option.monthlyInstallment|number_format:2:".":","}/bulan
+          </label>
 				</div>
 			{/foreach}
 			<br>
 			<p class="cheque-indent">
-                <strong class="dark">
+        <strong class="dark">
 					{l s='Here is a short summary of your order:' mod="`$moduleName`"}
-                </strong>
-            </p>
+        </strong>
+      </p>
 			<p>
 				- {l s='The total amount of your order is' mod="`$moduleName`"}
 				<span id="amount" class="price">{displayPrice price=$total}</span>

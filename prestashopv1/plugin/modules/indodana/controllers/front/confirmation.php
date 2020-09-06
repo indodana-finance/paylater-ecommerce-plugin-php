@@ -29,61 +29,61 @@
 
 class IndodanaConfirmationModuleFrontController extends ModuleFrontController
 {
-    public function postProcess()
-    {
-        if ((Tools::isSubmit('cart_id') == false) || (Tools::isSubmit('secure_key') == false)) {
-            return false;
-        }
-
-        $cartId = Tools::getValue('cart_id');
-        $secureKey = Tools::getValue('secure_key');
-
-        $cart = new Cart((int) $cartId);
-        $customer = new Customer((int) $cart->id_customer);
-
-        /**
-         * Since it's an example we are validating the order right here,
-         * You should not do it this way in your own module.
-         */
-        $paymentStatus = Configuration::get('PS_OS_PAYMENT'); // Default value for a payment that succeed.
-        $message = null; // You can add a comment directly into the order so the merchant will see it in the BO.
-
-        /**
-         * Converting cart into a valid order
-         */
-        $moduleName = $this->module->displayName;
-        $currencyId = (int) Context::getContext()->currency->id;
-
-        $this->module->validateOrder(
-            $cartId,
-            $paymentStatus,
-            $cart->getOrderTotal(),
-            $moduleName,
-            $message,
-            array(),
-            $currencyId,
-            false,
-            $secureKey
-        );
-
-        /**
-         * If the order has been validated we try to retrieve it
-         */
-        $order_id = Order::getOrderByCartId((int) $cart->id);
-
-        if ($order_id && ($secureKey == $customer->secure_key)) {
-            /**
-             * The order has been placed so we redirect the customer on the confirmation page.
-             */
-            $module_id = $this->module->id;
-            Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $cartId . '&id_module=' . $module_id . '&id_order=' . $order_id . '&key=' . $secureKey);
-        } else {
-            /*
-             * An error occured and is shown on a new page.
-             */
-            $this->errors[] = $this->module->l('An error occured. Please contact the merchant to have more informations');
-
-            return $this->setTemplate('error.tpl');
-        }
+  public function postProcess()
+  {
+    if ((Tools::isSubmit('cart_id') == false) || (Tools::isSubmit('secure_key') == false)) {
+      return false;
     }
+
+    $cartId = Tools::getValue('cart_id');
+    $secureKey = Tools::getValue('secure_key');
+
+    $cart = new Cart((int) $cartId);
+    $customer = new Customer((int) $cart->id_customer);
+
+    /**
+     * Since it's an example we are validating the order right here,
+     * You should not do it this way in your own module.
+     */
+    $paymentStatus = Configuration::get('PS_OS_PAYMENT'); // Default value for a payment that succeed.
+    $message = null; // You can add a comment directly into the order so the merchant will see it in the BO.
+
+    /**
+     * Converting cart into a valid order
+     */
+    $moduleName = $this->module->displayName;
+    $currencyId = (int) Context::getContext()->currency->id;
+
+    $this->module->validateOrder(
+      $cartId,
+      $paymentStatus,
+      $cart->getOrderTotal(),
+      $moduleName,
+      $message,
+      array(),
+      $currencyId,
+      false,
+      $secureKey
+    );
+
+    /**
+     * If the order has been validated we try to retrieve it
+     */
+    $order_id = Order::getOrderByCartId((int) $cart->id);
+
+    if ($order_id && ($secureKey == $customer->secure_key)) {
+      /**
+       * The order has been placed so we redirect the customer on the confirmation page.
+       */
+      $module_id = $this->module->id;
+      Tools::redirect('index.php?controller=order-confirmation&id_cart=' . $cartId . '&id_module=' . $module_id . '&id_order=' . $order_id . '&key=' . $secureKey);
+    } else {
+      /**
+       * An error occured and is shown on a new page.
+       */
+      $this->errors[] = $this->module->l('An error occured. Please contact the merchant to have more informations');
+
+      return $this->setTemplate('error.tpl');
+    }
+  }
 }

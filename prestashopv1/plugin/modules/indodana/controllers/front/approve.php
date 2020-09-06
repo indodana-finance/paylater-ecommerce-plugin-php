@@ -29,26 +29,26 @@
 
 class IndodanaApproveModuleFrontController extends ModuleFrontController
 {
-    /**
-     * This class should be use by your Instant Payment
-     * Notification system to validate the order remotely
-     */
-    public function postProcess()
-    {
-        $params = json_decode(file_get_contents('php://input'));
-        $order = new Order($_GET['id_order']);
-        $pending = Configuration::get('INDODANA_DEFAULT_ORDER_PENDING_STATUS');
-        if ($params->transactionStatus == 'PAID' && $order->current_state == $pending) {
-            $success = Configuration::get('INDODANA_DEFAULT_ORDER_SUCCESS_STATUS');
-            $order->setCurrentState($success);
-            $status = 'OK';
-        } else {
-            $status = 'REJECT';
-        }
-
-        die(Tools::jsonEncode([
-            'status' => $status,
-            'message' => ''
-        ]));
+  /**
+   * This class should be use by your Instant Payment
+   * Notification system to validate the order remotely
+   */
+  public function postProcess()
+  {
+    $params = json_decode(file_get_contents('php://input'));
+    $order = new Order($_GET['id_order']);
+    $pending = Configuration::get('INDODANA_DEFAULT_ORDER_PENDING_STATUS');
+    if ($params->transactionStatus == 'PAID' && $order->current_state == $pending) {
+      $success = Configuration::get('INDODANA_DEFAULT_ORDER_SUCCESS_STATUS');
+      $order->setCurrentState($success);
+      $status = 'OK';
+    } else {
+      $status = 'REJECT';
     }
+
+    die(Tools::jsonEncode([
+      'status' => $status,
+      'message' => ''
+    ]));
+  }
 }
