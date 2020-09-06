@@ -52,8 +52,8 @@ class Indodana extends PaymentModule
 
     parent::__construct();
 
-    $this->displayName = Configuration::get('INDODANA_TITLE') ?? $this->l('Indodana Paylater');
-    $this->description = $this->l('Indodana Paylater redirects customers to Indodana during checkout.');
+    $this->displayName = Configuration::get('INDODANA_TITLE') ?? $this->l('Indodana PayLater');
+    $this->description = $this->l('Indodana PayLater redirects customers to Indodana during checkout.');
     $this->confirmUninstall = $this->l('Are you sure you want to uninstall this module?');
     $this->limited_countries = ['ID'];
     $this->limited_currencies = ['IDR'];
@@ -61,7 +61,7 @@ class Indodana extends PaymentModule
 
     $this->moduleConfigs = [
       'INDODANA_ENABLE_TRUE' => 1,
-      'INDODANA_TITLE' => 'Indodana Paylater',
+      'INDODANA_TITLE' => 'Indodana PayLater',
       'INDODANA_DESCRIPTION' => 'Pay with installment via our PayLater product.',
       'INDODANA_ENVIRONMENT' => 'SANDBOX',
       'INDODANA_STORE_NAME' => '',
@@ -449,7 +449,7 @@ class Indodana extends PaymentModule
   {
     return [
       'INDODANA_ENABLE_TRUE' => Configuration::get('INDODANA_ENABLE_TRUE', null, null, null, 1),
-      'INDODANA_TITLE' => Configuration::get('INDODANA_TITLE', null, null, null, 'Indodana Paylater'),
+      'INDODANA_TITLE' => Configuration::get('INDODANA_TITLE', null, null, null, 'Indodana PayLater'),
       'INDODANA_DESCRIPTION' => Configuration::get('INDODANA_DESCRIPTION', null, null, null, 'Pay with installment via our PayLater product.'),
       'INDODANA_ENVIRONMENT' => Configuration::get('INDODANA_ENVIRONMENT', null, null, null, 'sandbox'),
       'INDODANA_STORE_NAME' => Configuration::get('INDODANA_STORE_NAME'),

@@ -1,6 +1,6 @@
 {
   "name": "indodana/indodana-paylater-prestashopv1",
-  "description": "Indodana Paylater module for Prestashop 1.7",
+  "description": "Indodana PayLater module for Prestashop 1.6 & 1.7",
   "type": "prestashop-module",
   "authors": [
     {
