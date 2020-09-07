@@ -567,12 +567,13 @@ class Indodana extends PaymentModule
       return;
     }
 
-    $installmentOptions = IndodanaTools::getIndodanaCommon()->getInstallmentOptions([
-      'totalAmount' => IndodanaTools::getTotal($cart),
-      'discountAmount' => IndodanaTools::getDiscount($cart),
-      'shippingAmount' => IndodanaTools::getShippingFee($cart),
-      'taxAmount' => IndodanaTools::getTax($cart),
-      'products' => IndodanaTools::getProducts($cart)
+    $indodanaTools = new IndodanaTools();
+    $installmentOptions = $indodanaTools->getIndodanaCommon()->getInstallmentOptions([
+      'totalAmount' => $indodanaTools->getTotalAmount($cart),
+      'discountAmount' => $indodanaTools->getTotalDiscountAmount($cart),
+      'shippingAmount' => $indodanaTools->getTotalShippingAmount($cart),
+      'taxAmount' => $indodanaTools->getTotalTaxAmount($cart),
+      'products' => $indodanaTools->getProducts($cart),
     ]);
 
     $formAction = $this->context->link->getModuleLink($this->name, 'validation', [], true);

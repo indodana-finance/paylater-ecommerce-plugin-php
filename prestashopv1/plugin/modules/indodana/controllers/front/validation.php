@@ -98,7 +98,7 @@ class IndodanaValidationModuleFrontController extends ModuleFrontController
     );
 
     $orderId = Order::getOrderByCartId((int) $cart->id);
-    $orderDetails = new Order((int) $orderId);
+    $order = new Order((int) $orderId);
 
     /**
      * An error occured and is shown on a new page.
@@ -125,26 +125,26 @@ class IndodanaValidationModuleFrontController extends ModuleFrontController
       ['id_order' => $orderId],
       true
     );
-    $lang = $this->context->language->iso_code;
-    $backUrl = _PS_BASE_URL_ . '/' . $lang  . '/order-confirmation?id_cart=' . $cart->id . '&id_module=' . $moduleId . '&id_order=' . $orderId . '&key=' . $customer->secure_key;
+    $backUrl = _PS_BASE_URL_ . '/index.php?controller=order-confirmation&id_cart=' . $cart->id . '&id_module=' . $moduleId . '&id_order=' . $orderId . '&key=' . $customer->secure_key;
 
-    $checkoutUrl = IndodanaTools::getIndodanaCommon()->checkout([
-      'merchantOrderId' => $orderId . '-' . $orderDetails->reference,
-      'totalAmount' => IndodanaTools::getTotal($cart),
-      'discountAmount' => IndodanaTools::getDiscount($cart),
-      'shippingAmount' => IndodanaTools::getShippingFee($cart),
-      'taxAmount' => IndodanaTools::getTax($cart),
-      'products' => IndodanaTools::getProducts($cart),
-      'customerDetails' => IndodanaTools::getCustomerDetails($orderId),
-      'billingAddress' => IndodanaTools::getBillingAddress($orderId),
-      'shippingAddress' => IndodanaTools::getDeliveryAddress($orderId),
+    $indodanaTools = new IndodanaTools();
+    $redirectUrl = $indodanaTools->getIndodanaCommon()->checkout([
+      'merchantOrderId' => $orderId . '-' . $order->reference,
+      'totalAmount' => $indodanaTools->getTotalAmount($cart),
+      'discountAmount' => $indodanaTools->getTotalDiscountAmount($cart),
+      'shippingAmount' => $indodanaTools->getTotalShippingAmount($cart),
+      'taxAmount' => $indodanaTools->getTotalTaxAmount($cart),
+      'products' => $indodanaTools->getProducts($cart),
+      'customerDetails' => $indodanaTools->getCustomerDetails($order),
+      'billingAddress' => $indodanaTools->getBillingAddress($order),
+      'shippingAddress' => $indodanaTools->getShippingAddress($order),
       'paymentType' => $_POST['indodana_selection'],
       'approvedNotificationUrl' => $approveUrl,
       'cancellationRedirectUrl' => $cancelUrl,
       'backToStoreUrl' => $backUrl
     ]);
 
-    Tools::redirect($checkoutUrl);
+    Tools::redirect($redirectUrl);
   }
 
   protected function isValidOrder()
