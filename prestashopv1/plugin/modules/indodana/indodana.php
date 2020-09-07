@@ -563,7 +563,7 @@ class Indodana extends PaymentModule
   {
     $cart = $params['cart'];
 
-    if (!$this->active || !$this->checkCurrency($cart)) {
+    if (!$this->active || !$this->checkCurrency($cart) || !$this->checkConfig()) {
       return;
     }
 
@@ -595,7 +595,18 @@ class Indodana extends PaymentModule
     ];
   }
 
-  public function checkCurrency($cart)
+  private function checkConfig()
+  {
+    foreach ($this->moduleConfigs as $key => $value) {
+      if (empty(Configuration::get($key))) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private function checkCurrency($cart)
   {
     $currencyOrder = new Currency($cart->id_currency);
     $currenciesModule = $this->getCurrency($cart->id_currency);
@@ -619,7 +630,7 @@ class Indodana extends PaymentModule
     $currencyId = $params['cart']->id_currency;
     $currency = new Currency((int)$currencyId);
 
-    if (in_array($currency->iso_code, $this->limited_currencies) == false) {
+    if (in_array($currency->iso_code, $this->limited_currencies) == false || !$this->checkConfig()) {
       return false;
     }
 
@@ -657,7 +668,7 @@ class Indodana extends PaymentModule
     return $this->display(__FILE__, 'views/templates/hook/confirmation.tpl');
   }
 
-  public function checkToggleModuleState($value)
+  private function checkToggleModuleState($value)
   {
     $old = (bool) Configuration::get('INDODANA_ENABLE_TRUE');
     if ($old !== $value) {
