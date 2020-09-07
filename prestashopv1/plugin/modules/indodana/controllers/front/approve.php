@@ -103,7 +103,7 @@ class IndodanaApproveModuleFrontController extends ModuleFrontController
       die;
     }
 
-    // Update order success status
+    // Handle success order
     $order->setCurrentState(Configuration::get('INDODANA_DEFAULT_ORDER_SUCCESS_STATUS'));
 
     IndodanaCommon\MerchantResponse::printSuccessResponse($namespace);

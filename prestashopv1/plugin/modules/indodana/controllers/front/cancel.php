@@ -37,9 +37,6 @@ class IndodanaCancelModuleFrontController extends ModuleFrontController
     $order = new Order($_GET['id_order']);
     $order->setCurrentState(Configuration::get('INDODANA_DEFAULT_ORDER_FAILED_STATUS'));
 
-    die(Tools::jsonEncode([
-      'status' => 'OK',
-      'message' => ''
-    ]));
+    Tools::redirect('index.php?controller=history');
   }
 }
