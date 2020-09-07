@@ -238,44 +238,81 @@ class Transaction extends AbstractHelper //implements IndodanaInterface
   public function getInstallmentOptions($order)
   {
     return $this->getIndodanaCommon()->getInstallmentOptions([
-      'amount'    => $this->getTotalAmount($order),
-      'items'       => $this->getProducts($order),
+      'totalAmount'    => $this->getTotalAmount($order),
       'discountAmount' => $this->getTotalDiscountAmount($order),
       'shippingAmount' => $this->getTotalShippingAmount($order),
-      'taxAmount'      => $this->getTotalTaxAmount($order)      
+      'taxAmount'      => $this->getTotalTaxAmount($order),
+      'products'       => $this->getProducts($order)
     ]);
+  }
+
+  public function checkOut($order,$paytype){
+    $approvedNotificationUrl = $this->_urlInterface->getUrl('indodanapayment/index/notify'); //Mage::getUrl('indodanapayment/checkout/notify');
+    $cancellationRedirectUrl = $this->_urlInterface->getUrl('indodanapayment/index/cancel');;//Mage::getUrl('indodanapayment/checkout/cancel');
+    $backToStoreUrl = $this->_helper->getStoreUrl();//Mage::getUrl('indodanapayment/checkout/success');
+    // $data=  [
+    //   'transactionDetails' =>[
+    //       'merchantOrderId'         => $order->getId(),
+    //       'totalAmount'    => $this->getTotalAmount($order),
+    //       'products'       => $this->getProducts($order),
+    //       'discountAmount' => $this->getTotalDiscountAmount($order),
+    //       'shippingAmount' => $this->getTotalShippingAmount($order),
+    //       'taxAmount'      => $this->getTotalTaxAmount($order),
+    //     ],
+    //   'customerDetails' => $this->getCustomerDetails($order), 
+    //   'sellers' =>[$this->getSeller()],
+    //   'billingAddress'          => $this->getBillingAddress($order),
+    //   'shippingAddress'         => $this->getShippingAddress($order),      
+    //   'paymentType' => $paytype,
+    //   'approvedNotificationUrl' => $approvedNotificationUrl,
+    //   'cancellationRedirectUrl' => $cancellationRedirectUrl,
+    //   'backToStoreUrl'          => $backToStoreUrl      
+    //             ];
+    // //return $data;                
+     return $this->getIndodanaCommon()->checkout(
+       [      'merchantOrderId'         => $order->getId(),
+       'totalAmount'             => $this->getTotalAmount($order),
+       'discountAmount'          => $this->getTotalDiscountAmount($order),
+       'shippingAmount'          => $this->getTotalShippingAmount($order),
+       'taxAmount'               => $this->getTotalTaxAmount($order),
+       'products'                => $this->getProducts($order),
+       'customerDetails'         => $this->getCustomerDetails($order),
+       'billingAddress'          => $this->getBillingAddress($order),
+       'shippingAddress'         => $this->getShippingAddress($order),
+       'approvedNotificationUrl' => str_replace('localhost','192.168.1.7',$approvedNotificationUrl),
+       'cancellationRedirectUrl' => str_replace('localhost','192.168.1.7',$cancellationRedirectUrl),
+       'backToStoreUrl'          => str_replace('localhost','192.168.1.7',$backToStoreUrl)
+ ]
+     );
+
   }
 
   public function getOrderData($order,$paytype)
   {
-    $approvedNotificationUrl = $this->_urlInterface->getUrl('IndodanaPayment/index/notify'); //Mage::getUrl('indodanapayment/checkout/notify');
-    $cancellationRedirectUrl = $this->_urlInterface->getUrl('IndodanaPayment/index/cancel');;//Mage::getUrl('indodanapayment/checkout/cancel');
+    $approvedNotificationUrl = $this->_urlInterface->getUrl('indodanapayment/index/notify'); //Mage::getUrl('indodanapayment/checkout/notify');
+    $cancellationRedirectUrl = $this->_urlInterface->getUrl('indodanapayment/index/cancel');;//Mage::getUrl('indodanapayment/checkout/cancel');
     $backToStoreUrl = $this->_helper->getStoreUrl();//Mage::getUrl('indodanapayment/checkout/success');
 
     // DEV MODE
     // $approvedNotificationUrl = 'https://example.com/indodanapayment/checkout/notify';
     // $cancellationRedirectUrl = 'https://example.com/indodanapayment/checkout/cancel';
     // $backToStoreUrl = 'https://example.com/indodanapayment/checkout/success';
-    $data=  [
-      'transactionDetails' =>[
-          'merchantOrderId'         => $order->getId(),
-          'amount'    => $this->getTotalAmount($order),
-          'items'       => $this->getProducts($order),
-          'discountAmount' => $this->getTotalDiscountAmount($order),
-          'shippingAmount' => $this->getTotalShippingAmount($order),
-          'taxAmount'      => $this->getTotalTaxAmount($order),
-        ],
-      'customerDetails' => $this->getCustomerDetails($order), 
-      'sellers' =>[$this->getSeller()],
+
+    return $this->getIndodanaCommon()->getCheckoutPayload([
+      'merchantOrderId'         => $order->getId(),
+      'totalAmount'             => $this->getTotalAmount($order),
+      'discountAmount'          => $this->getTotalDiscountAmount($order),
+      'shippingAmount'          => $this->getTotalShippingAmount($order),
+      'taxAmount'               => $this->getTotalTaxAmount($order),
+      'products'                => $this->getProducts($order),
+      'customerDetails'         => $this->getCustomerDetails($order),
       'billingAddress'          => $this->getBillingAddress($order),
-      'shippingAddress'         => $this->getShippingAddress($order),      
-      'paymentType' => $paytype,
+      'shippingAddress'         => $this->getShippingAddress($order),
       'approvedNotificationUrl' => $approvedNotificationUrl,
       'cancellationRedirectUrl' => $cancellationRedirectUrl,
-      'backToStoreUrl'          => $backToStoreUrl      
-                ];
-    //return $data;                
-    return $this->getIndodanaCommon()->checkout($data);
+      'backToStoreUrl'          => $backToStoreUrl
+    ]);
+
     
   }
 

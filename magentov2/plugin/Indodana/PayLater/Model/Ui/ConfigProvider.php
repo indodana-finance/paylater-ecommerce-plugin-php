@@ -28,7 +28,10 @@ final class ConfigProvider implements ConfigProviderInterface
                     'transactionResults' => [
                         ClientMock::SUCCESS => __('Success'),
                         ClientMock::FAILURE => __('Fraud')
-                    ]
+                    ],
+                    'installment'=>'',
+                    'paytype'=>''
+
                 ]
             ]
         ];

@@ -19,8 +19,8 @@ class Environment implements \Magento\Framework\Option\ArrayInterface
     {
         return [
             [
-                'value' => __('SANBOX'),
-                'label' => __('SANBOX')
+                'value' => __('SANDBOX'),
+                'label' => __('SANDBOX')
             ],
             [
                 'value' => __('PRODUCTION'),

@@ -3,7 +3,10 @@
 namespace Indodana\PayLater\Controller\Index;
 
 use Indodana\PayLater\Helper\Transaction;
-
+use IndodanaCommon\IndodanaInterface;
+use IndodanaCommon\IndodanaCommon;
+use IndodanaCommon\IndodanaConstant;
+use IndodanaCommon\IndodanaLogger;
 
 class Redirectto extends \Magento\Framework\App\Action\Action
 {
@@ -26,16 +29,23 @@ class Redirectto extends \Magento\Framework\App\Action\Action
     }
 
     public function execute(){
-        $paytype = $this->request->getParam('paytype');
+        
+        IndodanaLogger::info('test logger');
+        //IndodanaLogger::info('paytype => ' . $postData);
+        //$paytype =$this->_request->getParam('paytype'); //$postData('paytype') ;
+        $post = $this->_request->getPostValue();
+        $paytype=$post['paytype'];
+        //IndodanaLogger::info($post['paytype']);
         $result = $this->_resultFactory->create();
 
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
         $cart = $objectManager->get('\Magento\Checkout\Model\Cart'); 
         
-        $Installment=$this->_transaction->getInstallmentOptions($cart->getQuote());
+        //$Installment=$this->_transaction->getInstallmentOptions($cart->getQuote());
         //$bill =  $this->_transaction->getBillingAddress($cart->getQuote());
         //$ship =  $this->_transaction->getShippingAddress($cart->getQuote());
-        $order =  $this->_transaction->getOrderData($cart->getQuote(),paytype);
+        //$order =  $this->_transaction->getOrderData($cart->getQuote(),$paytype);
+        $order =  $this->_transaction->checkOut($cart->getQuote(),$paytype); 
         //$product =$this->_transaction->getProducts($cart->getQuote());
         return $result->setData(
             [

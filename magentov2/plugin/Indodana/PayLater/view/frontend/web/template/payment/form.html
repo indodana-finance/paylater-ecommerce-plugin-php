@@ -24,7 +24,7 @@
                 <input type="radio"
                        name="payment[id]"
                        class="radio"
-                       data-bind="attr: {'id': id}, value: id, click: onInstallmentClick.bind(this,id)"/>
+                       data-bind="attr: {'id': id}, value: id, click: $parent.onInstallmentClick"/>
                 <label class="label" data-bind="attr: {'for': id}">
                     <span data-bind="text: paymentType"></span>
                     <span >cicilan per bulan </span> <span data-bind="text: monthlyInstallment "></span>
@@ -44,25 +44,8 @@
             <!--/ko-->
         </div>
 
-        <div class="field required">
-            <label data-bind="attr: {for: getCode() + '_transaction_result'}" class="label">
-                <span><!-- ko i18n: 'Transaction Result'--><!-- /ko --></span>
-            </label>
 
-            <div class="control">
-                <select name="payment[transaction_result]"
-                        class="select"
-                        data-bind="
-                                  options: getTransactionResults(),
-                                  optionsValue: 'value',
-                                  optionsText: 'transaction_result',
-                                  optionsCaption: $t('Transaction Result'),
-                                  value: transactionResult">
-                </select>
-            </div>
-        </div>
-
-        <div class="actions-toolbar">
+        <div class="actions-toolbar" >
             <div class="primary">
                 <button class="action primary checkout"
                         type="submit"

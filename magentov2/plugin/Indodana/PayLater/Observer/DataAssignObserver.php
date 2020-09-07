@@ -27,6 +27,18 @@ class DataAssignObserver extends AbstractDataAssignObserver
                 $data->getDataByKey('transaction_result')
             );
         }
+        if ($data->getDataByKey('installment') !== null) {
+            $paymentInfo->setAdditionalInformation(
+                'installment',
+                $data->getDataByKey('installment')
+            );
+        }
+        if ($data->getDataByKey('paytype') !== null) {
+            $paymentInfo->setAdditionalInformation(
+                'paytype',
+                $data->getDataByKey('paytype')
+            );
+        }
 
     }
 }

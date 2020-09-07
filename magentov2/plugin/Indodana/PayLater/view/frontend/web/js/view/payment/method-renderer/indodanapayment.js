@@ -6,19 +6,22 @@
 /*global define*/
 define(
     [
+        'ko',
         'Magento_Checkout/js/view/payment/default',
         'mage/url',
         'Magento_Checkout/js/model/url-builder',
         'jquery'
     ],
-    function (Component, url,urlBuilder,$) {
+    function (ko,Component, url,urlBuilder,$) {
         'use strict';
 
         return Component.extend({
             defaults: {
                 template: 'Indodana_PayLater/payment/form',
                 transactionResult: '',
-                paytype:''
+                paytype:'',
+                installment:'',
+                selectedInstallment:''
             },
 
             initObservable: function () {
@@ -26,7 +29,8 @@ define(
                 this._super()
                     .observe([
                         'transactionResult',
-                        'paytype'
+                        'paytype',
+                        'installment'
                     ]);
                 return this;
             },
@@ -39,50 +43,71 @@ define(
                 return {
                     'method': this.item.method,
                     'additional_data': {
-                        'transaction_result': this.transactionResult()
+                        'transaction_result': this.transactionResult(),
+                        'paytype': this.paytype(),
+                        'installment': this.installment()
                     }
                 };
             },
 
-            getTransactionResults: function() {
-                return _.map(window.checkoutConfig.payment.sample_gateway.transactionResults, function(value, key) {
-                    return {
-                        'value': key,
-                        'transaction_result': value
-                    }
-                });
-            },
+            // getTransactionResults: function() {
+            //     return _.map(window.checkoutConfig.payment.indodanapayment.transactionResults, function(value, key) {
+            //         return {
+            //             'value': key,
+            //             'transaction_result': value
+            //         }
+            //     });
+            // },
+            
+            onInstallmentClick: function(item){
+                //alert(item.id);
+                
+                window.checkoutConfig.payment.indodanapayment.paytype=item.id;
+                //self.isInstallmentSelected(true);
+                return true;
+            },            
+            // getIsInstallmentSelected:function(){
+            //       return this.isInstallmentSelected();  
+            // },
+            
+    
+
             getPaymentOptions:function(){
-                $.ajax({
-                    type: "POST",
-                    url: url.build('IndodanaPayment/index/paymentoptions'),
-                    //data: data,
-                    success: function(data){
-                        return data.Installment;        
-                    },
-                    //dataType: dataType
-                  });
-            },
-            onInstallmentClick:function(paytype){
-                    alert(paytype);
-                    this.paytype=paytype;
+                if (window.checkoutConfig.payment.indodanapayment.installment==''){                
+                    $.ajax({
+                        async:false,
+                        type: "POST",
+                        url: url.build('indodanapayment/index/paymentoptions'),
+                        //data: data,
+                        success: function(data){                        
+
+                            //alert(data.Installment);
+                            window.checkoutConfig.payment.indodanapayment.installment=data.Installment;
+                            //return data.Installment;        
+                        },
+                        //dataType: dataType
+                    });
+                }
+                return window.checkoutConfig.payment.indodanapayment.installment;
             },
             afterPlaceOrder:function(){
-                alert(this.paytype);
+                //alert(window.checkoutConfig.payment.indodanapayment.paytype);
+                var ptype=window.checkoutConfig.payment.indodanapayment.paytype;
                 this.redirectAfterPlaceOrder = false;
-                var strurl =url.build('IndodanaPayment/index/redirectto')
+                var strurl =url.build('indodanapayment/index/redirectto')
                 $.ajax({
                     type: "POST",
                     url: strurl,
-                    data: {paytype:'30_days'},
+                    data: {paytype:ptype},
                     success: function(data){
-                        alert (data.redirectUrl);
-                        window.location.replace(data.redirectUrl);
+                        //alert (JSON.stringify(data) );
+                        //alert (data.Order);
+                        window.location.replace(data.Order);
                         //return data.Installment;        
                     },
                     //dataType: dataType
                   });
-
+                  return true;
 
                 
                 //window.location=strurl;

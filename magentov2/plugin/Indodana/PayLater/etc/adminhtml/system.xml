@@ -43,7 +43,7 @@
                 <field id="store_url" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Store URL</label>
                 </field>
-                <field id="store_country_code" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="store_country_code" translate="label" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Store Country</label>
                     <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
 
@@ -59,11 +59,9 @@
                 </field>
                 <field id="api_key" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>API Key</label>
-                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                 </field>
                 <field id="api_secret" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>API Secret</label>
-                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                 </field>
                 <field id="default_order_pending_status" translate="label" type="text" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Default Order Pending Status</label>
