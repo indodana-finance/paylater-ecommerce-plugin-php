@@ -30,13 +30,12 @@
 class IndodanaCancelModuleFrontController extends ModuleFrontController
 {
   /**
-   * This class should be use by your Instant Payment
-   * Notification system to validate the order remotely
+   * Handle payment notification from Indodana
    */
   public function postProcess()
   {
     $order = new Order($_GET['id_order']);
-    $order->setCurrentState(6); // cancelled
+    $order->setCurrentState(Configuration::get('INDODANA_DEFAULT_ORDER_FAILED_STATUS'));
 
     die(Tools::jsonEncode([
       'status' => 'OK',

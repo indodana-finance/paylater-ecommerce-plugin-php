@@ -27,28 +27,87 @@
  *  International Registered Trademark & Property of PrestaShop SA
  */
 
+require_once(_PS_MODULE_DIR_ . 'indodana' . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'IndodanaTools.php');
+
 class IndodanaApproveModuleFrontController extends ModuleFrontController
 {
   /**
-   * This class should be use by your Instant Payment
-   * Notification system to validate the order remotely
+   * Handle payment notification from Indodana
    */
   public function postProcess()
   {
-    $params = json_decode(file_get_contents('php://input'));
-    $order = new Order($_GET['id_order']);
-    $pending = Configuration::get('INDODANA_DEFAULT_ORDER_PENDING_STATUS');
-    if ($params->transactionStatus == 'PAID' && $order->current_state == $pending) {
-      $success = Configuration::get('INDODANA_DEFAULT_ORDER_SUCCESS_STATUS');
-      $order->setCurrentState($success);
-      $status = 'OK';
-    } else {
-      $status = 'REJECT';
+    // Log request headers
+    $namespace = '[PrestashopV1-notify]';
+
+    $requestHeaders = IndodanaCommon\IndodanaHelper::getRequestHeaders();
+
+    IndodanaCommon\IndodanaLogger::info(
+      sprintf(
+        '%s Request headers: %s',
+        $namespace,
+        json_encode($requestHeaders)
+      )
+    );
+
+    // Check whether request authorization is valid
+    $authToken = IndodanaCommon\IndodanaHelper::getAuthToken($requestHeaders, $namespace);
+
+    $indodanaTools = new IndodanaTools();
+    $isValidAuthorization = $indodanaTools->getIndodanaCommon()->isValidAuthToken($authToken);
+
+    if (!$isValidAuthorization) {
+      IndodanaCommon\MerchantResponse::printInvalidRequestAuthResponse($namespace);
+
+      die;;
     }
 
-    die(Tools::jsonEncode([
-      'status' => $status,
-      'message' => ''
-    ]));
+    // Log request body
+    $requestBody = IndodanaCommon\IndodanaHelper::getRequestBody();
+
+    IndodanaCommon\IndodanaLogger::info(
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($requestBody)
+      )
+    );
+
+    // Check whether request body is valid
+    if (!isset($requestBody['transactionStatus']) || !isset($requestBody['merchantOrderId'])) {
+      IndodanaCommon\MerchantResponse::printInvalidRequestBodyResponse($namespace);
+
+      die;
+    }
+
+    $transactionStatus = $requestBody['transactionStatus'];
+    $orderId = $requestBody['merchantOrderId'];
+
+    $order = new Order($_GET['id_order']);
+
+    if (!$order) {
+      IndodanaCommon\MerchantResponse::printNotFoundOrderResponse(
+        $orderId,
+        $namespace
+      );
+
+      die;
+    }
+
+    if (!in_array($transactionStatus, IndodanaCommon\IndodanaConstant::getSuccessTransactionStatuses())) {
+      IndodanaCommon\MerchantResponse::printInvalidTransactionStatusResponse(
+        $transactionStatus,
+        $orderId,
+        $namespace
+      );
+
+      die;
+    }
+
+    // Update order success status
+    $order->setCurrentState(Configuration::get('INDODANA_DEFAULT_ORDER_SUCCESS_STATUS'));
+
+    IndodanaCommon\MerchantResponse::printSuccessResponse($namespace);
+
+    die;
   }
 }
