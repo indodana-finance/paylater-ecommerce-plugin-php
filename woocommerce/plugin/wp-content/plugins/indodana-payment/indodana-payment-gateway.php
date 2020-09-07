@@ -244,6 +244,8 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
 
     $products = [];
 
+    $has_bundle_product = false;
+
     foreach($cart_items as $cart_item) {
       $product = $cart_item['data'];
 
@@ -254,6 +256,10 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
 
       // Type might not exists
       $type = $product->get_type() ?? '';
+
+      if ($type == 'bundle') {
+        $has_bundle_product = true;
+      }
 
       $products[] = [
         'id' => (string) $product->get_id(),
@@ -266,6 +272,30 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
         'category'  => IndodanaConstant::DEFAULT_ITEM_CATEGORY,
         'quantity' => (int) $cart_item['quantity'],
       ];
+    }
+
+    IndodanaLogger::info(
+      sprintf(
+        '%s Unfiltered products with price 0: %s',
+        $namespace,
+        json_encode($products)
+      )
+    );
+
+    if ($has_bundle_product) {
+      $filtered_price_zero_products = array_filter($products, function($product) {
+        return $product['price'] != 0;
+      });
+
+      IndodanaLogger::info(
+        sprintf(
+          '%s Filtered products with price 0: %s',
+          $namespace,
+          json_encode($filtered_price_zero_products)
+        )
+      );
+
+      return $filtered_price_zero_products;
     }
 
     return $products;
