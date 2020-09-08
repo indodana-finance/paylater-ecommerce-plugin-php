@@ -194,8 +194,7 @@ class Indodana extends PaymentModule
    */
   public function getContent()
   {
-    $this->context->smarty->assign('module_dir', $this->_path);
-    $output = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
+    $output = null;
 
     /**
      * If values have been submitted in the form, process.
@@ -487,26 +486,6 @@ class Indodana extends PaymentModule
   }
 
   /**
-   * Add the CSS & JavaScript files you want to be loaded in the BO.
-   */
-  public function hookBackOfficeHeader()
-  {
-    if (Tools::getValue('module_name') == $this->name) {
-      $this->context->controller->addJS($this->_path . 'views/js/back.js');
-      $this->context->controller->addCSS($this->_path . 'views/css/back.css');
-    }
-  }
-
-  /**
-   * Add the CSS & JavaScript files you want to be added on the FO.
-   */
-  public function hookHeader()
-  {
-    $this->context->controller->addJS($this->_path . '/views/js/front.js');
-    $this->context->controller->addCSS($this->_path . '/views/css/front.css');
-  }
-
-  /**
    * This method is used to render the payment button,
    * Take care if the button should be displayed or not.
    */
@@ -526,31 +505,6 @@ class Indodana extends PaymentModule
     ]);
 
     return $this->display(__FILE__, 'payment.tpl');
-  }
-
-  /**
-   * This hook is used to display the order confirmation page.
-   */
-  public function hookPaymentReturn($params)
-  {
-    if ($this->active == false) {
-      return;
-    }
-
-    $order = $params['objOrder'];
-
-    if ($order->getCurrentOrderState()->id != Configuration::get('PS_OS_ERROR')) {
-      $this->smarty->assign('status', 'ok');
-    }
-
-    $this->smarty->assign([
-      'id_order' => $order->id,
-      'reference' => $order->reference,
-      'params' => $params,
-      'total' => Tools::displayPrice($params['total_to_pay'], $params['currencyObj'], false),
-    ]);
-
-    return $this->display(__FILE__, 'views/templates/hook/confirmation.tpl');
   }
 
   /**
@@ -619,11 +573,6 @@ class Indodana extends PaymentModule
       }
     }
     return false;
-  }
-
-  public function hookActionPaymentConfirmation()
-  {
-    /* Place your code here. */
   }
 
   public function hookDisplayPayment($params)
