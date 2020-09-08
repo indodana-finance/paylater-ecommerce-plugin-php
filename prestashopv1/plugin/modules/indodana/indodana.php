@@ -1,5 +1,6 @@
 <?php
 
+// ignore vscode's phpcs extension missing namespace error
 // phpcs:disable PSR1.Classes.ClassDeclaration.MissingNamespace
 
 /**
