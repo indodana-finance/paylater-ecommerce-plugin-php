@@ -131,7 +131,7 @@ class IndodanaValidationModuleFrontController extends ModuleFrontController
       ['id_order' => $orderId],
       true
     );
-    $backUrl = 'index.php?controller=order-confirmation&id_cart=' . $cart->id . '&id_module=' . $moduleId . '&id_order=' . $orderId . '&key=' . $customer->secure_key;
+    $backUrl = _PS_BASE_URL_ . '/index.php?controller=order-confirmation&id_cart=' . $cart->id . '&id_module=' . $moduleId . '&id_order=' . $orderId . '&key=' . $customer->secure_key;
 
     $indodanaTools = new IndodanaTools();
     $redirectUrl = $indodanaTools->getIndodanaCommon()->checkout([
