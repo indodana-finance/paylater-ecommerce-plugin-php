@@ -33,9 +33,12 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
     $discount = 0;
     $products = $order->getProducts();
     foreach ($products as $product) {
+      // for prestashop v1.7
       if (_PS_VERSION_ >= 1.7) {
         $discount += $product['reduction'] * $product['quantity'];
       } else {
+        // for prestashop v1.6, prestashop v1.6 doesn't provide product price 'reduction'
+        // we need to calculate 'reduction' manually
         $discount += ($product['price_without_reduction'] - $product['price_with_reduction'])
           * $product['quantity'];
       }
