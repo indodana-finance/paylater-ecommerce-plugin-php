@@ -73,18 +73,23 @@ class IndodanaValidationModuleFrontController extends ModuleFrontController
     $currency = $this->context->currency;
     $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
 
-    if ($this->isValidOrder() === true) {
-      $paymentStatus = Configuration::get('INDODANA_DEFAULT_ORDER_PENDING_STATUS');
-      $message = null;
-    } else {
-      $paymentStatus = Configuration::get('PS_OS_ERROR');
+    $paymentStatus = Configuration::get('INDODANA_DEFAULT_ORDER_PENDING_STATUS');
+    $message = null;
 
-      /**
-       * Add a message to explain why the order has not been validated
-       */
-      $message = $this->module->l('An error occurred while processing payment');
-    }
+    $namespace = '[PrestashopV1-validateOrder]';
+    $log = $this->getValidateOrderLogData($cart);
 
+    IndodanaCommon\IndodanaLogger::info(
+      sprintf(
+        '%s Request body: %s',
+        $namespace,
+        json_encode($log)
+      )
+    );
+
+    /**
+     * Create order
+     */
     $this->module->validateOrder(
       $cart->id,
       $paymentStatus,
@@ -125,7 +130,7 @@ class IndodanaValidationModuleFrontController extends ModuleFrontController
       ['id_order' => $orderId],
       true
     );
-    $backUrl = _PS_BASE_URL_ . '/index.php?controller=order-confirmation&id_cart=' . $cart->id . '&id_module=' . $moduleId . '&id_order=' . $orderId . '&key=' . $customer->secure_key;
+    $backUrl = 'index.php?controller=order-confirmation&id_cart=' . $cart->id . '&id_module=' . $moduleId . '&id_order=' . $orderId . '&key=' . $customer->secure_key;
 
     $indodanaTools = new IndodanaTools();
     $redirectUrl = $indodanaTools->getIndodanaCommon()->checkout([
@@ -147,11 +152,16 @@ class IndodanaValidationModuleFrontController extends ModuleFrontController
     Tools::redirect($redirectUrl);
   }
 
-  protected function isValidOrder()
+  private function getValidateOrderLogData($cart)
   {
-    /**
-     * Add your checks right there
-     */
-    return true;
+    $indodanaTools = new IndodanaTools();
+    $billingAddress = $indodanaTools->getBillingAddress($cart);
+    $payment = [
+      'paymentMethod' => $this->module->name,
+      'paymentSelection' => $_POST['indodana_selection'],
+      'totalAmount' => $indodanaTools->getTotalAmount($cart)
+    ];
+
+    return array_merge($billingAddress, $payment);
   }
 }
