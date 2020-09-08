@@ -23,20 +23,23 @@
 *  International Registered Trademark & Property of PrestaShop SA
 *}
 
-<div class="row">
-	<div class="col-xs-12 col-md-6">
-		<p class="payment_module" id="indodana_payment_button">
-			{if $cart->getOrderTotal() < 2}
-				<a href="">
-					<img src="{$domain|cat:$payment_button|escape:'html':'UTF-8'}" alt="{l s='Pay with ' mod="`$moduleName`"} {$displayName}" />
-					{l s='Minimum amount required in order to pay with ' mod="`$moduleName`"} {$displayName}: {convertPrice price=2}
-				</a>
-			{else}
-				<a href="{$link->getModuleLink($moduleName, 'redirect', array(), true)|escape:'htmlall':'UTF-8'}" title="{l s='Pay with ' mod="`$moduleName`"}  {$displayName}">
-					<img src="{$module_dir|escape:'htmlall':'UTF-8'}/logo.png" alt="{l s='Pay with my payment module' mod="`$moduleName`"}" width="32" height="32" />
-					{l s='Pay with ' mod="`$moduleName`"} {$displayName}
-				</a>
-			{/if}
-		</p>
-	</div>
-</div>
+<p class="payment_module" id="indodana_payment_button">
+  <a href="{$link->getModuleLink($moduleName, 'redirect', array(), true)|escape:'htmlall':'UTF-8'}" class="payment-method" title="{l s='Pay with ' mod="`$moduleName`"}  {$displayName}">
+    <img src="{$indodanaLogo|escape:'htmlall':'UTF-8'}" alt="{l s='Pay with my payment module' mod="`$moduleName`"}" />
+    <span class="payment-text">
+      {l s='Pay with ' mod="`$moduleName`"} {$displayName}
+    </span>
+  </a>
+</p>
+
+<style>
+.payment-method {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+}
+
+.payment-text {
+  margin-left: 1rem;
+}
+</style>
