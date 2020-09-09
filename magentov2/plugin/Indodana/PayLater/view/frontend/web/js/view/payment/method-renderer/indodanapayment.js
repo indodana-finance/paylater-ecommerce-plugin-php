@@ -21,7 +21,7 @@ define(
                 transactionResult: '',
                 paytype:'',
                 installment:'',
-                selectedInstallment:''
+                redirecturl:''
             },
 
             initObservable: function () {
@@ -30,7 +30,8 @@ define(
                     .observe([
                         'transactionResult',
                         'paytype',
-                        'installment'
+                        'installment',
+                        'redirecturl'
                     ]);
                 return this;
             },
@@ -43,32 +44,30 @@ define(
                 return {
                     'method': this.item.method,
                     'additional_data': {
-                        'transaction_result': this.transactionResult(),
+                        'transaction_result': this.transactionResult(),                        
                         'paytype': this.paytype(),
-                        'installment': this.installment()
+                        'installment':this.installment(),
+                        'redirecturl':this.redirecturl()
                     }
                 };
             },
 
-            // getTransactionResults: function() {
-            //     return _.map(window.checkoutConfig.payment.indodanapayment.transactionResults, function(value, key) {
-            //         return {
-            //             'value': key,
-            //             'transaction_result': value
-            //         }
-            //     });
-            // },
+            getTransactionResults: function() {
+                return _.map(window.checkoutConfig.payment.indodanapayment.transactionResults, function(value, key) {
+                    return {
+                        'value': key,
+                        'transaction_result': value
+                    }
+                });
+            },
             
             onInstallmentClick: function(item){
                 //alert(item.id);
-                
                 window.checkoutConfig.payment.indodanapayment.paytype=item.id;
+                window.checkoutConfig.payment.indodanapayment.transactionResults='Success';
                 //self.isInstallmentSelected(true);
                 return true;
             },            
-            // getIsInstallmentSelected:function(){
-            //       return this.isInstallmentSelected();  
-            // },
             
     
 
@@ -83,16 +82,29 @@ define(
 
                             //alert(data.Installment);
                             window.checkoutConfig.payment.indodanapayment.installment=data.Installment;
+                            window.checkoutConfig.payment.indodanapayment.OrderID=data.OrderID;
+                            //window.checkoutConfig.payment.indodanapayment.installment='1';
                             //return data.Installment;        
                         },
                         //dataType: dataType
                     });
                 }
-                return window.checkoutConfig.payment.indodanapayment.installment;
+                return window.checkoutConfig.payment.indodanapayment.installment;                
             },
-            afterPlaceOrder:function(){
+            beforePlaceOrder:function(data, event){
                 //alert(window.checkoutConfig.payment.indodanapayment.paytype);
+                //alert(window.checkoutConfig.payment.indodanapayment.OrderID);
+                if(window.checkoutConfig.payment.indodanapayment.paytype==''){
+                    alert('Silahkan pilih ternor cicilan');
+                    return false;
+                }
+                  return this.placeOrder(data,event);
+            }
+
+            ,afterPlaceOrder:function(){
+                this.redirectAfterPlaceOrder = false;
                 var ptype=window.checkoutConfig.payment.indodanapayment.paytype;
+                //var orderid=window.checkoutConfig.payment.indodanapayment.OrderID;
                 this.redirectAfterPlaceOrder = false;
                 var strurl =url.build('indodanapayment/index/redirectto')
                 $.ajax({
@@ -100,17 +112,19 @@ define(
                     url: strurl,
                     data: {paytype:ptype},
                     success: function(data){
-                        //alert (JSON.stringify(data) );
+                        alert (JSON.stringify(data) );
                         //alert (data.Order);
-                        window.location.replace(data.Order);
+                        //window.location.replace(data.Order);
+                        window.checkoutConfig.payment.indodanapayment.redirecturl=data.Order;
                         //return data.Installment;        
+                        window.location.replace(window.checkoutConfig.payment.indodanapayment.redirecturl);
                     },
                     //dataType: dataType
                   });
-                  return true;
 
                 
                 //window.location=strurl;
+
             }
 
         });

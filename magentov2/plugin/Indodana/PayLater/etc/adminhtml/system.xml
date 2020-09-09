@@ -85,6 +85,11 @@
                     <label>Payment Action</label>
                     <source_model>Indodana\PayLater\Model\Adminhtml\Source\PaymentAction</source_model>
                 </field>
+                <field id="merchant_gateway_key" translate="label" type="obscure" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Merchant Gateway Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+
             </group>
         </section>
     </system>

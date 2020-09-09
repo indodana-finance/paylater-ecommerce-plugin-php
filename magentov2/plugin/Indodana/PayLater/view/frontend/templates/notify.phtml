@@ -1,3 +1,25 @@
 <?php
 
 echo 'a';
+?>
+
+<script>
+        require(['jquery',
+        'mage/url',
+        'Magento_Checkout/js/model/url-builder'
+    ], function($,url,urlBuilder) {
+            
+            var strurl =url.build('indodanapayment/index/notify')
+            alert(strurl);
+            $.ajax({
+                    type: "POST",
+                    url: strurl,
+                    //data: {paytype:ptype},
+                    success: function(data){
+                        alert (JSON.stringify(data) );
+                    },
+                    //dataType: dataType
+                  });
+
+        });
+    </script>

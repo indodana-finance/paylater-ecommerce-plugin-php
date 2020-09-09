@@ -10,6 +10,7 @@ use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
 
+
 class CaptureRequest implements BuilderInterface
 {
     /**
@@ -51,13 +52,14 @@ class CaptureRequest implements BuilderInterface
             throw new \LogicException('Order payment should be provided.');
         }
 
+
         return [
             'TXN_TYPE' => 'S',
-            'TXN_ID' => $payment->getLastTransId()
-            // 'MERCHANT_KEY' => $this->config->getValue(
-            //     'merchant_gateway_key',
-            //     $order->getStoreId()
-            //)
+            'TXN_ID' => $payment->getLastTransId(),
+            'MERCHANT_KEY' => $this->config->getValue(
+                'merchant_gateway_key',
+                $order->getStoreId()
+            )
         ];
     }
 }

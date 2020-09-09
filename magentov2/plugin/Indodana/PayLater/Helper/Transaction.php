@@ -195,7 +195,8 @@ class Transaction extends AbstractHelper //implements IndodanaInterface
       'city'          => $billingAddress->getCity(),
       'postalCode'    => $billingAddress->getPostcode(),
       'phone'         => $billingAddress->getTelephone(),
-      'countryCode'   => $this->countryCode($billingAddress->getCountry())
+      //'countryCode'   => $this->countryCode($billingAddress->getCountry())
+      'countryCode'   => $this->countryCode($billingAddress->getCountryId())
     ];
   }
 
@@ -211,7 +212,8 @@ class Transaction extends AbstractHelper //implements IndodanaInterface
       'city'          => $shippingAddress->getCity(),
       'postalCode'    => $shippingAddress->getPostcode(),
       'phone'         => $shippingAddress->getTelephone(),
-      'countryCode'   => $this->countryCode($shippingAddress->getCountry())
+      //'countryCode'   => $this->countryCode($shippingAddress->getCountry())
+      'countryCode'   => $this->countryCode($shippingAddress->getCountryId())
     ];
   }
 
@@ -250,26 +252,8 @@ class Transaction extends AbstractHelper //implements IndodanaInterface
     $approvedNotificationUrl = $this->_urlInterface->getUrl('indodanapayment/index/notify'); //Mage::getUrl('indodanapayment/checkout/notify');
     $cancellationRedirectUrl = $this->_urlInterface->getUrl('indodanapayment/index/cancel');;//Mage::getUrl('indodanapayment/checkout/cancel');
     $backToStoreUrl = $this->_helper->getStoreUrl();//Mage::getUrl('indodanapayment/checkout/success');
-    // $data=  [
-    //   'transactionDetails' =>[
-    //       'merchantOrderId'         => $order->getId(),
-    //       'totalAmount'    => $this->getTotalAmount($order),
-    //       'products'       => $this->getProducts($order),
-    //       'discountAmount' => $this->getTotalDiscountAmount($order),
-    //       'shippingAmount' => $this->getTotalShippingAmount($order),
-    //       'taxAmount'      => $this->getTotalTaxAmount($order),
-    //     ],
-    //   'customerDetails' => $this->getCustomerDetails($order), 
-    //   'sellers' =>[$this->getSeller()],
-    //   'billingAddress'          => $this->getBillingAddress($order),
-    //   'shippingAddress'         => $this->getShippingAddress($order),      
-    //   'paymentType' => $paytype,
-    //   'approvedNotificationUrl' => $approvedNotificationUrl,
-    //   'cancellationRedirectUrl' => $cancellationRedirectUrl,
-    //   'backToStoreUrl'          => $backToStoreUrl      
-    //             ];
-    // //return $data;                
-     return $this->getIndodanaCommon()->checkout(
+
+    return $this->getIndodanaCommon()->checkout(
        [      'merchantOrderId'         => $order->getId(),
        'totalAmount'             => $this->getTotalAmount($order),
        'discountAmount'          => $this->getTotalDiscountAmount($order),
@@ -279,12 +263,20 @@ class Transaction extends AbstractHelper //implements IndodanaInterface
        'customerDetails'         => $this->getCustomerDetails($order),
        'billingAddress'          => $this->getBillingAddress($order),
        'shippingAddress'         => $this->getShippingAddress($order),
-       'approvedNotificationUrl' => $approvedNotificationUrl,// str_replace('localhost','192.168.1.7',$approvedNotificationUrl),
-       'cancellationRedirectUrl' => $cancellationRedirectUrl, //str_replace('localhost','192.168.1.7',$cancellationRedirectUrl),
+       'approvedNotificationUrl' => $approvedNotificationUrl,//str_replace('localhost','192.168.1.7',$approvedNotificationUrl),
+       'cancellationRedirectUrl' => $cancellationRedirectUrl,//str_replace('localhost','192.168.1.7',$cancellationRedirectUrl),
        'backToStoreUrl'          => $backToStoreUrl //str_replace('localhost','192.168.1.7',$backToStoreUrl)
- ]
+       //'approvedNotificationUrl' => str_replace('localhost','192.168.1.7',$approvedNotificationUrl),
+       //'cancellationRedirectUrl' => str_replace('localhost','192.168.1.7',$cancellationRedirectUrl),
+       //'backToStoreUrl'          => str_replace('localhost','192.168.1.7',$backToStoreUrl)
+
+       ]
      );
 
+  }
+
+  public function getOrderID($order){
+      return $this->_helper->getStoreID().'-'.$order->getId();
   }
 
   public function getOrderData($order,$paytype)
