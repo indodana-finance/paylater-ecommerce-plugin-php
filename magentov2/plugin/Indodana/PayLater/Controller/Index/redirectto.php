@@ -55,7 +55,7 @@ class Redirectto extends \Magento\Framework\App\Action\Action
 
         $result = $this->_resultFactory->create();
 
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        //$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
         //$cart = $objectManager->get('\Magento\Checkout\Model\Cart'); 
         //$order = $cart->getQuote();
         $order= $this->getOrder();

@@ -263,12 +263,12 @@ class Transaction extends AbstractHelper //implements IndodanaInterface
        'customerDetails'         => $this->getCustomerDetails($order),
        'billingAddress'          => $this->getBillingAddress($order),
        'shippingAddress'         => $this->getShippingAddress($order),
-       'approvedNotificationUrl' => $approvedNotificationUrl,//str_replace('localhost','192.168.1.7',$approvedNotificationUrl),
-       'cancellationRedirectUrl' => $cancellationRedirectUrl,//str_replace('localhost','192.168.1.7',$cancellationRedirectUrl),
-       'backToStoreUrl'          => $backToStoreUrl //str_replace('localhost','192.168.1.7',$backToStoreUrl)
-       //'approvedNotificationUrl' => str_replace('localhost','192.168.1.7',$approvedNotificationUrl),
-       //'cancellationRedirectUrl' => str_replace('localhost','192.168.1.7',$cancellationRedirectUrl),
-       //'backToStoreUrl'          => str_replace('localhost','192.168.1.7',$backToStoreUrl)
+       //'approvedNotificationUrl' => $approvedNotificationUrl,//str_replace('localhost','192.168.1.7',$approvedNotificationUrl),
+       //'cancellationRedirectUrl' => $cancellationRedirectUrl,//str_replace('localhost','192.168.1.7',$cancellationRedirectUrl),
+       //'backToStoreUrl'          => $backToStoreUrl //str_replace('localhost','192.168.1.7',$backToStoreUrl)
+       'approvedNotificationUrl' => str_replace('localhost','192.168.1.7',$approvedNotificationUrl),
+       'cancellationRedirectUrl' => str_replace('localhost','192.168.1.7',$cancellationRedirectUrl),
+       'backToStoreUrl'          => str_replace('localhost','192.168.1.7',$backToStoreUrl)
 
        ]
      );
