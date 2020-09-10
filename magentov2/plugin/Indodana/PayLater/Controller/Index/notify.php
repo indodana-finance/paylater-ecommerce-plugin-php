@@ -3,7 +3,7 @@
 namespace Indodana\PayLater\Controller\Index;
 
 use Indodana\PayLater\Helper\Transaction;
-
+use Indodana\PayLater\Helper\Data;
 use IndodanaCommon\IndodanaInterface;
 use IndodanaCommon\IndodanaCommon;
 use IndodanaCommon\IndodanaConstant;
@@ -19,14 +19,19 @@ class Notify extends \Magento\Framework\App\Action\Action
    protected $_helper;
    protected $_checkoutSession;
    protected $_orderFactory;
+   protected $_coretransaction;
+   protected $_order;
     public function __construct(
-        \Magento\Framework\View\Result\PageFactory $pageFactory,        
+      \Magento\Framework\Controller\Result\JsonFactory $pageFactory,        
         \Magento\Framework\App\Action\Context $context,
-        Transaction $transaction,
+        \Indodana\PayLater\Helper\Transaction $transaction,
         \Magento\Framework\App\Request\Http $request,
-        Indodana\PayLater\Helper\Data $helper,
+        \Indodana\PayLater\Helper\Data $helper,
         \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Sales\Model\OrderFactory $orderFactory
+        \Magento\Sales\Model\OrderFactory $orderFactory,
+        \Magento\Framework\DB\Transaction $coretransaction,
+        \Magento\Sales\Api\Data\OrderInterface $order,
+        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
     )
     {
         $this->_resultFactory = $pageFactory;
@@ -35,7 +40,8 @@ class Notify extends \Magento\Framework\App\Action\Action
         $this->_helper = $helper;
         $this->_checkoutSession = $checkoutSession;
         $this->_orderFactory = $orderFactory;
-
+        $this->_coretransaction=$coretransaction;
+        $this->_order=$orderRepository;
         return parent::__construct($context);
     }
 
@@ -53,17 +59,43 @@ class Notify extends \Magento\Framework\App\Action\Action
         }
         return false;
     }
+    public function getOrderByIncrementId($orderIncrementId){      
+      //$order = $this->_orderFactory->create()->loadByIncrementId($orderIncrementId);
+      $order = $this->_order->loadByIncrementId($orderIncrementId);
+      
+    }
 
 
     public function execute(){
+        $namespace = '[MagentoV1-notifyAction]';
         $result = $this->_resultFactory->create();
-        //echo
+        $this->notifyAction();
         
-      //================================
-     //Disallow any action for invalid request
-     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-         return $this->norouteAction();
-       }
+        
+        
+        // $realOrderId =$this->getRealOrderId(); 
+        // $orderid=28;//$this->getRealOrderId();
+        // $order = $this->_order->get($orderid);
+
+        // IndodanaLogger::info(
+        //   sprintf(
+        //     '%s order status : %s',
+        //     $namespace,
+        //     $order->getStatus()
+        //   )
+        // );
+  
+        // $this->handleSuccessOrder($order);
+        return ;
+    }
+
+    
+    public function notifyAction(){
+    
+      //Disallow any action for invalid request
+      if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+         return;// $this->norouteAction();
+      }
   
       // Log request headers
       // -----
@@ -114,12 +146,9 @@ class Notify extends \Magento\Framework\App\Action\Action
       }
   
       $transactionStatus = $requestBody['transactionStatus'];
-      $orderId = $requestBody['merchantOrderId'];
-  
-      //$order = Mage::getModel('sales/order');
-      $realOrderId = $this->getRealOrderId();
-      $order= $this->getOrder();
-      $order->load($orderId);
+      $orderId = $requestBody['merchantOrderId'];      
+      $order= $this->_order->get($orderid);
+      
   
       if (!$order) {
         MerchantResponse::printNotFoundOrderResponse(
@@ -149,26 +178,24 @@ class Notify extends \Magento\Framework\App\Action\Action
       //return;
   
       //===================================        
+
         
         return $result;
     }
 
-    private function handleSuccessOrder(&$order) {
+    private function handleSuccessOrder($order) {
       // Save invoice && transaction
       // -----
       $invoice = $order->prepareInvoice()
-         ->setTransactionId($order->getId())
-         ->addComment('Transaction is successfully processed by Indodana')
-         ->register()
-         ->pay();
-  
-      $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-      //$transaction = Mage::getModel('core/resource_transaction')
-      $transaction =  $objectManager->get('core/resource_transaction')      
-        ->addObject($invoice)
+        ->setTransactionId($order->getId())
+        ->addComment('Transaction is successfully processed by Indodana')
+        ->register()
+        ->pay();
+
+      $transactionSave = $this->_coretransaction->addObject($invoice)
         ->addObject($invoice->getOrder());
-  
-      $transaction->save();
+      $transactionSave->save();
+
   
       // Set order as success
       // -----

@@ -3,6 +3,7 @@
 namespace Indodana\PayLater\Controller\Index;
 
 use Indodana\PayLater\Helper\Transaction;
+use Indodana\PayLater\Helper\Data;
 use IndodanaCommon\IndodanaInterface;
 use IndodanaCommon\IndodanaCommon;
 use IndodanaCommon\IndodanaConstant;
@@ -18,10 +19,12 @@ class Redirectto extends \Magento\Framework\App\Action\Action
     public function __construct(
         \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory,
         \Magento\Framework\App\Action\Context $context,
-        Transaction $transaction,
+        \Indodana\PayLater\Helper\Transaction $transaction,
         \Magento\Framework\App\Request\Http $request,
         \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Sales\Model\OrderFactory $orderFactory
+        \Magento\Sales\Model\OrderFactory $orderFactory,
+        \Indodana\PayLater\Helper\Data $helper
+
     )
     {
         $this->_resultFactory = $jsonResultFactory;
@@ -29,6 +32,7 @@ class Redirectto extends \Magento\Framework\App\Action\Action
         $this->_request = $request;
         $this->_checkoutSession = $checkoutSession;
         $this->_orderFactory = $orderFactory;
+        $this->_helper = $helper;
         return parent::__construct($context);
     }
 
@@ -41,8 +45,8 @@ class Redirectto extends \Magento\Framework\App\Action\Action
     public function getOrder()
     {
         if ($this->_checkoutSession->getLastRealOrderId()) {
-             $order = $this->_orderFactory->create()->loadByIncrementId($this->_checkoutSession->getLastRealOrderId());
-        return $order;
+            $order = $this->_orderFactory->create()->loadByIncrementId($this->_checkoutSession->getLastRealOrderId());
+            return $order;
         }
         return false;
     }
@@ -50,25 +54,37 @@ class Redirectto extends \Magento\Framework\App\Action\Action
     public function execute(){
         
         $post = $this->_request->getPostValue();
+
         $paytype=$post['paytype'];
-        //$orderid=$post['orderid'];
 
         $result = $this->_resultFactory->create();
 
-        //$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        //$cart = $objectManager->get('\Magento\Checkout\Model\Cart'); 
-        //$order = $cart->getQuote();
         $order= $this->getOrder();
+
         $checkout =  $this->_transaction->checkOut($order,$paytype); 
-        //$product =$this->_transaction->getProducts($cart->getQuote());
+        $namespace = '[Indodana\PayLater\Controller\Index]';
+        if ($order) {        
+            IndodanaLogger::info(
+                sprintf(
+                  '%s DefaultOrderPendingStatus: %s',
+                  $namespace,
+                  $this->_helper->getDefaultOrderPendingStatus()
+                )
+              );
+            
+            $order
+              ->addStatusToHistory(
+                $this->_helper->getDefaultOrderPendingStatus(),
+                'Order has been placed on Indodana'
+              )
+              ->save();
+        }
+
         return $result->setData(
             [
                 'success' => true,
                 'message' => __('Your message here'),
-                //'Installment' => $Installment,
-                'Order' =>$checkout,
-                //'ship' =>$ship,
-                //'bill'=>$bill
+                'Order' =>$checkout
             ]
             );    
     }

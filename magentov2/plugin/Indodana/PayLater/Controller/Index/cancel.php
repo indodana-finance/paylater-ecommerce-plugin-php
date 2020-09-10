@@ -3,19 +3,24 @@
 namespace Indodana\PayLater\Controller\Index;
 
 use Indodana\PayLater\Helper\Transaction;
-
+use Magento\Framework\View\Result\ResultFactory;
 
 class Cancel extends \Magento\Framework\App\Action\Action
 {
    protected $_resultFactory;
    protected $_transaction;
    protected $_request;
-
+   protected $_helper;
+   protected $_checkoutSession;
+   protected $_orderFactory;
     public function __construct(
-        \Magento\Framework\View\Result\PageFactory $pageFactory,        
+        \Magento\Framework\Controller\Result\RedirectFactory  $pageFactory,        
         \Magento\Framework\App\Action\Context $context,
-        Transaction $transaction,
-        \Magento\Framework\App\Request\Http $request
+        \Indodana\PayLater\Helper\Transaction $transaction,
+        \Magento\Framework\App\Request\Http $request,
+        \Magento\Checkout\Model\Session $checkoutSession,
+        \Magento\Sales\Model\OrderFactory $orderFactory,
+        \Indodana\PayLater\Helper\Data $helper
 
     )
     {
@@ -24,8 +29,8 @@ class Cancel extends \Magento\Framework\App\Action\Action
         $this->_request = $request;
         $this->_checkoutSession = $checkoutSession;
         $this->_orderFactory = $orderFactory;
-
-        return parent::__construct($context);
+        $this->_helper=$helper;
+        return parent::__construct($context);       
     }
 
     public function getRealOrderId()
@@ -45,9 +50,11 @@ class Cancel extends \Magento\Framework\App\Action\Action
     
 
     public function execute(){
-     // Redirect to home page for invalid request
+        
+
+        // Redirect to home page for invalid request
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-            return Mage_Core_Controller_Varien_Action::_redirect('');
+            return; //Mage_Core_Controller_Varien_Action::_redirect('');
         }
     
         //$order = $this->getLatestOrder();
@@ -56,14 +63,28 @@ class Cancel extends \Magento\Framework\App\Action\Action
         if ($order) {
             $order
             ->addStatusToHistory(
-                Mage::helper('indodanapayment')->getDefaultOrderFailedStatus(),
+                $this->_helper->getDefaultOrderFailedStatus(),
                 'Failed to complete order on Indodana'
             )
             ->save();
         }
     
         // TODO: If possible, redirect to Magento's cancel page instead
-        return Mage_Core_Controller_Varien_Action::_redirect('checkout/cart');
+        //return Mage_Core_Controller_Varien_Action::_redirect('checkout/cart');
+        //$this->goBack();
+     }
+
+     protected function goBack()
+     {       
+
+        $resultRedirect = $this->_resultFactory->create();
+        //$resultRedirect->setPath('checkout/cart');
+        //return $resultRedirect;
+
+        $url = 'http://localhost/magentoce240s/checkout/cart';
+        $resultRedirect->setUrl($url);
+        return $resultRedirect;        
+                
      }
 
 

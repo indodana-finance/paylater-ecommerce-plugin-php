@@ -3,15 +3,14 @@
 
 namespace Indodana\PayLater\Helper;
 
-//require_once Mage::getBaseDir('lib') . '/Indodana/PayLater/autoload.php';
-//use Indodana\Indodana;
 use IndodanaCommon\IndodanaInterface;
 use IndodanaCommon\IndodanaCommon;
 use IndodanaCommon\IndodanaConstant;
 
 use Magento\Framework\App\Helper\AbstractHelper;
 use \Magento\Framework\App\Filesystem\DirectoryList;
-class Transaction extends AbstractHelper //implements IndodanaInterface
+
+class Transaction extends AbstractHelper implements IndodanaInterface
 {
   private $indodanaCommon;
   protected $_helper;
@@ -55,26 +54,6 @@ class Transaction extends AbstractHelper //implements IndodanaInterface
   public function getTotalAmount($order)
   {
     return (float) $order->getGrandTotal();
-    /*
-    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-    // We only need parent products
-    $orderItems = $order->getAllVisibleItems();
-
-    $total=0;
-
-    foreach($orderItems as $orderItem) {
-      $product = $orderItem->getProduct();
-      // For get installment options
-      $quantity = $orderItem->getQty();
-      // For checkout
-      if (!$quantity) {
-        $quantity = $orderItem->getQtyToInvoice();
-      }
-      $total = $total +  $product->getPrice() * ((float)$quantity);
-
-    }
-    return $total;
-    */
   }
 
   public function getTotalDiscountAmount($order)
@@ -253,6 +232,11 @@ class Transaction extends AbstractHelper //implements IndodanaInterface
     $cancellationRedirectUrl = $this->_urlInterface->getUrl('indodanapayment/index/cancel');;//Mage::getUrl('indodanapayment/checkout/cancel');
     $backToStoreUrl = $this->_helper->getStoreUrl();//Mage::getUrl('indodanapayment/checkout/success');
 
+    ///Developmetn Test
+    // $approvedNotificationUrl = str_replace('localhost','192.168.1.4',$approvedNotificationUrl);
+    // $cancellationRedirectUrl = str_replace('localhost','192.168.1.4',$cancellationRedirectUrl);
+    // $backToStoreUrl = str_replace('localhost','192.168.1.4',$backToStoreUrl);
+
     return $this->getIndodanaCommon()->checkout(
        [      'merchantOrderId'         => $order->getId(),
        'totalAmount'             => $this->getTotalAmount($order),
@@ -263,12 +247,9 @@ class Transaction extends AbstractHelper //implements IndodanaInterface
        'customerDetails'         => $this->getCustomerDetails($order),
        'billingAddress'          => $this->getBillingAddress($order),
        'shippingAddress'         => $this->getShippingAddress($order),
-       //'approvedNotificationUrl' => $approvedNotificationUrl,//str_replace('localhost','192.168.1.7',$approvedNotificationUrl),
-       //'cancellationRedirectUrl' => $cancellationRedirectUrl,//str_replace('localhost','192.168.1.7',$cancellationRedirectUrl),
-       //'backToStoreUrl'          => $backToStoreUrl //str_replace('localhost','192.168.1.7',$backToStoreUrl)
-       'approvedNotificationUrl' => str_replace('localhost','192.168.1.7',$approvedNotificationUrl),
-       'cancellationRedirectUrl' => str_replace('localhost','192.168.1.7',$cancellationRedirectUrl),
-       'backToStoreUrl'          => str_replace('localhost','192.168.1.7',$backToStoreUrl)
+       'approvedNotificationUrl' => $approvedNotificationUrl,
+       'cancellationRedirectUrl' => $cancellationRedirectUrl,
+       'backToStoreUrl'          => $backToStoreUrl 
 
        ]
      );

@@ -1,4 +1,2 @@
-[INDODANA][2020-09-07 18:35:29][/magentoce240s/indodanapayment/index/redirectto][Common-Checkout] Common Exception: Key totalAmount must be present, Key products must be present, Key shippingAmount must be present, Key taxAmount must be present, Key discountAmount must be present
-[INDODANA][2020-09-07 18:45:22][/magentoce240s/indodanapayment/index/redirectto][Common-Checkout] Request Exception: "approvedNotificationUrl cannot be localhost"
-[INDODANA][2020-09-07 18:55:54][/magentoce240s/indodanapayment/index/redirectto][Common-Checkout] Request Exception: "cancellationRedirectUrl cannot be localhost"
-[INDODANA][2020-09-07 19:10:55][/magentoce240s/indodanapayment/index/redirectto][Common-Checkout] Request Exception: "Purchase transaction with order id 8 already exist"
+[INDODANA][2020-09-10 05:51:07][/magentoce240s/indodanapayment/index/redirectto][Common-Checkout] Request Exception: {"items":[[],[],{"price":{"integer":"Price must be an integer."}},[]],"sellers":[[]]}
+[INDODANA][2020-09-10 07:11:22][/magentoce240s/indodanapayment/index/redirectto][Common-Checkout] Request Exception: {"items":[[],[],{"price":{"integer":"Price must be an integer."}},{"price":{"integer":"Price must be an integer."}}],"sellers":[[]]}

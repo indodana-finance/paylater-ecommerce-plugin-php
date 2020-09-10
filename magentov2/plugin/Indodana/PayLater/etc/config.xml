@@ -13,7 +13,7 @@
                 <active>0</active>
                 <model>PayLaterFacade</model>
                 <merchant_gateway_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
-                <order_status>pending_payment</order_status>
+                <default_order_pending_status>pending_payment</default_order_pending_status>
                 <payment_action>authorize</payment_action>
                 <title>Indodana PayLater</title>
                 <description>Indodana PayLater</description>

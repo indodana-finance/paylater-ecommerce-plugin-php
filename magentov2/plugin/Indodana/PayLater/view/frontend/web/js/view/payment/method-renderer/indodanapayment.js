@@ -51,6 +51,9 @@ define(
                     }
                 };
             },
+            getLogoUrl: function() {
+                return window.checkoutConfig.payment.indodanapayment.logo;
+            },
 
             getTransactionResults: function() {
                 return _.map(window.checkoutConfig.payment.indodanapayment.transactionResults, function(value, key) {
@@ -104,7 +107,6 @@ define(
             ,afterPlaceOrder:function(){
                 this.redirectAfterPlaceOrder = false;
                 var ptype=window.checkoutConfig.payment.indodanapayment.paytype;
-                //var orderid=window.checkoutConfig.payment.indodanapayment.OrderID;
                 this.redirectAfterPlaceOrder = false;
                 var strurl =url.build('indodanapayment/index/redirectto')
                 $.ajax({
@@ -112,11 +114,8 @@ define(
                     url: strurl,
                     data: {paytype:ptype},
                     success: function(data){
-                        alert (JSON.stringify(data) );
-                        //alert (data.Order);
-                        //window.location.replace(data.Order);
+                        //alert (JSON.stringify(data) );
                         window.checkoutConfig.payment.indodanapayment.redirecturl=data.Order;
-                        //return data.Installment;        
                         window.location.replace(window.checkoutConfig.payment.indodanapayment.redirecturl);
                     },
                     //dataType: dataType

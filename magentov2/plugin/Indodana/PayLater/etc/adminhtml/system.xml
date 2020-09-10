@@ -63,9 +63,9 @@
                 <field id="api_secret" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>API Secret</label>
                 </field>
+                
                 <field id="default_order_pending_status" translate="label" type="text" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Default Order Pending Status</label>
-                    <config_path>payment/settings/order_status</config_path>
+                    <label>Default Order Pending Status</label>                    
                 </field>
                 <field id="default_order_success_status" translate="label" type="text" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Default Order Success Status</label>

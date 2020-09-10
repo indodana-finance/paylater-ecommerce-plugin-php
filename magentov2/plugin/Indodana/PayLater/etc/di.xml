@@ -7,6 +7,8 @@
 -->
 
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+
     <!-- Payment Method Facade configuration -->
     <virtualType name="PayLaterFacade" type="Magento\Payment\Model\Method\Adapter">
         <arguments>
@@ -139,5 +141,11 @@
             <argument name="config" xsi:type="object">PayLaterConfig</argument>
         </arguments>
     </type>
+
+    <preference for="Indodana\PayLater\Api\HelloInterface"
+                type="Indodana\PayLater\Model\Api\Hello" />
+
+    <preference for="Indodana\PayLater\Api\CustomOrderInterface"
+                type="Indodana\PayLater\Model\Api\CustomOrder" />
 
 </config>
