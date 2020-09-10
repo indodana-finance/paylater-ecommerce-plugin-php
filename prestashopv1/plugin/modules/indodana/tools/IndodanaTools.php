@@ -54,16 +54,18 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
 
   public function getTotalTaxAmount($order)
   {
-    $tax = 0;
-    $deficit = 0;
+    $totalTax = 0;
     $products = $order->getProducts();
     foreach ($products as $product) {
-      $tax += ($product['price_without_reduction'] - $this->getPriceWithoutReductionWithoutTax($product))
-        * $product['quantity'];
-      $deficit += $this->getDeficit($product);
+      $qty = $product['quantity'];
+      $productTotalWithTax = $product['price_without_reduction'] * $qty;
+      $productTotalWithoutTax = $this->getPriceWithoutReductionWithoutTax($product) * $qty;
+      $productTax = $productTotalWithTax - $productTotalWithoutTax;
+
+      $totalTax += $productTax;
     }
 
-    return round($tax) + $deficit;
+    return (int) $totalTax;
   }
 
   public function getProducts($order)
@@ -142,22 +144,6 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
         'countryCode' => Configuration::get('INDODANA_STORE_COUNTRY_CODE')
       ]
     ];
-  }
-
-  private function getTotalProduct($product)
-  {
-    return round($this->getPriceWithoutReductionWithoutTax($product) * $product['quantity']);
-  }
-
-  /**
-   * sometimes when rounding up/down numbers there will be deficit
-   * so that the total price calculation does not match
-   */
-  private function getDeficit($product)
-  {
-    $total = $this->getTotalProduct($product);
-
-    return $total % 2 ? floor($product['quantity'] / 2) : 0;
   }
 
   private function getPriceWithoutReductionWithoutTax($product)
