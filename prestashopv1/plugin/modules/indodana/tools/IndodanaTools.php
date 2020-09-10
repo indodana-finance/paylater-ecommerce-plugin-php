@@ -25,7 +25,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
 
   public function getTotalAmount($order)
   {
-    return $order->getOrderTotal(true, Cart::BOTH);
+    return (int) $order->getOrderTotal(true, Cart::BOTH);
   }
 
   public function getTotalDiscountAmount($order)
@@ -44,7 +44,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
       }
     }
 
-    return round($discount);
+    return (int) $discount;
   }
 
   public function getTotalShippingAmount($order)
@@ -54,18 +54,29 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
 
   public function getTotalTaxAmount($order)
   {
-    $totalTax = 0;
+
+    /**
+     * Because we use `round()` function on product price to avoid double/float type number
+     * And we got miscalculation error response:
+     * `Purchase transaction amount (1609000) is different from calculated amount at list of item (1608998).`
+     * I think the tricky solution is to do reverse calculation to get total tax amount
+     */
+    $orderTotal = $this->getTotalAmount($order);
+    $discountTotal = $this->getTotalDiscountAmount($order);
+    $shippingTotal = $this->getTotalShippingAmount($order);
+    $productTotal = 0;
+
     $products = $order->getProducts();
     foreach ($products as $product) {
+      $price = round($this->getPriceWithoutReductionWithoutTax($product));
       $qty = $product['quantity'];
-      $productTotalWithTax = $product['price_without_reduction'] * $qty;
-      $productTotalWithoutTax = $this->getPriceWithoutReductionWithoutTax($product) * $qty;
-      $productTax = $productTotalWithTax - $productTotalWithoutTax;
 
-      $totalTax += $productTax;
+      $productTotal += $price * $qty;
     }
 
-    return (int) $totalTax;
+    $taxTotal = $orderTotal + $discountTotal - $shippingTotal - $productTotal;
+
+    return $taxTotal;
   }
 
   public function getProducts($order)
