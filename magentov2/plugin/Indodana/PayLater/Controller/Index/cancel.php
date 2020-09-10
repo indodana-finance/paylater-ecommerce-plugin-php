@@ -3,7 +3,7 @@
 namespace Indodana\PayLater\Controller\Index;
 
 use Indodana\PayLater\Helper\Transaction;
-use Magento\Framework\View\Result\ResultFactory;
+
 
 class Cancel extends \Magento\Framework\App\Action\Action
 {
@@ -14,7 +14,7 @@ class Cancel extends \Magento\Framework\App\Action\Action
    protected $_checkoutSession;
    protected $_orderFactory;
     public function __construct(
-        \Magento\Framework\Controller\Result\RedirectFactory  $pageFactory,        
+        \Magento\Framework\Controller\Result\RedirectFactory   $pageFactory,        
         \Magento\Framework\App\Action\Context $context,
         \Indodana\PayLater\Helper\Transaction $transaction,
         \Magento\Framework\App\Request\Http $request,
@@ -50,42 +50,41 @@ class Cancel extends \Magento\Framework\App\Action\Action
     
 
     public function execute(){
-        
-
+        $namespace = '[MagentoV1-Indodana\PayLater\Controller\Index\cancel]';
         // Redirect to home page for invalid request
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             return; //Mage_Core_Controller_Varien_Action::_redirect('');
         }
     
         //$order = $this->getLatestOrder();
-        $order = $this->getOrder();
-    
-        if ($order) {
-            $order
-            ->addStatusToHistory(
-                $this->_helper->getDefaultOrderFailedStatus(),
-                'Failed to complete order on Indodana'
+        try {
+            $order = $this->getOrder();
+        
+            if ($order) {
+                $order
+                ->addStatusToHistory(
+                    $this->_helper->getDefaultOrderFailedStatus(),
+                    'Failed to complete order on Indodana'
+                )
+                ->save();
+            }
+        } catch (Exception $e) {
+            //echo 'Caught exception: ',  $e->getMessage(), "\n";
+            IndodanaLogger::error(
+            sprintf(
+                '%s Error Msg : %s',
+                $namespace,
+                $e->getMessage()
             )
-            ->save();
-        }
-    
-        // TODO: If possible, redirect to Magento's cancel page instead
-        //return Mage_Core_Controller_Varien_Action::_redirect('checkout/cart');
-        //$this->goBack();
+            );
+
+        }        
+
+        $resultRedirect=$this->_resultFactory->create();
+        $resultRedirect->setPath('checkout/cart');
+        return $resultRedirect;
      }
 
-     protected function goBack()
-     {       
-
-        $resultRedirect = $this->_resultFactory->create();
-        //$resultRedirect->setPath('checkout/cart');
-        //return $resultRedirect;
-
-        $url = 'http://localhost/magentoce240s/checkout/cart';
-        $resultRedirect->setUrl($url);
-        return $resultRedirect;        
-                
-     }
 
 
 }

@@ -38,8 +38,4 @@ class Info extends ConfigurableInfo
         return parent::getValueView($field, $value);
     }
 
-    protected function getUrl(){
-        return 'http://ww.google.com';
-
-    }
 }
