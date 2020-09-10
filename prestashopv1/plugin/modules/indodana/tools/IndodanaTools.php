@@ -3,7 +3,7 @@
 // ignore vscode's phpcs extension missing namespace error
 // phpcs:disable PSR1.Classes.ClassDeclaration.MissingNamespace
 
-require_once(_PS_MODULE_DIR_ . 'indodana' . DIRECTORY_SEPARATOR . 'library' . DIRECTORY_SEPARATOR . 'Indodana' . DIRECTORY_SEPARATOR . 'Payment' . DIRECTORY_SEPARATOR . 'autoload.php');
+require_once(_PS_MODULE_DIR_ . 'indodana' . DIRECTORY_SEPARATOR . 'autoload.php');
 
 class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
 {
