@@ -4,4 +4,4 @@ set -e
 
 . ./build
 
-build_plugin "prestashopv1" "modules/indodana/library/Indodana/Payment"
+build_plugin "prestashopv1" "modules/indodana"
