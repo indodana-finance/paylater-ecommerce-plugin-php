@@ -11,9 +11,9 @@
 - [Module Structure](#module-structure)
 - [Hooks](#hooks)
 - [ObjectModel class](#objectmodel-class)
-- [Template engine: Smarty](#template-engine:-smarty)
+- [Template engine: Smarty](#template-engine-smarty)
 - [Passing data to Smarty view](#passing-data-to-smarty-view)
-- [Backward compatibility with PrestaShop 1.6](#backward-compatibility-with-prestashop-1.6)
+- [Backward compatibility with PrestaShop 1.6](#backward-compatibility-with-prestashop-16)
 
 [How the Module Works](#how-the-module-works)
 
