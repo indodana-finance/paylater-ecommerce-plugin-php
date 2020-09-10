@@ -78,8 +78,6 @@
 
 11. Install Indodana payment module on `Modules > Module Catalog` and configure it.
 
-12. Setup Indodana Payment configuration on `System > Configuration > Payment Methods > Indodana Payment`
-
 ---
 
 ## Concepts
