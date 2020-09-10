@@ -103,3 +103,22 @@ magento1-log-tail:
 
 
 
+# Prestashop V1
+# ----------------------------------
+prestashopv1_build_dir = .build/prestashopv1/upload
+prestashopv1_dir = ./prestashopv1
+
+prestashopv1-install-dependencies:
+	cd ./prestashopv1/ && composer install
+
+prestashopv1-build:
+	./build-prestashopv1
+
+prestashopv1-test:
+	$(prestashopv1_dir)/vendor/bin/
+
+prestashopv1-serve: prestashopv1-build
+	php -S localhost:6401 -t $(prestashopv1_build_dir)
+
+prestashopv1-log-tail:
+	tail -f ./$(prestashopv1_build_dir)/library/Indodana/Payment/log/info.log
