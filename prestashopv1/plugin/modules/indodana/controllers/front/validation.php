@@ -71,6 +71,19 @@ class IndodanaValidationModuleFrontController extends ModuleFrontController
       Tools::redirect('index.php?controller=order&step=1');
     }
 
+    /**
+     * Prestashop v1.7 phone number is optional by default
+     * We have to validate it
+     */
+    if (_PS_VERSION_ >= 1.7) {
+      $invoiceDetails = new Address((int) $cart->id_address_invoice);
+      $deliveryDetails = new Address((int) $cart->id_address_delivery);
+      if (empty($invoiceDetails->phone) || empty($deliveryDetails->phone)) {
+        $this->errors[] = $this->l('Phone number is required');
+        $this->redirectWithNotifications('index.php?controller=order&step=1');
+      }
+    }
+
     $currency = $this->context->currency;
     $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
 
