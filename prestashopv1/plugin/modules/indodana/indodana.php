@@ -590,6 +590,7 @@ class Indodana extends PaymentModule
       'this_path_ssl' => Tools::getShopDomainSsl(true, true) . __PS_BASE_URI__ . 'modules/' . $this->name . '/',
       'moduleName' => $this->name,
       'displayName' => $this->displayName,
+      'indodanaLogo' => IndodanaCommon\IndodanaConstant::LOGO_URL
     ]);
 
     return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
