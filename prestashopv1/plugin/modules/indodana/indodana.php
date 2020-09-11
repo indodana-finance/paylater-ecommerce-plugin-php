@@ -215,6 +215,7 @@ class Indodana extends PaymentModule
         $output .= $this->displayError($this->l('Invalid store postal code value'));
       } else {
         $this->postProcess();
+        $output .= $this->displayConfirmation($this->l('Settings updated'));
       }
     }
 
