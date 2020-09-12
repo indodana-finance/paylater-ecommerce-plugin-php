@@ -1,7 +1,6 @@
 <?php
 
 namespace Indodana\PayLater\Controller\Index;
-
 use Indodana\PayLater\Helper\Transaction;
 use Indodana\PayLater\Helper\Data;
 use IndodanaCommon\IndodanaInterface;
@@ -11,9 +10,9 @@ use IndodanaCommon\IndodanaLogger;
 
 class Redirectto extends \Magento\Framework\App\Action\Action
 {
-   protected $_resultFactory;
-   protected $_transaction;
-   protected $_request;
+    protected $_resultFactory;
+    protected $_transaction;
+    protected $_request;
     protected $_checkoutSession;
     protected $_orderFactory;
     public function __construct(
@@ -24,7 +23,6 @@ class Redirectto extends \Magento\Framework\App\Action\Action
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Sales\Model\OrderFactory $orderFactory,
         \Indodana\PayLater\Helper\Data $helper
-
     )
     {
         $this->_resultFactory = $jsonResultFactory;
@@ -51,18 +49,14 @@ class Redirectto extends \Magento\Framework\App\Action\Action
         return false;
     }
 
-    public function execute(){
-        
-        $post = $this->_request->getPostValue();
-
-        $paytype=$post['paytype'];
-
+    public function execute()
+    {       
         $result = $this->_resultFactory->create();
-
+        $post = $this->_request->getPostValue();
+        $paytype=$post['paytype'];
         $order= $this->getOrder();
-
         $checkout =  $this->_transaction->checkOut($order,$paytype); 
-        $namespace = '[Indodana\PayLater\Controller\Index]';
+        $namespace = '[Magentov2 - Indodana\PayLater\Controller\Index\Redirectto\execute]';
         if ($order) {        
             IndodanaLogger::info(
                 sprintf(
@@ -70,8 +64,7 @@ class Redirectto extends \Magento\Framework\App\Action\Action
                   $namespace,
                   $this->_helper->getDefaultOrderPendingStatus()
                 )
-              );
-            
+              );            
             $order
               ->addStatusToHistory(
                 $this->_helper->getDefaultOrderPendingStatus(),
@@ -79,15 +72,12 @@ class Redirectto extends \Magento\Framework\App\Action\Action
               )
               ->save();
         }
-
         return $result->setData(
             [
                 'success' => true,
                 'message' => __('Your message here'),
                 'Order' =>$checkout
             ]
-            );    
+        );    
     }
-
-
 }

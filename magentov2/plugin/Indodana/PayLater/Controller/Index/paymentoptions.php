@@ -1,22 +1,18 @@
 <?php
 
 namespace Indodana\PayLater\Controller\Index;
-
 use Indodana\PayLater\Helper\Transaction;
-
 
 class paymentoptions extends \Magento\Framework\App\Action\Action
 {
-   protected $_resultFactory;
-   protected $_transaction;
-   protected $_request;
-
+    protected $_resultFactory;
+    protected $_transaction;
+    protected $_request;
     public function __construct(
         \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory,
         \Magento\Framework\App\Action\Context $context,
         Transaction $transaction,
         \Magento\Framework\App\Request\Http $request
-
     )
     {
         $this->_resultFactory = $jsonResultFactory;
@@ -27,10 +23,8 @@ class paymentoptions extends \Magento\Framework\App\Action\Action
 
     public function execute(){
         $result = $this->_resultFactory->create();
-
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $cart = $objectManager->get('\Magento\Checkout\Model\Cart'); 
-        
+        $cart = $objectManager->get('\Magento\Checkout\Model\Cart');         
         $Installment=$this->_transaction->getInstallmentOptions($cart->getQuote());
         return $result->setData(
             [
@@ -41,6 +35,4 @@ class paymentoptions extends \Magento\Framework\App\Action\Action
             ]
             );    
     }
-
-
 }

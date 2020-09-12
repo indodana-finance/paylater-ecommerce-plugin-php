@@ -1,10 +1,8 @@
 <?php
 
 namespace Indodana\PayLater\Helper;
-
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Payment\Gateway\ConfigInterface;
-
 
 class Data extends AbstractHelper
 {
