@@ -54,9 +54,8 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
 
   public function getTotalTaxAmount($order)
   {
-
     /**
-     * Because we use `round()` function on product price to avoid double/float type number
+     * Because we use `ceil()` function on product price to avoid double/float type number
      * And we got miscalculation error response:
      * `Purchase transaction amount (1609000) is different from calculated amount at list of item (1608998).`
      * I think the tricky solution is to do reverse calculation to get total tax amount
@@ -68,7 +67,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
 
     $products = $order->getProducts();
     foreach ($products as $product) {
-      $price = round($this->getPriceWithoutReductionWithoutTax($product));
+      $price = ceil($this->getPriceWithoutReductionWithoutTax($product));
       $qty = $product['quantity'];
 
       $productTotal += $price * $qty;
@@ -87,7 +86,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
       $items[] = [
         'id' => $product['reference'],
         'name' => $product['name'],
-        'price' => round($this->getPriceWithoutReductionWithoutTax($product)),
+        'price' => ceil($this->getPriceWithoutReductionWithoutTax($product)),
         'quantity' => $product['quantity'],
         'category'  => IndodanaCommon\IndodanaConstant::DEFAULT_ITEM_CATEGORY,
       ];
