@@ -8,7 +8,9 @@ class paymentoptions extends \Magento\Framework\App\Action\Action
     protected $_resultFactory;
     protected $_transaction;
     protected $_request;
-    public function __construct(
+    
+    public function __construct
+    (
         \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory,
         \Magento\Framework\App\Action\Context $context,
         Transaction $transaction,
@@ -18,6 +20,7 @@ class paymentoptions extends \Magento\Framework\App\Action\Action
         $this->_resultFactory = $jsonResultFactory;
         $this->_transaction = $transaction;
         $this->_request = $request;
+        
         return parent::__construct($context);
     }
 
@@ -26,10 +29,9 @@ class paymentoptions extends \Magento\Framework\App\Action\Action
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
         $cart = $objectManager->get('\Magento\Checkout\Model\Cart');         
         $Installment=$this->_transaction->getInstallmentOptions($cart->getQuote());
+        
         return $result->setData(
             [
-                'success' => true,
-                'message' => __('Your message here'),//,
                 'Installment' => $Installment,
                 'OrderID' => $cart->getQuote()->getId()
             ]

@@ -4,7 +4,6 @@
  * See COPYING.txt for license details.
  */
 namespace Indodana\Paylater\Gateway\Response;
-
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Response\HandlerInterface;
 
@@ -29,10 +28,7 @@ class TxnIdHandler implements HandlerInterface
 
         /** @var PaymentDataObjectInterface $paymentDO */
         $paymentDO = $handlingSubject['payment'];
-
         $payment = $paymentDO->getPayment();
-
-
 
         /** @var $payment \Magento\Sales\Model\Order\Payment */
         $payment->setTransactionId($response[self::TXN_ID]);

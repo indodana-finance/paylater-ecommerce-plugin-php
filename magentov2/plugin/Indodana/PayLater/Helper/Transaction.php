@@ -42,6 +42,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
         'seller'        => $this->getSeller()
       ]);
     }
+    
     return $this->indodanaCommon;
   }
 
@@ -56,6 +57,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
     foreach ($order->getAllVisibleItems() as $item) {
       $totalDiscountAmount += (float) $item->getDiscountAmount();
     }
+    
     return $totalDiscountAmount;
   }
 
@@ -68,6 +70,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
     if (!$totalShippingAmount) {
       $totalShippingAmount = (float) $order->getShippingInclTax();
     }
+    
     return $totalShippingAmount;
   }
 
@@ -77,6 +80,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
     foreach ($order->getAllVisibleItems() as $item) {
       $totalTaxAmount += (float) $item->getTaxAmount();
     }
+
     return $totalTaxAmount;
   }
 
@@ -107,6 +111,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
         'parentId' => $this->_helper->getStoreID()// '5e96ac2c-e123-11ea-9c01-00163e014000'
       ];
     }
+    
     return $products;
   }
 
@@ -123,6 +128,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
     // Therefore, we will get the billing address instead
     if (!$customer->getId()) {
       $billingAddress = $order->getBillingAddress();
+      
       return [
         'firstName' => $billingAddress->getFirstname(),
         'lastName'  => $billingAddress->getLastname(),
@@ -130,6 +136,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
         'phone'     => $phone,
       ];
     }
+    
     return [
       'firstName' => $customer->getFirstname(),
       'lastName'  => $customer->getLastname(),
@@ -141,6 +148,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
   public function getBillingAddress($order)
   {
     $billingAddress  = $order->getBillingAddress();
+    
     return [
       'firstName'     => $billingAddress->getFirstname(),
       'lastName'      => $billingAddress->getLastname(),
@@ -157,6 +165,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
   {
     // Shipping address always exist even though the user ship to billing address
     $shippingAddress  = $order->getShippingAddress();
+    
     return [
       'firstName'     => $shippingAddress->getFirstname(),
       'lastName'      => $shippingAddress->getLastname(),
@@ -171,6 +180,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
   public function getSeller()
   {
     $sellerName = $this->_helper->getStoreName();
+    
     return [
       'id'      =>  $this->_helper->getStoreID(),
       'name'    => $sellerName,

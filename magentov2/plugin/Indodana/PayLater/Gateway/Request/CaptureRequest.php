@@ -10,7 +10,6 @@ use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
 
-
 class CaptureRequest implements BuilderInterface
 {
     /**
@@ -23,7 +22,8 @@ class CaptureRequest implements BuilderInterface
      */
     public function __construct(
         ConfigInterface $config
-    ) {
+    ) 
+    {
         $this->config = $config;
     }
 
@@ -51,7 +51,6 @@ class CaptureRequest implements BuilderInterface
         if (!$payment instanceof OrderPaymentInterface) {
             throw new \LogicException('Order payment should be provided.');
         }
-
 
         return [
             'TXN_TYPE' => 'S',

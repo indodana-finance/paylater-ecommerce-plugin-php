@@ -9,8 +9,6 @@ use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\SamplePaymentGateway\Gateway\Http\Client\ClientMock;
 
-
-
 class MockDataRequest implements BuilderInterface
 {
     const FORCE_RESULT = 'FORCE_RESULT';
@@ -34,7 +32,6 @@ class MockDataRequest implements BuilderInterface
         $payment = $paymentDO->getPayment();
 
         $transactionResult = $payment->getAdditionalInformation('transaction_result');
-
 
         return [
             self::FORCE_RESULT => $transactionResult === null

@@ -20,7 +20,8 @@ class Notify extends \Magento\Framework\App\Action\Action
   protected $_orderFactory;
   protected $_coretransaction;
   protected $_order;
-  public function __construct(
+  
+  public function __construct (
     \Magento\Framework\Controller\Result\JsonFactory $pageFactory,        
     \Magento\Framework\App\Action\Context $context,
     \Indodana\PayLater\Helper\Transaction $transaction,
@@ -41,25 +42,27 @@ class Notify extends \Magento\Framework\App\Action\Action
     $this->_orderFactory = $orderFactory;
     $this->_coretransaction=$coretransaction;
     $this->_order=$orderRepository;
+    
     return parent::__construct($context);
   }
 
   public function execute(){
-    $namespace = '[MagentoV2-notifyAction]';
+    $namespace = '[MagentoV2-Indodana\PayLater\Controller\Index\Notify\execute]';
     $result = $this->_resultFactory->create();
     $this->notifyAction();
+    
     return ;
   }
     
   public function notifyAction(){
-
+    $namespace = '[MagentoV2-Indodana\PayLater\Controller\Index\Notify\notifyAction]';
     //Disallow any action for invalid request
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        return;// $this->norouteAction();
+
+      return;
     }  
     // Log request headers
-    // -----
-    $namespace = '[MagentoV2-Indodana\PayLater\Controller\Index\Notify\notifyAction]';  
+    // -----    
     $requestHeaders = IndodanaHelper::getRequestHeaders();  
     IndodanaLogger::info(
       sprintf(
@@ -76,6 +79,7 @@ class Notify extends \Magento\Framework\App\Action\Action
       ->isValidAuthToken($authToken);  
     if (!$isValidAuthorization) {
       MerchantResponse::printInvalidRequestAuthResponse($namespace);  
+      
       return;
     }
 
@@ -94,24 +98,30 @@ class Notify extends \Magento\Framework\App\Action\Action
     // -----
     if (!isset($requestBody['transactionStatus']) || !isset($requestBody['merchantOrderId'])) {
       MerchantResponse::printInvalidRequestBodyResponse($namespace);  
+      
       return;
     }  
+
     $transactionStatus = $requestBody['transactionStatus'];
     $orderId = $requestBody['merchantOrderId'];      
     $order= $this->_order->get($orderid);  
+    
     if (!$order) {
       MerchantResponse::printNotFoundOrderResponse(
         $orderId,
         $namespace
       );
+      
       return;
-    }  
+    }
+
     if (!in_array($transactionStatus, IndodanaConstant::getSuccessTransactionStatuses())) {
       MerchantResponse::printInvalidTransactionStatusResponse(
         $transactionStatus,
         $orderId,
         $namespace
       );  
+      
       return;
     }
 
@@ -119,6 +129,7 @@ class Notify extends \Magento\Framework\App\Action\Action
     // -----
     $this->handleSuccessOrder($order);  
     MerchantResponse::printSuccessResponse($namespace);  
+    
     return $result;
   }
 

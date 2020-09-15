@@ -9,7 +9,6 @@ use Magento\Payment\Gateway\ConfigInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 
-
 class AuthorizationRequest implements BuilderInterface
 {
     /**
@@ -22,7 +21,8 @@ class AuthorizationRequest implements BuilderInterface
      */
     public function __construct(
         ConfigInterface $config
-    ) {
+    ) 
+    {
         $this->config = $config;
     }
 
@@ -50,7 +50,7 @@ class AuthorizationRequest implements BuilderInterface
             'INVOICE' => $order->getOrderIncrementId(),
             'AMOUNT' => $order->getGrandTotalAmount(),
             'CURRENCY' => $order->getCurrencyCode(),
-             'EMAIL' => $address->getEmail(),
+            'EMAIL' => $address->getEmail(),
             'MERCHANT_KEY' => $this->config->getValue(
                 'merchant_gateway_key',
                 $order->getStoreId()

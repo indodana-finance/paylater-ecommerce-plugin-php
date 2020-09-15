@@ -18,7 +18,8 @@ final class ConfigProvider implements ConfigProviderInterface
     public function __construct(
 
         \Magento\Framework\View\Asset\Repository $assetRepo
-    ){
+    )
+    {
         $this->_assetRepo = $assetRepo;
     }    
     /**

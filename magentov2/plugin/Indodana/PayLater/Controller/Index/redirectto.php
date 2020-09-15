@@ -15,6 +15,7 @@ class Redirectto extends \Magento\Framework\App\Action\Action
     protected $_request;
     protected $_checkoutSession;
     protected $_orderFactory;
+
     public function __construct(
         \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory,
         \Magento\Framework\App\Action\Context $context,
@@ -31,12 +32,14 @@ class Redirectto extends \Magento\Framework\App\Action\Action
         $this->_checkoutSession = $checkoutSession;
         $this->_orderFactory = $orderFactory;
         $this->_helper = $helper;
+        
         return parent::__construct($context);
     }
 
     public function getRealOrderId()
     {
         $lastorderId = $this->_checkoutSession->getLastOrderId();
+        
         return $lastorderId;
     }
 
@@ -46,6 +49,7 @@ class Redirectto extends \Magento\Framework\App\Action\Action
             $order = $this->_orderFactory->create()->loadByIncrementId($this->_checkoutSession->getLastRealOrderId());
             return $order;
         }
+
         return false;
     }
 
@@ -57,6 +61,7 @@ class Redirectto extends \Magento\Framework\App\Action\Action
         $order= $this->getOrder();
         $checkout =  $this->_transaction->checkOut($order,$paytype); 
         $namespace = '[Magentov2 - Indodana\PayLater\Controller\Index\Redirectto\execute]';
+        
         if ($order) {        
             IndodanaLogger::info(
                 sprintf(
@@ -72,10 +77,10 @@ class Redirectto extends \Magento\Framework\App\Action\Action
               )
               ->save();
         }
+        
         return $result->setData(
             [
                 'success' => true,
-                'message' => __('Your message here'),
                 'Order' =>$checkout
             ]
         );    

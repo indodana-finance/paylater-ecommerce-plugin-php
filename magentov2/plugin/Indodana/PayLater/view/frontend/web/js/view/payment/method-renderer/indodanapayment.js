@@ -65,10 +65,9 @@ define(
             },
             
             onInstallmentClick: function(item){
-                //alert(item.id);
                 window.checkoutConfig.payment.indodanapayment.paytype=item.id;
                 window.checkoutConfig.payment.indodanapayment.transactionResults='Success';
-                //self.isInstallmentSelected(true);
+                
                 return true;
             },            
             
@@ -83,11 +82,8 @@ define(
                         //data: data,
                         success: function(data){                        
 
-                            //alert(data.Installment);
                             window.checkoutConfig.payment.indodanapayment.installment=data.Installment;
                             window.checkoutConfig.payment.indodanapayment.OrderID=data.OrderID;
-                            //window.checkoutConfig.payment.indodanapayment.installment='1';
-                            //return data.Installment;        
                         },
                         //dataType: dataType
                     });
@@ -95,8 +91,6 @@ define(
                 return window.checkoutConfig.payment.indodanapayment.installment;                
             },
             beforePlaceOrder:function(data, event){
-                //alert(window.checkoutConfig.payment.indodanapayment.paytype);
-                //alert(window.checkoutConfig.payment.indodanapayment.OrderID);
                 if(window.checkoutConfig.payment.indodanapayment.paytype==''){
                     alert('Silahkan pilih ternor cicilan');
                     return false;
@@ -105,7 +99,6 @@ define(
             }
 
             ,afterPlaceOrder:function(){
-                this.redirectAfterPlaceOrder = false;
                 var ptype=window.checkoutConfig.payment.indodanapayment.paytype;
                 this.redirectAfterPlaceOrder = false;
                 var strurl =url.build('indodanapayment/index/redirectto')
@@ -114,18 +107,12 @@ define(
                     url: strurl,
                     data: {paytype:ptype},
                     success: function(data){
-                        //alert (JSON.stringify(data) );
                         window.checkoutConfig.payment.indodanapayment.redirecturl=data.Order;
                         window.location.replace(window.checkoutConfig.payment.indodanapayment.redirecturl);
                     },
                     //dataType: dataType
                   });
-
-                
-                //window.location=strurl;
-
             }
-
         });
     }
 );

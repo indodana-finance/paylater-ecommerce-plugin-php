@@ -11,6 +11,7 @@ class Cancel extends \Magento\Framework\App\Action\Action
     protected $_helper;
     protected $_checkoutSession;
     protected $_orderFactory;
+
     public function __construct(        
         \Magento\Framework\Controller\Result\RedirectFactory $pageFactory,        
         \Magento\Framework\App\Action\Context $context,
@@ -21,7 +22,7 @@ class Cancel extends \Magento\Framework\App\Action\Action
         \Indodana\PayLater\Helper\Data $helper
     )
     {
-        $this->_resultFactory = $pageFactory;
+        $this->_resultFactory = $pageFactory; 
         $this->_transaction = $transaction;
         $this->_request = $request;
         $this->_checkoutSession = $checkoutSession;
@@ -33,24 +34,28 @@ class Cancel extends \Magento\Framework\App\Action\Action
     public function getRealOrderId()
     {
         $lastorderId = $this->_checkoutSession->getLastOrderId();
+
         return $lastorderId;
     }
 
     public function getOrder()
     {
         if ($this->_checkoutSession->getLastRealOrderId()) {
-             $order = $this->_orderFactory->create()->loadByIncrementId($this->_checkoutSession->getLastRealOrderId());
-        return $order;
+            $order = $this->_orderFactory->create()->loadByIncrementId($this->_checkoutSession->getLastRealOrderId());
+
+            return $order;
         }
+
         return false;
     }
 
     public function execute(){
         $namespace = '[MagentoV2-Indodana\PayLater\Controller\Index\cancel]';
         // Redirect to home page for invalid request
-        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-            return; //Mage_Core_Controller_Varien_Action::_redirect('');
-        }            
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {            
+            return; 
+        }
+
         try {
             $order = $this->getOrder();        
             if ($order) {
@@ -70,9 +75,11 @@ class Cancel extends \Magento\Framework\App\Action\Action
                 $e->getMessage()
             )
             );
-        }        
+        }
+                
         $resultRedirect=$this->_resultFactory->create();
         $resultRedirect->setPath('checkout/cart');
+
         return $resultRedirect;
      }
 }

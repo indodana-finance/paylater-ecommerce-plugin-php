@@ -1,6 +1,6 @@
 {
   "name": "indodana/indodana-paylater-magento2",
-  "description": "Indodana Paylater plugin for Magento v2",
+  "description": "Indodana PayLater plugin for Magento V2",
   "type":"magento2-module",
   "authors": [
     {
