@@ -65,6 +65,10 @@ class Indodana extends PaymentModule
       'INDODANA_TITLE' => 'Indodana PayLater',
       'INDODANA_DESCRIPTION' => 'Pay with installment via our PayLater product.',
       'INDODANA_ENVIRONMENT' => 'SANDBOX',
+      'INDODANA_API_KEY' => '',
+      'INDODANA_API_SECRET' => '',
+      'INDODANA_API_KEY_PRODUCTION' => '',
+      'INDODANA_API_SECRET_PRODUCTION' => '',
       'INDODANA_STORE_NAME' => '',
       'INDODANA_STORE_URL' => '',
       'INDODANA_STORE_EMAIL' => '',
@@ -73,8 +77,6 @@ class Indodana extends PaymentModule
       'INDODANA_STORE_CITY' => '',
       'INDODANA_STORE_ADDRESS' => '',
       'INDODANA_STORE_POSTAL_CODE' => '',
-      'INDODANA_API_KEY' => '',
-      'INDODANA_API_SECRET' => '',
       'INDODANA_DEFAULT_ORDER_PENDING_STATUS' => '',
       'INDODANA_DEFAULT_ORDER_SUCCESS_STATUS' => '2', // default: payment accepted
       'INDODANA_DEFAULT_ORDER_FAILED_STATUS' => '6',  // default: cancelled
@@ -194,32 +196,84 @@ class Indodana extends PaymentModule
    */
   public function getContent()
   {
-    $output = null;
+    $output = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
 
     /**
      * If values have been submitted in the form, process.
      */
     if (((bool) Tools::isSubmit('submitIndodanaModule')) == true) {
-      $storeUrl = strval(Tools::getValue('INDODANA_STORE_URL'));
-      $storeEmail = strval(Tools::getValue('INDODANA_STORE_EMAIL'));
-      $storePhone = strval(Tools::getValue('INDODANA_STORE_PHONE'));
-      $storePostalCode = strval(Tools::getValue('INDODANA_STORE_POSTAL_CODE'));
+      $env = Tools::getValue('INDODANA_ENVIRONMENT');
+      $isValid = [];
 
-      if (!Validate::isUrl($storeUrl)) {
+      if (!Validate::isUrl(Tools::getValue('INDODANA_STORE_URL'))) {
         $output .= $this->displayError($this->l('Invalid store url value'));
-      } elseif (!Validate::isEmail($storeEmail)) {
+        $isValid[] = false;
+      }
+
+      if (!Validate::isEmail(Tools::getValue('INDODANA_STORE_EMAIL'))) {
         $output .= $this->displayError($this->l('Invalid store email value'));
-      } elseif (!Validate::isPhoneNumber($storePhone)) {
+        $isValid[] = false;
+      }
+
+      if (!Validate::isPhoneNumber(Tools::getValue('INDODANA_STORE_PHONE'))) {
         $output .= $this->displayError($this->l('Invalid store phone value'));
-      } elseif (!Validate::isInt($storePostalCode)) {
+        $isValid[] = false;
+      }
+
+      if (!Validate::isInt(Tools::getValue('INDODANA_STORE_POSTAL_CODE'))) {
         $output .= $this->displayError($this->l('Invalid store postal code value'));
-      } else {
-        $this->postProcess();
+        $isValid[] = false;
+      }
+
+      if (empty(Tools::getValue('INDODANA_API_KEY')) && $env == 'SANDBOX') {
+        $output .= $this->displayError($this->l('Sandbox API Key is required'));
+        $isValid[] = false;
+      }
+
+      if (empty(Tools::getValue('INDODANA_API_SECRET')) && $env == 'SANDBOX') {
+        $output .= $this->displayError($this->l('Sandbox API Secret is required'));
+        $isValid[] = false;
+      }
+
+      if (empty(Tools::getValue('INDODANA_API_KEY_PRODUCTION')) && $env == 'PRODUCTION') {
+        $output .= $this->displayError($this->l('Production API Key is required'));
+        $isValid[] = false;
+      }
+
+      if (empty(Tools::getValue('INDODANA_API_SECRET_PRODUCTION')) && $env == 'PRODUCTION') {
+        $output .= $this->displayError($this->l('Production API Secret is required'));
+        $isValid[] = false;
+      }
+
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_TITLE');
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_DESCRIPTION');
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_STORE_NAME');
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_STORE_CITY');
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_STORE_ADDRESS');
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_DEFAULT_ORDER_PENDING_STATUS');
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_DEFAULT_ORDER_SUCCESS_STATUS');
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_DEFAULT_ORDER_FAILED_STATUS');
+
+      $this->postProcess();
+
+      if (!in_array(false, $isValid)) {
         $output .= $this->displayConfirmation($this->l('Settings updated'));
       }
     }
 
     return $output . $this->renderForm();
+  }
+
+  private function checkRequiredConfigValue($configName)
+  {
+    $isValid = true;
+    if ((empty(Tools::getValue($configName)))) {
+      $message = ucwords(strtolower(str_replace('_', ' ', substr($configName, 9))));
+      $output .= $this->displayError($this->l($message . ' is required'));
+      $isValid = false;
+    }
+
+    return $isValid;
   }
 
   /**
@@ -323,6 +377,38 @@ class Indodana extends PaymentModule
           ],
           [
             'type' => 'text',
+            'label' => $this->l('Sandbox API Key'),
+            'desc' => 'Enter sandbox API Key provided by Indodana',
+            'name' => 'INDODANA_API_KEY',
+            'size' => 100,
+            'required' => true
+          ],
+          [
+            'type' => 'text',
+            'label' => $this->l('Sandbox API Secret'),
+            'desc' => 'Enter sandbox API Secret provided by Indodana',
+            'name' => 'INDODANA_API_SECRET',
+            'size' => 100,
+            'required' => true
+          ],
+          [
+            'type' => 'text',
+            'label' => $this->l('Production API Key'),
+            'desc' => 'Enter production API Key provided by Indodana',
+            'name' => 'INDODANA_API_KEY_PRODUCTION',
+            'size' => 100,
+            'required' => true
+          ],
+          [
+            'type' => 'text',
+            'label' => $this->l('Production API Secret'),
+            'desc' => 'Enter production API Secret provided by Indodana',
+            'name' => 'INDODANA_API_SECRET_PRODUCTION',
+            'size' => 100,
+            'required' => true
+          ],
+          [
+            'type' => 'text',
             'label' => $this->l('Store Name'),
             'name' => 'INDODANA_STORE_NAME',
             'size' => 100,
@@ -386,22 +472,6 @@ class Indodana extends PaymentModule
             'required' => true
           ],
           [
-            'type' => 'text',
-            'label' => $this->l('API Key'),
-            'desc' => 'Enter API Key provided by Indodana',
-            'name' => 'INDODANA_API_KEY',
-            'size' => 100,
-            'required' => true
-          ],
-          [
-            'type' => 'text',
-            'label' => $this->l('API Secret'),
-            'desc' => 'Enter API Secret provided by Indodana',
-            'name' => 'INDODANA_API_SECRET',
-            'size' => 100,
-            'required' => true
-          ],
-          [
             'class' => 'form-control',
             'type' => 'select',
             'label' => $this->l('Default Order Pending Status'),
@@ -448,25 +518,12 @@ class Indodana extends PaymentModule
    */
   protected function getConfigFormValues()
   {
-    return [
-      'INDODANA_ENABLE_TRUE' => Configuration::get('INDODANA_ENABLE_TRUE', null, null, null, 1),
-      'INDODANA_TITLE' => Configuration::get('INDODANA_TITLE', null, null, null, 'Indodana PayLater'),
-      'INDODANA_DESCRIPTION' => Configuration::get('INDODANA_DESCRIPTION', null, null, null, 'Pay with installment via our PayLater product.'),
-      'INDODANA_ENVIRONMENT' => Configuration::get('INDODANA_ENVIRONMENT', null, null, null, 'sandbox'),
-      'INDODANA_STORE_NAME' => Configuration::get('INDODANA_STORE_NAME'),
-      'INDODANA_STORE_URL' => Configuration::get('INDODANA_STORE_URL'),
-      'INDODANA_STORE_EMAIL' => Configuration::get('INDODANA_STORE_EMAIL'),
-      'INDODANA_STORE_PHONE' => Configuration::get('INDODANA_STORE_PHONE'),
-      'INDODANA_STORE_COUNTRY_CODE' => Configuration::get('INDODANA_STORE_COUNTRY_CODE', null, null, null, 'IDN'),
-      'INDODANA_STORE_CITY' => Configuration::get('INDODANA_STORE_CITY'),
-      'INDODANA_STORE_ADDRESS' => Configuration::get('INDODANA_STORE_ADDRESS'),
-      'INDODANA_STORE_POSTAL_CODE' => Configuration::get('INDODANA_STORE_POSTAL_CODE'),
-      'INDODANA_API_KEY' => Configuration::get('INDODANA_API_KEY'),
-      'INDODANA_API_SECRET' => Configuration::get('INDODANA_API_SECRET'),
-      'INDODANA_DEFAULT_ORDER_PENDING_STATUS' => Configuration::get('INDODANA_DEFAULT_ORDER_PENDING_STATUS'),
-      'INDODANA_DEFAULT_ORDER_SUCCESS_STATUS' => Configuration::get('INDODANA_DEFAULT_ORDER_SUCCESS_STATUS'),
-      'INDODANA_DEFAULT_ORDER_FAILED_STATUS' => Configuration::get('INDODANA_DEFAULT_ORDER_FAILED_STATUS'),
-    ];
+    $formValues = [];
+    foreach ($this->moduleConfigs as $key => $value) {
+      $formValues[$key] = Configuration::get($key);
+    }
+
+    return $formValues;
   }
 
   /**
