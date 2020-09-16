@@ -24,7 +24,7 @@
 *}
 
 <style>
-  .d-none {
+  .display-none {
     display: none !important;
   }
 </style>
@@ -46,7 +46,7 @@ $(function () {
     var productionApiKey = $('input[name="INDODANA_API_KEY_PRODUCTION"]');
     var productionApiSecret = $('input[name="INDODANA_API_SECRET_PRODUCTION"]');
 
-    var displayNone = 'd-none';
+    var displayNone = 'display-none';
 
     if (value === 'PRODUCTION') {
       // hide sandbox
