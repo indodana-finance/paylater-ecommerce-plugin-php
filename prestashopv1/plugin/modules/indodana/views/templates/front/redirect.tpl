@@ -28,8 +28,6 @@
 		<a href="{$link->getPageLink('order', true, NULL, "step=3")|escape:'html':'UTF-8'}" title="{l s='Go back to the Checkout' mod="`$moduleName`"}">{l s='Checkout' mod="`$moduleName`"}</a><span class="navigation-pipe">{$navigationPipe}</span>{l s="`$displayName` payment" mod="`$moduleName`"}
 	{/capture}
 
-	{* {include file="$tpl_dir./breadcrumb.tpl"} *}
-
 	<h2 class="page-heading">{l s='Order summary' mod="`$moduleName`"}</h2>
 
 	{assign var='current_step' value='payment'}
@@ -41,15 +39,16 @@
 
 	<form action="{$link->getModuleLink($moduleName, 'validation', [], true)|escape:'html'}" method="post">
 		<div class="box cheque-box">
-			<h3 class="page-subheading">{l s="`$displayName` payment" mod="`$moduleName`"}</h3>
+			<h3 class="page-subheading">
+        <img src="{$indodanaLogo}" alt="{l s='Bank wire' mod="`$moduleName`"}">
+      </h3>
 			<p class="cheque-indent">
         <strong class="dark">
-          {* <img src="{$this_path_bw}logo.png" alt="{l s='Bank wire' mod="`$moduleName`"}" style="float:left; margin: 0px 10px 5px 0px;" /> *}
           {l s="Pay with installment via our Paylater product." mod="`$moduleName`"}
         </strong>
       </p>
-			{foreach from=$installmentOptions item=option}
-				<div class="form-check">
+       {foreach from=$installmentOptions item=option}
+        <div class="form-check">
           <input
             class="form-check-input"
             type="radio"
@@ -58,13 +57,15 @@
             value="{$option.id}"
             style="margin-left: 0;"
             required>
-          <label class="form-check-label" for="indodana_selection_{$option.id}" style="padding-left: 1.5rem;">
+          <label class="form-check-label label-type font-weight-normal" for="indodana_selection_{$option.id}">
             {$option.paymentType}
-            &emsp;|&emsp;
-            {$currencies.0.sign}{$option.monthlyInstallment|number_format:2:".":","}/bulan
           </label>
-				</div>
-			{/foreach}
+          <div class="filler"></div>
+          <label class="form-check-label label-amount font-weight-normal" for="indodana_selection_{$option.id}">
+            {displayPrice price=$option.monthlyInstallment}/bulan
+          </label>
+        </div>
+      {/foreach}
 			<br>
 			<p class="cheque-indent">
         <strong class="dark">
@@ -78,22 +79,6 @@
 					{l s='(tax incl.)' mod="`$moduleName`"}
 				{/if}
 			</p>
-			{* <p>
-				-
-				{if $currencies|@count > 1}
-					{l s='We allow several currencies to be sent via bank wire.' mod="`$moduleName`"}
-					<br /><br />
-					{l s='Choose one of the following:' mod="`$moduleName`"}
-					<select id="currency_payement" name="currency_payement" onchange="setCurrency($('#currency_payement').val());">
-						{foreach from=$currencies item=currency}
-							<option value="{$currency.id_currency}" {if $currency.id_currency == $custCurrency}selected="selected"{/if}>{$currency.name}</option>
-						{/foreach}
-					</select>
-				{else}
-					{l s='We allow the following currency to be sent via bank wire:' mod="`$moduleName`"}&nbsp;<b>{$currencies.0.name}</b>
-					<input type="hidden" name="currency_payement" value="{$currencies.0.id_currency}" />
-				{/if}
-			</p> *}
 			<p>
 				- {l s='Please confirm your order by clicking "I confirm my order".' mod="`$moduleName`"}
 			</p>
@@ -112,3 +97,81 @@
 	</form>
 	{/if}
 </div>
+
+<style>
+  .form-indodana {
+    padding-left: 2.5rem;
+    padding-right: 0.5rem;
+    background: #F6F6F6;
+  }
+
+  .indodana-payment-option {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-check {
+    display: flex;
+  }
+
+  .form-check-input:checked ~ label {
+    font-weight: bold;
+  }
+
+  .radio {
+    margin-top: 4px !important;
+  }
+
+  .filler {
+    flex-grow: 1;
+  }
+
+  .label-type {
+    padding-left: 1.5rem;
+    text-align: left;
+  }
+
+  .font-weight-normal {
+    font-weight: normal;
+  }
+
+  @media (max-width: 575.98px) {
+    .form-check {
+      width: 100%;
+    }
+  }
+
+  @media (min-width: 576px) and (max-width: 767.98px) {
+    .form-check {
+      width: 70%;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 991.98px) {
+    .form-check {
+      width: 70%;
+    }
+  }
+
+  @media (min-width: 992px) and (max-width: 1199.98px) {
+    .form-check {
+      width: 60%;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .form-check {
+      width: 50%;
+    }
+  }
+</style>
+
+<script>
+$(function () {
+  // bold selected payment text
+  $('input[name="indodana_selection"]').change(function () {
+    $('.form-check').find('label').addClass('font-weight-normal');
+    $(this).parents('.form-check').find('label').removeClass('font-weight-normal');
+  });
+})
+</script>

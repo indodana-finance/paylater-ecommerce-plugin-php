@@ -32,7 +32,6 @@
   </div>
 </form>
 
-
 <style>
   .form-indodana {
     padding-left: 2.5rem;

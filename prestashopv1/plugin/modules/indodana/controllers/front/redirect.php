@@ -33,7 +33,7 @@ require_once(_PS_MODULE_DIR_ . 'indodana' . DIRECTORY_SEPARATOR . 'tools' . DIRE
 class IndodanaRedirectModuleFrontController extends ModuleFrontController
 {
   /**
-   * Do whatever you have to before redirecting the customer on the website of your payment processor.
+   * Do whatever you have to before redirecting the customer on the website of your payment page.
    */
   public function postProcess()
   {
@@ -58,6 +58,7 @@ class IndodanaRedirectModuleFrontController extends ModuleFrontController
     $this->context->smarty->assign([
       'moduleName' => $this->module->name,
       'displayName' => $this->module->displayName,
+      'indodanaLogo' => IndodanaCommon\IndodanaConstant::LOGO_URL,
       'cartId' => Context::getContext()->cart->id,
       'secureKey' => Context::getContext()->customer->secure_key,
       'nbProducts' => $cart->nbProducts(),
