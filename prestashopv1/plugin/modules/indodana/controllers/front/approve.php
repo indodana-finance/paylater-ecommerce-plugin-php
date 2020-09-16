@@ -59,7 +59,7 @@ class IndodanaApproveModuleFrontController extends ModuleFrontController
     if (!$isValidAuthorization) {
       IndodanaCommon\MerchantResponse::printInvalidRequestAuthResponse($namespace);
 
-      die;;
+      die;
     }
 
     // Log request body
