@@ -583,8 +583,9 @@ class Indodana extends PaymentModule
 
     try {
       $indodanaTools = new IndodanaTools();
+      $totalAmount = $indodanaTools->getTotalAmount($cart);
       $installmentOptions = $indodanaTools->getIndodanaCommon()->getInstallmentOptions([
-        'totalAmount' => $indodanaTools->getTotalAmount($cart),
+        'totalAmount' => $totalAmount,
         'discountAmount' => $indodanaTools->getTotalDiscountAmount($cart),
         'shippingAmount' => $indodanaTools->getTotalShippingAmount($cart),
         'taxAmount' => $indodanaTools->getTotalTaxAmount($cart),
@@ -598,7 +599,9 @@ class Indodana extends PaymentModule
     $formAction = $this->context->link->getModuleLink($this->name, 'validation', [], true);
     $this->smarty->assign([
       'action' => $formAction,
-      'installmentOptions' => $installmentOptions
+      'installmentOptions' => $installmentOptions,
+      'displayName' => $this->displayName,
+      'totalAmount' => $totalAmount
     ]);
     $paymentForm = $this->fetch('module:indodana/views/templates/hook/payment_form.tpl');
 
@@ -664,8 +667,9 @@ class Indodana extends PaymentModule
 
     try {
       $indodanaTools = new IndodanaTools();
+      $totalAmount = $indodanaTools->getTotalAmount($cart);
       $installmentOptions = $indodanaTools->getIndodanaCommon()->getInstallmentOptions([
-        'totalAmount' => $indodanaTools->getTotalAmount($cart),
+        'totalAmount' => $totalAmount,
         'discountAmount' => $indodanaTools->getTotalDiscountAmount($cart),
         'shippingAmount' => $indodanaTools->getTotalShippingAmount($cart),
         'taxAmount' => $indodanaTools->getTotalTaxAmount($cart),
@@ -682,7 +686,8 @@ class Indodana extends PaymentModule
       'this_path_ssl' => Tools::getShopDomainSsl(true, true) . __PS_BASE_URI__ . 'modules/' . $this->name . '/',
       'moduleName' => $this->name,
       'displayName' => $this->displayName,
-      'indodanaLogo' => IndodanaCommon\IndodanaConstant::LOGO_URL
+      'indodanaLogo' => IndodanaCommon\IndodanaConstant::LOGO_URL,
+      'totalAmount' => $totalAmount
     ]);
 
     return $this->display(__FILE__, 'views/templates/hook/payment.tpl');

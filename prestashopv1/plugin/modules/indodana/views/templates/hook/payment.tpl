@@ -24,10 +24,15 @@
 *}
 
 <p class="payment_module" id="indodana_payment_button">
-  <a href="{$link->getModuleLink($moduleName, 'redirect', array(), true)|escape:'htmlall':'UTF-8'}" class="payment-method" title="{l s='Pay with ' mod="`$moduleName`"}  {$displayName}">
+  <a href="{$link->getModuleLink($moduleName, 'redirect', [], true)|escape:'htmlall':'UTF-8'}"
+    class="payment-method {if $totalAmount < 10000} payment-disabled {/if}"
+    title="{l s='Pay with ' mod="`$moduleName`"} {$displayName}">
     <img src="{$indodanaLogo|escape:'htmlall':'UTF-8'}" alt="{l s='Pay with my payment module' mod="`$moduleName`"}" />
     <span class="payment-text">
       {l s='Pay with ' mod="`$moduleName`"} {$displayName}
+      {if $totalAmount < 10000}
+        (Your transaction has not met minimum limit)
+      {/if}
     </span>
   </a>
 </p>
@@ -41,5 +46,10 @@
 
 .payment-text {
   margin-left: 1rem;
+}
+
+.payment-disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 </style>

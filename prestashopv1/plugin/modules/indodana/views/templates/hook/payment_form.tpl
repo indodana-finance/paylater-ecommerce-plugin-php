@@ -1,12 +1,6 @@
 {*
- * PrestaPay - A Sample Payment Module for PrestaShop 1.7
- *
  * Form to be displayed in the payment step
- *
- * @author Andresa Martins <contact@andresa.dev>
- * @license https://opensource.org/licenses/afl-3.0.php
  *}
-
 <form method="post" action="{$action}" class="form-indodana">
   <p>Pay with installment via our Paylater product.</p>
   <div class="indodana-payment-option">
@@ -60,4 +54,23 @@
     padding-left: 1.5rem;
     text-align: left;
   }
+
+  .payment-disabled {
+    opacity: 0.5;
+  }
 </style>
+
+{if $totalAmount < 10000}
+  <script>
+    // disable payment method when total amount under 10000
+    document.addEventListener("DOMContentLoaded", function() {
+      var input = document.querySelector('[data-module-name="{$displayName}"]');
+      var paymentOption = input.closest('.payment-option');
+
+      input.setAttribute('disabled', '');
+      paymentOption.classList.add('payment-disabled');
+      // display message
+      paymentOption.querySelector('label').innerHTML += '<br><span style="float: left; font-size: 0.8rem;">Your transaction has not met minimum limit<\/span>';
+    });
+  </script>
+{/if}
