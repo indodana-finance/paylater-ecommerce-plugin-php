@@ -12,9 +12,17 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
   public function getIndodanaCommon()
   {
     if (!isset($this->indodanaCommon)) {
+      if (Configuration::get('INDODANA_ENVIRONMENT') == 'PRODUCTION') {
+        $apiKey = Configuration::get('INDODANA_API_KEY_PRODUCTION');
+        $apiSecret = Configuration::get('INDODANA_API_KEY_PRODUCTION');
+      } else {
+        $apiKey = Configuration::get('INDODANA_API_KEY');
+        $apiSecret = Configuration::get('INDODANA_API_SECRET');
+      }
+
       $this->indodanaCommon = new IndodanaCommon\IndodanaCommon([
-        'apiKey' => Configuration::get('INDODANA_API_KEY'),
-        'apiSecret' => Configuration::get('INDODANA_API_SECRET'),
+        'apiKey' => $apiKey,
+        'apiSecret' => $apiSecret,
         'environment' => Configuration::get('INDODANA_ENVIRONMENT'),
         'seller' => $this->getSeller()
       ]);
