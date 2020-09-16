@@ -268,6 +268,7 @@ class Indodana extends PaymentModule
   {
     $isValid = true;
     if ((empty(Tools::getValue($configName)))) {
+      // convert config name to more readable text
       $message = ucwords(strtolower(str_replace('_', ' ', substr($configName, 9))));
       $output .= $this->displayError($this->l($message . ' is required'));
       $isValid = false;
@@ -580,14 +581,19 @@ class Indodana extends PaymentModule
       return;
     }
 
-    $indodanaTools = new IndodanaTools();
-    $installmentOptions = $indodanaTools->getIndodanaCommon()->getInstallmentOptions([
-      'totalAmount' => $indodanaTools->getTotalAmount($cart),
-      'discountAmount' => $indodanaTools->getTotalDiscountAmount($cart),
-      'shippingAmount' => $indodanaTools->getTotalShippingAmount($cart),
-      'taxAmount' => $indodanaTools->getTotalTaxAmount($cart),
-      'products' => $indodanaTools->getProducts($cart),
-    ]);
+    try {
+      $indodanaTools = new IndodanaTools();
+      $installmentOptions = $indodanaTools->getIndodanaCommon()->getInstallmentOptions([
+        'totalAmount' => $indodanaTools->getTotalAmount($cart),
+        'discountAmount' => $indodanaTools->getTotalDiscountAmount($cart),
+        'shippingAmount' => $indodanaTools->getTotalShippingAmount($cart),
+        'taxAmount' => $indodanaTools->getTotalTaxAmount($cart),
+        'products' => $indodanaTools->getProducts($cart),
+      ]);
+    } catch (Exception $e) {
+      // hide Indodana payment method when IndodanaCommon return exception
+      return;
+    }
 
     $formAction = $this->context->link->getModuleLink($this->name, 'validation', [], true);
     $this->smarty->assign([
@@ -611,6 +617,15 @@ class Indodana extends PaymentModule
   private function checkConfig()
   {
     foreach ($this->moduleConfigs as $key => $value) {
+      $env = Configuration::get('INDODANA_ENVIRONMENT');
+
+      // skip api key/secret check when environment is different
+      if ($env == 'SANDBOX' && ($key == 'INDODANA_API_KEY_PRODUCTION' || $key == 'INDODANA_API_SECRET_PRODUCTION')) {
+        continue;
+      } elseif ($env == 'PRODUCTION' && ($key == 'INDODANA_API_KEY' || $key == 'INDODANA_API_SECRET')) {
+        continue;
+      }
+
       if (empty(Configuration::get($key))) {
         return false;
       }
@@ -630,15 +645,34 @@ class Indodana extends PaymentModule
         }
       }
     }
+
     return false;
   }
 
+  /**
+   * Displaying payment method for Prestashop 1.6
+   */
   public function hookDisplayPayment($params)
   {
-    $currencyId = $params['cart']->id_currency;
+    $cart = $params['cart'];
+    $currencyId = $cart->id_currency;
     $currency = new Currency((int)$currencyId);
 
     if (in_array($currency->iso_code, $this->limited_currencies) == false || !$this->checkConfig()) {
+      return false;
+    }
+
+    try {
+      $indodanaTools = new IndodanaTools();
+      $installmentOptions = $indodanaTools->getIndodanaCommon()->getInstallmentOptions([
+        'totalAmount' => $indodanaTools->getTotalAmount($cart),
+        'discountAmount' => $indodanaTools->getTotalDiscountAmount($cart),
+        'shippingAmount' => $indodanaTools->getTotalShippingAmount($cart),
+        'taxAmount' => $indodanaTools->getTotalTaxAmount($cart),
+        'products' => $indodanaTools->getProducts($cart),
+      ]);
+    } catch (Exception $e) {
+      // hide Indodana payment method when IndodanaCommon return exception
       return false;
     }
 
@@ -654,9 +688,12 @@ class Indodana extends PaymentModule
     return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
   }
 
+  /**
+   * Displaying order confirmation page for Prestashop 1.6
+   */
   public function hookDisplayPaymentReturn($params)
   {
-    // v1.7 use default page
+    // Prestsahop 1.7 use default confirmation page
     if (_PS_VERSION_ >= 1.7 || $this->active == false) {
       return;
     }
@@ -677,6 +714,9 @@ class Indodana extends PaymentModule
     return $this->display(__FILE__, 'views/templates/hook/confirmation.tpl');
   }
 
+  /**
+   * Enable/disable module
+   */
   private function checkToggleModuleState($value)
   {
     $old = (bool) Configuration::get('INDODANA_ENABLE_TRUE');
