@@ -92,7 +92,7 @@ define(
             },
             beforePlaceOrder:function(data, event){
                 if(window.checkoutConfig.payment.indodanapayment.paytype==''){
-                    alert('Silahkan pilih ternor cicilan');
+                    alert('Silahkan pilih tenor cicilan');
                     return false;
                 }
                   return this.placeOrder(data,event);

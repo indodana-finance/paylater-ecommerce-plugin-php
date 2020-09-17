@@ -24,7 +24,7 @@
                 </field>
                 <field id="environment" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Environment</label>
-                    <source_model>Indodana\Paylater\Model\Adminhtml\Source\Environment</source_model>
+                    <source_model>Indodana\PayLater\Model\Adminhtml\Source\Environment</source_model>
                 </field>
                 <field id="store_name" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Store Name</label>

@@ -14,6 +14,8 @@ class Transaction extends AbstractHelper implements IndodanaInterface
   protected $_customer;
   protected $_urlInterface;
   protected $_dir;
+  protected $objectManager; 
+
   public function __construct(
     Data $helper,
     \Magento\Customer\Api\CustomerRepositoryInterface $customerRepositoryInterface,
@@ -25,7 +27,16 @@ class Transaction extends AbstractHelper implements IndodanaInterface
           $this->_customer= $customerRepositoryInterface;
           $this->_urlInterface = $urlInterface;
           $this->_dir = $directoryList;
-          require_once($this->_dir->getPath(DirectoryList::APP). '/code/Indodana/PayLater/autoload.php' );
+          $this->objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+          
+          /// use by indodana logger
+          define('INDODANA_LOG_DIR',$this->_dir->getPath('log'). DIRECTORY_SEPARATOR . 'Indodana' . DIRECTORY_SEPARATOR );
+          
+          if (!is_dir(INDODANA_LOG_DIR)) {
+            mkdir(INDODANA_LOG_DIR, 0777, true);
+          }
+
+          //require_once($this->_dir->getPath(DirectoryList::APP). '/code/Indodana/PayLater/autoload.php' );
   }
 
   public function getIndodanaCommon()
@@ -86,7 +97,6 @@ class Transaction extends AbstractHelper implements IndodanaInterface
 
   public function getProducts($order)
   {
-    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
     // We only need parent products
     $orderItems = $order->getAllVisibleItems();
     $products = [];
@@ -98,7 +108,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
       if (!$quantity) {
         $quantity = $orderItem->getQtyToInvoice();
       }
-      $cat = $objectManager->create('Magento\Catalog\Model\Category')->load($product->getCategoryIds()[0]);
+      $cat = $this->objectManager->create('Magento\Catalog\Model\Category')->load($product->getCategoryIds()[0]);
       $products[] = [
         'id'        => $product->getId(),
         'name'      => $product->getName(),
@@ -107,8 +117,8 @@ class Transaction extends AbstractHelper implements IndodanaInterface
         'imageUrl'  => '', // TODO: Search how to do this
         'type'      => '', // TODO: Search how to do this
         'quantity'  => $quantity,
-        'category' =>  IndodanaConstant::DEFAULT_ITEM_CATEGORY,//'baby',//$cat->getName(),
-        'parentId' => $this->_helper->getStoreID()// '5e96ac2c-e123-11ea-9c01-00163e014000'
+        'category' =>  IndodanaConstant::DEFAULT_ITEM_CATEGORY,
+        'parentId' => $this->_helper->getStoreID()
       ];
     }
     
@@ -117,11 +127,9 @@ class Transaction extends AbstractHelper implements IndodanaInterface
 
   public function getCustomerDetails($order)
   { 
-    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-    $customerFactory = $objectManager->get('\Magento\Customer\Model\CustomerFactory')->create();    
+    $customerFactory = $this->objectManager->get('\Magento\Customer\Model\CustomerFactory')->create();    
     $customerId = $order->getCustomerId();    
     $customer = $customerFactory->load($customerId);    
-    //$customer = $this->_customer.getById($order->getCustomerId());
     // Get phone from billing address whenever possible
     $phone = $order->getBillingAddress()->getTelephone();
     // If the user didn't login, customer won't exist
@@ -156,7 +164,6 @@ class Transaction extends AbstractHelper implements IndodanaInterface
       'city'          => $billingAddress->getCity(),
       'postalCode'    => $billingAddress->getPostcode(),
       'phone'         => $billingAddress->getTelephone(),
-      //'countryCode'   => $this->countryCode($billingAddress->getCountry())
       'countryCode'   => $this->countryCode($billingAddress->getCountryId())
     ];
   }
@@ -220,7 +227,8 @@ class Transaction extends AbstractHelper implements IndodanaInterface
     /// -->
 
     return $this->getIndodanaCommon()->checkout(
-       [      'merchantOrderId'         => $order->getId(),
+       [      
+       'merchantOrderId'         => $order->getId(),
        'totalAmount'             => $this->getTotalAmount($order),
        'discountAmount'          => $this->getTotalDiscountAmount($order),
        'shippingAmount'          => $this->getTotalShippingAmount($order),
@@ -240,30 +248,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
       return $this->_helper->getStoreID().'-'.$order->getId();
   }
 
-  public function getOrderData($order,$paytype)
-  {
-    $approvedNotificationUrl = $this->_urlInterface->getUrl('indodanapayment/index/notify'); //Mage::getUrl('indodanapayment/checkout/notify');
-    $cancellationRedirectUrl = $this->_urlInterface->getUrl('indodanapayment/index/cancel');;//Mage::getUrl('indodanapayment/checkout/cancel');
-    $backToStoreUrl = $this->_helper->getStoreUrl();//Mage::getUrl('indodanapayment/checkout/success');
-
-    return $this->getIndodanaCommon()->getCheckoutPayload([
-      'merchantOrderId'         => $order->getId(),
-      'totalAmount'             => $this->getTotalAmount($order),
-      'discountAmount'          => $this->getTotalDiscountAmount($order),
-      'shippingAmount'          => $this->getTotalShippingAmount($order),
-      'taxAmount'               => $this->getTotalTaxAmount($order),
-      'products'                => $this->getProducts($order),
-      'customerDetails'         => $this->getCustomerDetails($order),
-      'billingAddress'          => $this->getBillingAddress($order),
-      'shippingAddress'         => $this->getShippingAddress($order),
-      'approvedNotificationUrl' => $approvedNotificationUrl,
-      'cancellationRedirectUrl' => $cancellationRedirectUrl,
-      'backToStoreUrl'          => $backToStoreUrl
-    ]);
-
-    
-  }
-
+  
   private function countryCode($country_code)
   {
     // 3 digits country codes

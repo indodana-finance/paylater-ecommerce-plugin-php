@@ -3,7 +3,7 @@
  * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Indodana\Paylater\Model\Adminhtml\Source;
+namespace Indodana\PayLater\Model\Adminhtml\Source;
 
 use Magento\Payment\Model\Method\AbstractMethod;
 
