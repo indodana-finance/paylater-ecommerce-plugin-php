@@ -71,6 +71,9 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
     $orderTotal = $this->getTotalAmount($order);
     $discountTotal = $this->getTotalDiscountAmount($order);
     $shippingTotal = $this->getTotalShippingAmount($order);
+    $adminFee = $this->getAdminFeeAmount($order);
+    $additionalFee = $this->getAdditionalFeeAmount($order);
+    $insuranceFee = $this->getInsuranceFeeAmount($order);
     $productTotal = 0;
 
     $products = $order->getProducts();
@@ -81,7 +84,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
       $productTotal += $price * $qty;
     }
 
-    $taxTotal = $orderTotal + $discountTotal - $shippingTotal - $productTotal;
+    $taxTotal = $orderTotal + $discountTotal - $shippingTotal - $productTotal - $adminFee - $additionalFee - $insuranceFee;
 
     return $taxTotal;
   }
@@ -101,6 +104,30 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
     }
 
     return $items;
+  }
+
+  /**
+   * Prestashop doesn't have admin fee feature
+   */
+  public function getAdminFeeAmount($order)
+  {
+    return 0;
+  }
+
+  /**
+   * Prestashop doesn't have additional fee feature
+   */
+  public function getAdditionalFeeAmount($order)
+  {
+    return 0;
+  }
+
+  /**
+   * Prestashop doesn't have insurance fee feature
+   */
+  public function getInsuranceFeeAmount($order)
+  {
+    return 0;
   }
 
   public function getCustomerDetails($order)

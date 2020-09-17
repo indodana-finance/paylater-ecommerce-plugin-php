@@ -53,6 +53,9 @@ class IndodanaRedirectModuleFrontController extends ModuleFrontController
       'shippingAmount' => $indodanaTools->getTotalShippingAmount($cart),
       'taxAmount' => $indodanaTools->getTotalTaxAmount($cart),
       'products' => $indodanaTools->getProducts($cart),
+      'adminFeeAmount' => $indodanaTools->getAdminFeeAmount($cart),
+      'additionalFeeAmount' => $indodanaTools->getAdditionalFeeAmount($cart),
+      'insuranceFeeAmount' => $indodanaTools->getInsuranceFeeAmount($cart)
     ]);
 
     $this->context->smarty->assign([
