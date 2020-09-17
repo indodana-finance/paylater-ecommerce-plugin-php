@@ -168,7 +168,7 @@ class OrderTest extends TestCase
     }
 
     // Check shipping object
-    $shippingObjectIndex = $this->getIndexOfItemById(Order::SHIPPING_ITEM_ID, $items);
+    $shippingObjectIndex = $this->getIndexOfItemById(Order::SHIPPING_FEE_ITEM_ID, $items);
 
     $this->assertNotEmpty($shippingObjectIndex);
     $this->assertEquals(
@@ -177,7 +177,7 @@ class OrderTest extends TestCase
     );
 
     // Check tax object
-    $taxObjectIndex = $this->getIndexOfItemById(Order::TAX_ITEM_ID, $items);
+    $taxObjectIndex = $this->getIndexOfItemById(Order::TAX_FEE_ITEM_ID, $items);
 
     $this->assertNotEmpty($taxObjectIndex);
     $this->assertEquals(
