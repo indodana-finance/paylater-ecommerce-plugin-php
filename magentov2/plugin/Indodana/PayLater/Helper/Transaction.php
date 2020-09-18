@@ -15,18 +15,21 @@ class Transaction extends AbstractHelper implements IndodanaInterface
   protected $_urlInterface;
   protected $_dir;
   protected $objectManager; 
+  protected $imageHelperFactory;
 
   public function __construct(
     Data $helper,
     \Magento\Customer\Api\CustomerRepositoryInterface $customerRepositoryInterface,
     \Magento\Framework\UrlInterface $urlInterface,
-    \Magento\Framework\App\Filesystem\DirectoryList $directoryList
+    \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
+    \Magento\Catalog\Helper\ImageFactory $imageHelperFactory
     )
   {
           $this->_helper = $helper;
           $this->_customer= $customerRepositoryInterface;
           $this->_urlInterface = $urlInterface;
           $this->_dir = $directoryList;
+          $this->imageHelperFactory = $imageHelperFactory;
           $this->objectManager = \Magento\Framework\App\ObjectManager::getInstance();
           
           /// use by indodana logger
@@ -108,14 +111,17 @@ class Transaction extends AbstractHelper implements IndodanaInterface
       if (!$quantity) {
         $quantity = $orderItem->getQtyToInvoice();
       }
-      $cat = $this->objectManager->create('Magento\Catalog\Model\Category')->load($product->getCategoryIds()[0]);
+
+      $imageUrl = $this->imageHelperFactory->create()
+        ->init($product, 'product_thumbnail_image')->getUrl();      
+
       $products[] = [
         'id'        => $product->getId(),
         'name'      => $product->getName(),
         'price'     => (float) $product->getPrice(),
         'url'       => $product->getProductUrl(),
-        'imageUrl'  => '', // TODO: Search how to do this
-        'type'      => '', // TODO: Search how to do this
+        'imageUrl'  => $imageUrl, 
+        'type'      => $product->getTypeId(), 
         'quantity'  => $quantity,
         'category' =>  IndodanaConstant::DEFAULT_ITEM_CATEGORY,
         'parentId' => $this->_helper->getStoreID()

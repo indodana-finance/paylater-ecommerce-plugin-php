@@ -95,6 +95,7 @@ class Redirectto extends \Magento\Framework\App\Action\Action
               )
               ->save();
         }
+        $this->_checkoutSession->clearQuote();
         
         return $result->setData(
             [

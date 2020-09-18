@@ -1,6 +1,12 @@
 <?php
 
 namespace Indodana\PayLater\Model\Api;
+use IndodanaCommon\IndodanaInterface;
+use IndodanaCommon\IndodanaCommon;
+use IndodanaCommon\IndodanaConstant;
+use IndodanaCommon\IndodanaLogger;
+use IndodanaCommon\IndodanaHelper;
+use IndodanaCommon\MerchantResponse;
 
 class Notify implements \Indodana\PayLater\Api\NotifyInterface
 {
@@ -8,19 +14,22 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
     protected $_transaction;
     protected $_helper;
     protected $_dir;
+    protected $_coretransaction;
 
     public function __construct
     (
             \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
             \Indodana\PayLater\Helper\Transaction $transaction,
             \Indodana\PayLater\Helper\Data $helper,
-            \Magento\Framework\App\Filesystem\DirectoryList $directoryList
+            \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
+            \Magento\Framework\DB\Transaction $coretransaction
     )
     {
             $this->_order=$orderRepository;
             $this->_transaction = $transaction;
             $this->_helper = $helper;
             $this->_dir = $directoryList;
+            $this->_coretransaction=$coretransaction;
             /// use by indodana logger
             //define('INDODANA_LOG_DIR',$this->_dir->getPath('log'). DIRECTORY_SEPARATOR . 'Indodana' . DIRECTORY_SEPARATOR );
 
@@ -33,15 +42,31 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
 
     public function OKReturn()
     {
-        return [
+      $namespace = '[MagentoV2-Indodana\PayLater\Model\Api\Notify\OKReturn]';
+      IndodanaLogger::info(
+        sprintf(
+          '%s OK Return ',
+          $namespace
+        )
+      );  
+
+      return [
             'status' => 'OK',
             'message' => 'Message from merchant if any'
         ];
     }
-    public function RejectReturn(){
+    public function RejectReturn($msg){
+      $namespace = '[MagentoV2-Indodana\PayLater\Model\Api\Notify\RejectReturn]';
+      IndodanaLogger::info(
+        sprintf(
+          '%s Reject Return : %s',
+          $namespace,$msg
+        )
+      );  
+
         return [
             'status' => 'REJECT',
-            'message' => 'Message from merchant if any'
+            'message' => 'Message from merchant if any' . $msg
         ];
 
     }
@@ -60,7 +85,7 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
               $namespace
             )
           );  
-  
+    
         $this->notifyAction();
         
     }
@@ -70,7 +95,7 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
         //Disallow any action for invalid request
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     
-          $this->RejectReturn();
+          $this->RejectReturn('must be post method');
         }  
         // Log request headers
         // -----    
@@ -91,7 +116,7 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
         if (!$isValidAuthorization) {
           MerchantResponse::printInvalidRequestAuthResponse($namespace);  
           
-          $this->RejectReturn();
+          $this->RejectReturn( 'Invalid  authorization');
         }
     
         // Log request body
@@ -110,12 +135,20 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
         if (!isset($requestBody['transactionStatus']) || !isset($requestBody['merchantOrderId'])) {
           MerchantResponse::printInvalidRequestBodyResponse($namespace);  
           
-          $this->RejectReturn();
+          $this->RejectReturn('Invalid body');
         }  
     
         $transactionStatus = $requestBody['transactionStatus'];
         $orderId = str_replace('KK','',$requestBody['merchantOrderId']);      
-        $order= $this->_order->get($orderid);  
+        $order= $this->_order->get($orderId);  
+
+        IndodanaLogger::info(
+          sprintf(
+            '%s Order Status: %s',
+            $namespace,
+            $order->getStatus()
+          )
+        );  
 
         IndodanaLogger::info(
             sprintf(
@@ -132,7 +165,7 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
             $namespace
           );
           
-          $this->RejectReturn();
+          $this->RejectReturn('Order not found ');
         }
     
         if (!in_array($transactionStatus, IndodanaConstant::getSuccessTransactionStatuses())) {
@@ -142,7 +175,7 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
             $namespace
           );  
           
-          $this->RejectReturn();
+          $this->RejectReturn(' transaction invalid ');
         }
     
         // Handle success order
