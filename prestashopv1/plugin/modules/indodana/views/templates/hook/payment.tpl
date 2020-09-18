@@ -23,21 +23,27 @@
 *  International Registered Trademark & Property of PrestaShop SA
 *}
 
-<p class="payment_module" id="indodana_payment_button">
+<p class="payment_module indodana" id="indodana_payment_button">
   <a href="{$link->getModuleLink($moduleName, 'redirect', [], true)|escape:'htmlall':'UTF-8'}"
     class="payment-method {if $totalAmount < 10000} payment-disabled {/if}"
     title="{l s='Pay with ' mod="`$moduleName`"} {$displayName}">
     <img src="{$indodanaLogo|escape:'htmlall':'UTF-8'}" alt="{l s='Pay with my payment module' mod="`$moduleName`"}" />
     <span class="payment-text">
       {l s='Pay with ' mod="`$moduleName`"} {$displayName}
-      {if $totalAmount < 10000}
-        (Your transaction has not met minimum limit)
-      {/if}
     </span>
+    {if $totalAmount < 10000}
+      <span class="payment-description">
+        (Your transaction has not met minimum limit)
+      </span>
+    {/if}
   </a>
 </p>
 
 <style>
+p.payment_module.indodana a {
+  padding-left: 17px;
+}
+
 .payment-method {
   display: flex !important;
   flex-direction: row;
@@ -45,7 +51,14 @@
 }
 
 .payment-text {
+  margin-top: 2px;
   margin-left: 1rem;
+  color: #333 !important;
+}
+
+.payment-description {
+  margin-top: 2px;
+  margin-left: 0.5rem;
 }
 
 .payment-disabled {

@@ -143,25 +143,25 @@
 
   @media (min-width: 576px) and (max-width: 767.98px) {
     .form-check {
-      width: 70%;
+      width: 100%;
     }
   }
 
   @media (min-width: 768px) and (max-width: 991.98px) {
     .form-check {
-      width: 70%;
+      width: 100%;
     }
   }
 
   @media (min-width: 992px) and (max-width: 1199.98px) {
     .form-check {
-      width: 60%;
+      width: 80%;
     }
   }
 
   @media (min-width: 1200px) {
     .form-check {
-      width: 50%;
+      width: 65%;
     }
   }
 </style>
