@@ -8,6 +8,7 @@
 
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
 
+    <preference for="Indodana\PayLater\Api\NotifyInterface" type="Indodana\PayLater\Model\Api\Notify"/>
 
     <!-- Payment Method Facade configuration -->
     <virtualType name="PayLaterFacade" type="Magento\Payment\Model\Method\Adapter">

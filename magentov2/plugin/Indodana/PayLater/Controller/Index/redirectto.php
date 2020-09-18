@@ -15,6 +15,7 @@ class Redirectto extends \Magento\Framework\App\Action\Action
     protected $_request;
     protected $_checkoutSession;
     protected $_orderFactory;
+    protected $_orderRepository;
 
     public function __construct(
         \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory,
@@ -23,7 +24,8 @@ class Redirectto extends \Magento\Framework\App\Action\Action
         \Magento\Framework\App\Request\Http $request,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Indodana\PayLater\Helper\Data $helper
+        \Indodana\PayLater\Helper\Data $helper,
+        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
     )
     {
         $this->_resultFactory = $jsonResultFactory;
@@ -32,6 +34,7 @@ class Redirectto extends \Magento\Framework\App\Action\Action
         $this->_checkoutSession = $checkoutSession;
         $this->_orderFactory = $orderFactory;
         $this->_helper = $helper;
+        $this->_orderRepository = $orderRepository;
         
         return parent::__construct($context);
     }
@@ -54,13 +57,28 @@ class Redirectto extends \Magento\Framework\App\Action\Action
     }
 
     public function execute()
-    {       
+    {   $namespace = '[Magentov2 - Indodana\PayLater\Controller\Index\Redirectto\execute]';            
         $result = $this->_resultFactory->create();
         $post = $this->_request->getPostValue();
         $paytype=$post['paytype'];
-        $order= $this->getOrder();
-        $checkout =  $this->_transaction->checkOut($order,$paytype); 
-        $namespace = '[Magentov2 - Indodana\PayLater\Controller\Index\Redirectto\execute]';
+        IndodanaLogger::info(
+            sprintf(
+              '%s OrderId: %s',
+              $namespace,
+              $this->getRealOrderId()
+            )
+          );            
+
+        $order= $this->getOrder();     
+        IndodanaLogger::info(
+            sprintf(
+              '%s $order.getId() : %s',
+              $namespace,
+              $order->getId()
+            )
+          );            
+
+        $checkout =  $this->_transaction->checkOut($order,$paytype);         
         
         if ($order) {        
             IndodanaLogger::info(
