@@ -33,7 +33,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
 
   public function getTotalAmount($order)
   {
-    return (int) $order->getOrderTotal(true, Cart::BOTH);
+    return $order->getOrderTotal(true, Cart::BOTH);
   }
 
   public function getTotalDiscountAmount($order)
@@ -52,7 +52,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
       }
     }
 
-    return (int) $discount;
+    return $discount;
   }
 
   public function getTotalShippingAmount($order)
@@ -62,29 +62,13 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
 
   public function getTotalTaxAmount($order)
   {
-    /**
-     * Because we use `ceil()` function on product price to avoid double/float type number
-     * And we got miscalculation error response:
-     * `Purchase transaction amount (1609000) is different from calculated amount at list of item (1608998).`
-     * I think the tricky solution is to do reverse calculation to get total tax amount
-     */
-    $orderTotal = $this->getTotalAmount($order);
-    $discountTotal = $this->getTotalDiscountAmount($order);
-    $shippingTotal = $this->getTotalShippingAmount($order);
-    $adminFee = $this->getAdminFeeAmount($order);
-    $additionalFee = $this->getAdditionalFeeAmount($order);
-    $insuranceFee = $this->getInsuranceFeeAmount($order);
-    $productTotal = 0;
-
+    $taxTotal = 0;
     $products = $order->getProducts();
-    foreach ($products as $product) {
-      $price = ceil($this->getPriceWithoutReductionWithoutTax($product));
-      $qty = $product['quantity'];
-
-      $productTotal += $price * $qty;
+    foreach ($products as $key => $product) {
+      $taxProduct = $product['price_without_reduction'] - $this->getPriceWithoutReductionWithoutTax($product);
+      $taxProduct = $this->convertPrecisionNumber($taxProduct);
+      $taxTotal += $taxProduct * $product['quantity'];
     }
-
-    $taxTotal = $orderTotal + $discountTotal - $shippingTotal - $productTotal - $adminFee - $additionalFee - $insuranceFee;
 
     return $taxTotal;
   }
@@ -97,7 +81,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
       $items[] = [
         'id' => $product['reference'],
         'name' => $product['name'],
-        'price' => ceil($this->getPriceWithoutReductionWithoutTax($product)),
+        'price' => $this->convertPrecisionNumber($this->getPriceWithoutReductionWithoutTax($product)),
         'quantity' => $product['quantity'],
         'category'  => IndodanaCommon\IndodanaConstant::DEFAULT_ITEM_CATEGORY,
       ];
@@ -119,7 +103,26 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
    */
   public function getAdditionalFeeAmount($order)
   {
-    return 0;
+    // return 0;
+    $orderTotal = $this->getTotalAmount($order);
+    $discountTotal = $this->getTotalDiscountAmount($order);
+    $shippingTotal = $this->getTotalShippingAmount($order);
+    $taxTotal = $this->getTotalTaxAmount($order);
+    $adminFee = $this->getAdminFeeAmount($order);
+    $insuranceFee = $this->getInsuranceFeeAmount($order);
+    $productTotal = 0;
+
+    $products = $order->getProducts();
+    foreach ($products as $key => $product) {
+      $price = $this->convertPrecisionNumber($this->getPriceWithoutReductionWithoutTax($product));
+      $productTotal += $price * $product['quantity'];
+    }
+
+    $productWithTax = $productTotal + $taxTotal;
+    $manualTotal = $productWithTax + $shippingTotal + $adminFee + $insuranceFee - $discountTotal;
+    $additionalFee = $orderTotal - $manualTotal;
+
+    return $additionalFee;
   }
 
   /**
@@ -194,5 +197,10 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
   private function getPriceWithoutReductionWithoutTax($product)
   {
     return $product['price_without_reduction'] / (($product['rate'] + 100) / 100);
+  }
+
+  private function convertPrecisionNumber($value)
+  {
+    return (float) number_format($value, 2, '.', '');
   }
 }
