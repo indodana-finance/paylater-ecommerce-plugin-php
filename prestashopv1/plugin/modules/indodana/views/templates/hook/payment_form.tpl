@@ -58,11 +58,15 @@
   .payment-disabled {
     opacity: 0.5;
   }
+
+  .payment-disabled label{
+    text-align: left;
+  }
 </style>
 
-{if $totalAmount < 10000}
+{if $totalAmount < 10000 || $totalAmount > 25000000}
   <script>
-    // disable payment method when total amount under 10000
+    // disable payment method when total amount less than 10000 or more than 25000000
     document.addEventListener("DOMContentLoaded", function() {
       var input = document.querySelector('[data-module-name="{$displayName}"]');
       var paymentOption = input.closest('.payment-option');
@@ -70,7 +74,7 @@
       input.setAttribute('disabled', '');
       paymentOption.classList.add('payment-disabled');
       // display message
-      paymentOption.querySelector('label').innerHTML += '<br><span style="float: left; font-size: 0.8rem;">Your transaction has not met minimum limit<\/span>';
+      paymentOption.querySelector('label').innerHTML += '<br><span style="float: left; font-size: 0.8rem;">Nilai transaksi Anda tidak sesuai dengan ketentuan penggunaan Indodana Paylater<\/span>';
     });
   </script>
 {/if}

@@ -25,15 +25,15 @@
 
 <p class="payment_module indodana" id="indodana_payment_button">
   <a href="{$link->getModuleLink($moduleName, 'redirect', [], true)|escape:'htmlall':'UTF-8'}"
-    class="payment-method {if $totalAmount < 10000} payment-disabled {/if}"
+    class="payment-method {if $totalAmount < 10000 || $totalAmount > 25000000} payment-disabled {/if}"
     title="{l s='Pay with ' mod="`$moduleName`"} {$displayName}">
     <img src="{$indodanaLogo|escape:'htmlall':'UTF-8'}" alt="{l s='Pay with my payment module' mod="`$moduleName`"}" />
     <span class="payment-text">
       {l s='Pay with ' mod="`$moduleName`"} {$displayName}
     </span>
-    {if $totalAmount < 10000}
+    {if $totalAmount < 10000 || $totalAmount > 25000000}
       <span class="payment-description">
-        (Your transaction has not met minimum limit)
+        (Nilai transaksi Anda tidak sesuai dengan ketentuan penggunaan Indodana Paylater)
       </span>
     {/if}
   </a>
