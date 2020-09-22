@@ -46,17 +46,28 @@ class IndodanaRedirectModuleFrontController extends ModuleFrontController
 
     $cart = $this->context->cart;
 
-    $indodanaTools = new IndodanaTools();
-    $installmentOptions = $indodanaTools->getIndodanaCommon()->getInstallmentOptions([
-      'totalAmount' => $indodanaTools->getTotalAmount($cart),
-      'discountAmount' => $indodanaTools->getTotalDiscountAmount($cart),
-      'shippingAmount' => $indodanaTools->getTotalShippingAmount($cart),
-      'taxAmount' => $indodanaTools->getTotalTaxAmount($cart),
-      'products' => $indodanaTools->getProducts($cart),
-      'adminFeeAmount' => $indodanaTools->getAdminFeeAmount($cart),
-      'additionalFeeAmount' => $indodanaTools->getAdditionalFeeAmount($cart),
-      'insuranceFeeAmount' => $indodanaTools->getInsuranceFeeAmount($cart)
-    ]);
+    try {
+      $indodanaTools = new IndodanaTools();
+      $installmentOptions = $indodanaTools->getIndodanaCommon()->getInstallmentOptions([
+        'totalAmount' => $indodanaTools->getTotalAmount($cart),
+        'discountAmount' => $indodanaTools->getTotalDiscountAmount($cart),
+        'shippingAmount' => $indodanaTools->getTotalShippingAmount($cart),
+        'taxAmount' => $indodanaTools->getTotalTaxAmount($cart),
+        'products' => $indodanaTools->getProducts($cart),
+        'adminFeeAmount' => $indodanaTools->getAdminFeeAmount($cart),
+        'additionalFeeAmount' => $indodanaTools->getAdditionalFeeAmount($cart),
+        'insuranceFeeAmount' => $indodanaTools->getInsuranceFeeAmount($cart)
+      ]);
+    } catch (Exception $e) {
+      // show error page when IndodanaCommon return exception
+      $this->errors[] = $this->module->l('Cart is empty');
+      $this->context->smarty->assign([
+        'baseUrl' => _PS_BASE_URL_,
+        'moduleName' =>  $this->module->name
+      ]);
+
+      return $this->setTemplate('error.tpl');
+    }
 
     $this->context->smarty->assign([
       'moduleName' => $this->module->name,

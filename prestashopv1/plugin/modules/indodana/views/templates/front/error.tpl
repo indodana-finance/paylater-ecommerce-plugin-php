@@ -30,4 +30,9 @@
 			<li>{$error|escape:'htmlall':'UTF-8'}.</li>
 		{/foreach}
 	</ul>
+  <p class="cart_navigation clearfix" id="cart_navigation">
+			<a class="button-exclusive btn btn-default" href="{$smarty.const._PS_BASE_URL_}">
+				<i class="icon-chevron-left"></i> {l s='Back to home' mod="`$moduleName`"}
+			</a>
+		</p>
 </div>

@@ -43,6 +43,17 @@ class IndodanaValidationModuleFrontController extends ModuleFrontController
      */
     $cart = $this->context->cart;
 
+    // show error page when cart is empty
+    if (!Validate::isLoadedObject($cart)) {
+      $this->errors[] = $this->module->l('Cart is empty');
+      $this->context->smarty->assign([
+        'baseUrl' => _PS_BASE_URL_,
+        'moduleName' =>  $this->module->name
+      ]);
+
+      return $this->setTemplate('error.tpl');
+    }
+
     if (
       $cart->id_customer == 0
       || $cart->id_address_delivery == 0
