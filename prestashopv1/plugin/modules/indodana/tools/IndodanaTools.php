@@ -47,12 +47,13 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
       } else {
         // for prestashop v1.6, prestashop v1.6 doesn't provide product price 'reduction'
         // we need to calculate 'reduction' manually
-        $discount += ($product['price_without_reduction'] - $product['price_with_reduction'])
-          * $product['quantity'];
+        $discountProduct = $product['price_without_reduction'] - $product['price_with_reduction'];
+        $discountProduct = $this->convertPrecisionNumber($discountProduct);
+        $discount += $discountProduct * $product['quantity'];
       }
     }
 
-    return $discount;
+    return $this->convertPrecisionNumber($discount);
   }
 
   public function getTotalShippingAmount($order)
@@ -70,7 +71,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
       $taxTotal += $taxProduct * $product['quantity'];
     }
 
-    return $taxTotal;
+    return $this->convertPrecisionNumber($taxTotal);
   }
 
   public function getProducts($order)
@@ -103,26 +104,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
    */
   public function getAdditionalFeeAmount($order)
   {
-    // return 0;
-    $orderTotal = $this->getTotalAmount($order);
-    $discountTotal = $this->getTotalDiscountAmount($order);
-    $shippingTotal = $this->getTotalShippingAmount($order);
-    $taxTotal = $this->getTotalTaxAmount($order);
-    $adminFee = $this->getAdminFeeAmount($order);
-    $insuranceFee = $this->getInsuranceFeeAmount($order);
-    $productTotal = 0;
-
-    $products = $order->getProducts();
-    foreach ($products as $key => $product) {
-      $price = $this->convertPrecisionNumber($this->getPriceWithoutReductionWithoutTax($product));
-      $productTotal += $price * $product['quantity'];
-    }
-
-    $productWithTax = $productTotal + $taxTotal;
-    $manualTotal = $productWithTax + $shippingTotal + $adminFee + $insuranceFee - $discountTotal;
-    $additionalFee = $orderTotal - $manualTotal;
-
-    return $additionalFee;
+    return 0;
   }
 
   /**
