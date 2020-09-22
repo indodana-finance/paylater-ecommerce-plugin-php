@@ -124,7 +124,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
       'firstName' => $customer->firstname,
       'lastName' => $customer->lastname,
       'email' => $customer->email,
-      'phone' => $invoiceDetails->phone
+      'phone' => $this->getPhoneNumber($invoiceDetails)
     ];
   }
 
@@ -138,7 +138,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
       'address' => $invoiceDetails->address1 . ' ' . $invoiceDetails->address2,
       'city' => $invoiceDetails->city,
       'postalCode' => $invoiceDetails->postcode,
-      'phone' => $invoiceDetails->phone,
+      'phone' => $this->getPhoneNumber($invoiceDetails),
       'countryCode' => Configuration::get('INDODANA_STORE_COUNTRY_CODE')
     ];
   }
@@ -153,7 +153,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
       'address' => $deliveryDetails->address1 . ' ' . $deliveryDetails->address2,
       'city' => $deliveryDetails->city,
       'postalCode' => $deliveryDetails->postcode,
-      'phone' => $deliveryDetails->phone,
+      'phone' => $this->getPhoneNumber($deliveryDetails),
       'countryCode' => Configuration::get('INDODANA_STORE_COUNTRY_CODE')
     ];
   }
@@ -184,5 +184,13 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
   private function convertPrecisionNumber($value)
   {
     return (float) number_format($value, 2, '.', '');
+  }
+
+  /**
+   * get a phone number
+   */
+  private function getPhoneNumber($details)
+  {
+    return $details->phone != '' ? $details->phone : $details->phone_mobile;
   }
 }
