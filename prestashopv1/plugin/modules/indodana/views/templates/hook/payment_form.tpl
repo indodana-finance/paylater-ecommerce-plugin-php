@@ -19,7 +19,7 @@
         </label>
         <div class="filler"></div>
         <label class="form-check-label label-amount" for="indodana_selection_{$option.id}">
-          {$currency.sign}{$option.monthlyInstallment|number_format:2:".":","}/bulan
+          {Tools::displayPrice($option.monthlyInstallment)}/bulan
         </label>
       </div>
     {/foreach}
