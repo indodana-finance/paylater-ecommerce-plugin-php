@@ -7,6 +7,7 @@ use IndodanaCommon\IndodanaConstant;
 use IndodanaCommon\IndodanaLogger;
 use IndodanaCommon\IndodanaHelper;
 use IndodanaCommon\MerchantResponse;
+use Indodana\PayLater\Helper\Transaction;
 
 class Notify implements \Indodana\PayLater\Api\NotifyInterface
 {
@@ -18,24 +19,24 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
 
     public function __construct
     (
-            \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
-            \Indodana\PayLater\Helper\Transaction $transaction,
-            \Indodana\PayLater\Helper\Data $helper,
-            \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
-            \Magento\Framework\DB\Transaction $coretransaction
+      \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
+      \Indodana\PayLater\Helper\Transaction $transaction,
+      \Indodana\PayLater\Helper\Data $helper,
+      \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
+      \Magento\Framework\DB\Transaction $coretransaction
     )
     {
-            $this->_order=$orderRepository;
-            $this->_transaction = $transaction;
-            $this->_helper = $helper;
-            $this->_dir = $directoryList;
-            $this->_coretransaction=$coretransaction;
-            /// use by indodana logger
-            //define('INDODANA_LOG_DIR',$this->_dir->getPath('log'). DIRECTORY_SEPARATOR . 'Indodana' . DIRECTORY_SEPARATOR );
+      $this->_order=$orderRepository;
+      $this->_transaction = $transaction;
+      $this->_helper = $helper;
+      $this->_dir = $directoryList;
+      $this->_coretransaction=$coretransaction;
+      /// use by indodana logger
+      //define('INDODANA_LOG_DIR',$this->_dir->getPath('log'). DIRECTORY_SEPARATOR . 'Indodana' . DIRECTORY_SEPARATOR );
 
-            if (!is_dir(INDODANA_LOG_DIR)) {
-              mkdir(INDODANA_LOG_DIR, 0777, true);
-            }
+      if (!is_dir(INDODANA_LOG_DIR)) {
+        mkdir(INDODANA_LOG_DIR, 0777, true);
+      }
 
     }
 
@@ -139,7 +140,7 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
         }  
     
         $transactionStatus = $requestBody['transactionStatus'];
-        $orderId = str_replace('KK','',$requestBody['merchantOrderId']);      
+        $orderId = str_replace(Transaction::PREVIX_ORDERID,'',$requestBody['merchantOrderId']);      
         $order= $this->_order->get($orderId);  
 
         IndodanaLogger::info(

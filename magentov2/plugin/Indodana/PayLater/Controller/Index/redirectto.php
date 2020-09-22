@@ -42,7 +42,7 @@ class Redirectto extends \Magento\Framework\App\Action\Action
     public function getRealOrderId()
     {
         $lastorderId = $this->_checkoutSession->getLastOrderId();
-        
+                       
         return $lastorderId;
     }
 
@@ -58,7 +58,6 @@ class Redirectto extends \Magento\Framework\App\Action\Action
 
     public function execute()
     {   $namespace = '[Magentov2 - Indodana\PayLater\Controller\Index\Redirectto\execute]';            
-        $result = $this->_resultFactory->create();
         $post = $this->_request->getPostValue();
         $paytype=$post['paytype'];
         IndodanaLogger::info(
@@ -95,8 +94,12 @@ class Redirectto extends \Magento\Framework\App\Action\Action
               )
               ->save();
         }
-        $this->_checkoutSession->clearQuote();
-        
+        //$objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 
+        //$cartObject = $objectManager->create('Magento\Checkout\Model\Cart')->truncate(); 
+        //$cartObject->saveQuote();
+        //$this->_checkoutSession->clearQuote();
+         
+        $result = $this->_resultFactory->create();
         return $result->setData(
             [
                 'success' => true,

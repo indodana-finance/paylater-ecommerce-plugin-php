@@ -7,7 +7,7 @@ namespace Indodana\Paylater\Gateway\Request;
 
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
-use Magento\SamplePaymentGateway\Gateway\Http\Client\ClientMock;
+use Indodana\Paylater\Gateway\Http\Client\ClientMock;
 
 class MockDataRequest implements BuilderInterface
 {

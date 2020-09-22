@@ -16,13 +16,21 @@ class Transaction extends AbstractHelper implements IndodanaInterface
   protected $_dir;
   protected $objectManager; 
   protected $imageHelperFactory;
+  protected $_storeManager;
+  protected $_currency;  
+
+  /// to make uniq order id between magento 2.3.5 and 2.4.0
+  /// due to the same configuration (store id, apikey & secret key)
+  public const PREVIX_ORDERID='M235';
 
   public function __construct(
     Data $helper,
     \Magento\Customer\Api\CustomerRepositoryInterface $customerRepositoryInterface,
     \Magento\Framework\UrlInterface $urlInterface,
     \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
-    \Magento\Catalog\Helper\ImageFactory $imageHelperFactory
+    \Magento\Catalog\Helper\ImageFactory $imageHelperFactory,
+    \Magento\Store\Model\StoreManagerInterface $storeManager,
+    \Magento\Directory\Model\Currency $currency      
     )
   {
           $this->_helper = $helper;
@@ -30,6 +38,8 @@ class Transaction extends AbstractHelper implements IndodanaInterface
           $this->_urlInterface = $urlInterface;
           $this->_dir = $directoryList;
           $this->imageHelperFactory = $imageHelperFactory;
+          $this->_storeManager = $storeManager;
+          $this->_currency = $currency; 
           $this->objectManager = \Magento\Framework\App\ObjectManager::getInstance();
           
           /// use by indodana logger
@@ -39,7 +49,6 @@ class Transaction extends AbstractHelper implements IndodanaInterface
             mkdir(INDODANA_LOG_DIR, 0777, true);
           }
 
-          //require_once($this->_dir->getPath(DirectoryList::APP). '/code/Indodana/PayLater/autoload.php' );
   }
 
   public function getIndodanaCommon()
@@ -64,6 +73,16 @@ class Transaction extends AbstractHelper implements IndodanaInterface
   {
     return (float) $order->getGrandTotal();
   }
+
+  public function getMinimumTotalAmount()
+  {
+    return (float) 10000;
+  }
+  public function getOrderCurrencyCode()
+  {
+     return $this->_storeManager->getStore()->getCurrentCurrencyCode();
+  }  
+
 
   public function getTotalDiscountAmount($order)
   {
@@ -222,9 +241,9 @@ class Transaction extends AbstractHelper implements IndodanaInterface
   }
 
   public function checkOut($order,$paytype){
-    $approvedNotificationUrl = $this->_urlInterface->getUrl('indodanapayment/index/notify'); 
+    $approvedNotificationUrl = $this->_urlInterface->getUrl('rest/V1/indodanapayment') .'notify/'; 
     $cancellationRedirectUrl = $this->_urlInterface->getUrl('indodanapayment/index/cancel');
-    $backToStoreUrl = $this->_helper->getStoreUrl();
+    $backToStoreUrl = $this->_urlInterface->getUrl('checkout/onepage/success'); //$this->_helper->getStoreUrl();
 
     /// <!-- Development Mode
     $approvedNotificationUrl = str_replace('localhost','192.168.1.10',$approvedNotificationUrl);
@@ -234,7 +253,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
 
     return $this->getIndodanaCommon()->checkout(
        [      
-       'merchantOrderId'         => $order->getId(),
+       'merchantOrderId'         => Transaction::PREVIX_ORDERID . $order->getId(),
        'totalAmount'             => $this->getTotalAmount($order),
        'discountAmount'          => $this->getTotalDiscountAmount($order),
        'shippingAmount'          => $this->getTotalShippingAmount($order),
@@ -245,7 +264,8 @@ class Transaction extends AbstractHelper implements IndodanaInterface
        'shippingAddress'         => $this->getShippingAddress($order),
        'approvedNotificationUrl' => $approvedNotificationUrl,
        'cancellationRedirectUrl' => $cancellationRedirectUrl,
-       'backToStoreUrl'          => $backToStoreUrl 
+       'backToStoreUrl'          => $backToStoreUrl,
+       'paymentType'              => $paytype  
        ]
      );
   }

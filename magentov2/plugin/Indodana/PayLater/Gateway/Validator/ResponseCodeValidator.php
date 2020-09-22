@@ -7,7 +7,7 @@ namespace Indodana\Paylater\Gateway\Validator;
 
 use Magento\Payment\Gateway\Validator\AbstractValidator;
 use Magento\Payment\Gateway\Validator\ResultInterface;
-use Magento\SamplePaymentGateway\Gateway\Http\Client\ClientMock;
+use Indodana\Paylater\Gateway\Http\Client\ClientMock;
 
 class ResponseCodeValidator extends AbstractValidator
 {

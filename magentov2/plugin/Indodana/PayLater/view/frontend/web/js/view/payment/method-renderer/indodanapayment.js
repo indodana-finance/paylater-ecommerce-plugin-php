@@ -48,6 +48,7 @@ define(
                         'paytype': this.paytype(),
                         'installment':this.installment(),
                         'redirecturl':this.redirecturl()
+                        
                     }
                 };
             },
@@ -84,34 +85,64 @@ define(
 
                             window.checkoutConfig.payment.indodanapayment.installment=data.Installment;
                             window.checkoutConfig.payment.indodanapayment.OrderID=data.OrderID;
+                            window.checkoutConfig.payment.indodanapayment.PassMinAmount=data.PassMinAmount;
+                            window.checkoutConfig.payment.indodanapayment.PassMaxItemPrice=data.PassMaxItemPrice;                            
+
+                            window.checkoutConfig.payment.indodanapayment.installment.forEach(function (d){
+                                d.monthlyInstallment=data.CurCode +' '+  d.monthlyInstallment.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+                            });
                         },
                         //dataType: dataType
                     });
                 }
                 return window.checkoutConfig.payment.indodanapayment.installment;                
             },
+            beforeselectPaymentMethod : function(){
+                if(window.checkoutConfig.payment.indodanapayment.PassMinAmount==false){
+                    alert('Nilai traksaksi Anda tidak sesuai dengan ketentuan penggunaan Indodana PayLater');
+                    return false;
+                }
+                if(window.checkoutConfig.payment.indodanapayment.PassMaxItemPrice==false){
+                    alert('Nilai traksaksi Anda tidak sesuai dengan ketentuan penggunaan Indodana PayLater');
+                    return false;
+                }                
+                return this.selectPaymentMethod();
+            },
             beforePlaceOrder:function(data, event){
+                if(window.checkoutConfig.payment.indodanapayment.PassMinAmount==false){
+                    alert('Nilai traksaksi Anda tidak sesuai dengan ketentuan penggunaan Indodana PayLater');
+                    return false;
+                }
+                if(window.checkoutConfig.payment.indodanapayment.PassMaxItemPrice==false){
+                    alert('Nilai traksaksi Anda tidak sesuai dengan ketentuan penggunaan Indodana PayLater');
+                    return false;
+                }                
+
                 if(window.checkoutConfig.payment.indodanapayment.paytype==''){
                     alert('Silahkan pilih tenor cicilan');
                     return false;
                 }
+
                   return this.placeOrder(data,event);
             }
 
             ,afterPlaceOrder:function(){
+                
                 var ptype=window.checkoutConfig.payment.indodanapayment.paytype;
                 this.redirectAfterPlaceOrder = false;
                 var strurl =url.build('indodanapayment/index/redirectto')
+
                 $.ajax({
+                    //async:true,
                     type: "POST",
                     url: strurl,
                     data: {paytype:ptype},
-                    success: function(data){
+                    success: function(data){                        
                         window.checkoutConfig.payment.indodanapayment.redirecturl=data.Order;
                         window.location.replace(window.checkoutConfig.payment.indodanapayment.redirecturl);
                     },
-                    //dataType: dataType
                   });
+                  return true;
             }
         });
     }

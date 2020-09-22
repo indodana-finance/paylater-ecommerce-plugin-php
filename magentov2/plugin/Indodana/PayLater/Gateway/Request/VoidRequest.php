@@ -7,7 +7,7 @@ namespace Indodana\Paylater\Gateway\Request;
 
 use Magento\Payment\Gateway\ConfigInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
-use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
+use Indodana\Paylater\Data\PaymentDataObjectInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
 
 class VoidRequest implements BuilderInterface

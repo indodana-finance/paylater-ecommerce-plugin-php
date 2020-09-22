@@ -8,7 +8,7 @@ namespace Indodana\Paylater\Gateway\Http;
 use Magento\Payment\Gateway\Http\TransferBuilder;
 use Magento\Payment\Gateway\Http\TransferFactoryInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
-use Magento\SamplePaymentGateway\Gateway\Request\MockDataRequest;
+use Indodana\Paylater\Gateway\Request\MockDataRequest;
 
 class TransferFactory implements TransferFactoryInterface
 {
