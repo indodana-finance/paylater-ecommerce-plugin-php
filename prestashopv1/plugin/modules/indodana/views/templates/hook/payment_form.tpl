@@ -2,7 +2,7 @@
  * Form to be displayed in the payment step
  *}
 <form method="post" action="{$action}" class="form-indodana">
-  <p>Pay with installment via our Paylater product.</p>
+  <p>{$description}</p>
   <div class="indodana-payment-option">
     {foreach from=$installmentOptions item=option}
       <div class="form-check">

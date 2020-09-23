@@ -44,7 +44,7 @@
       </h3>
 			<p class="cheque-indent">
         <strong class="dark">
-          {l s="Pay with installment via our Paylater product." mod="`$moduleName`"}
+          {l s=$description mod="`$moduleName`"}
         </strong>
       </p>
        {foreach from=$installmentOptions item=option}

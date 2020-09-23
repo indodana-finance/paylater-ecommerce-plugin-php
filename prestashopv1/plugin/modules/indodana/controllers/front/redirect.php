@@ -72,6 +72,7 @@ class IndodanaRedirectModuleFrontController extends ModuleFrontController
     $this->context->smarty->assign([
       'moduleName' => $this->module->name,
       'displayName' => $this->module->displayName,
+      'description' => Configuration::get('INDODANA_DESCRIPTION'),
       'indodanaLogo' => IndodanaCommon\IndodanaConstant::LOGO_URL,
       'cartId' => Context::getContext()->cart->id,
       'secureKey' => Context::getContext()->customer->secure_key,
