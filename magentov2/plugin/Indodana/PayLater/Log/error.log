@@ -1,2 +1,0 @@
-[INDODANA][2020-09-10 05:51:07][/magentoce240s/indodanapayment/index/redirectto][Common-Checkout] Request Exception: {"items":[[],[],{"price":{"integer":"Price must be an integer."}},[]],"sellers":[[]]}
-[INDODANA][2020-09-10 07:11:22][/magentoce240s/indodanapayment/index/redirectto][Common-Checkout] Request Exception: {"items":[[],[],{"price":{"integer":"Price must be an integer."}},{"price":{"integer":"Price must be an integer."}}],"sellers":[[]]}
