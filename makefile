@@ -118,7 +118,7 @@ prestashopv1-test:
 	$(prestashopv1_dir)/vendor/bin/
 
 prestashopv1-serve: prestashopv1-build
-	php7.2 -S localhost:6401 -t $(prestashopv1_build_dir)
+	php5.6 -S localhost:6401 -t $(prestashopv1_build_dir)
 
 prestashopv1-log-tail:
 	tail -f ./$(prestashopv1_build_dir)/library/Indodana/Payment/log/info.log

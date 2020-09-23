@@ -53,7 +53,7 @@ class Indodana extends PaymentModule
 
     parent::__construct();
 
-    $this->displayName = Configuration::get('INDODANA_TITLE') ?? $this->l('Indodana PayLater');
+    $this->displayName = Configuration::get('INDODANA_TITLE') != '' ? Configuration::get('INDODANA_TITLE') : $this->l('Indodana PayLater');
     $this->description = $this->l('Indodana PayLater redirects customers to Indodana during checkout.');
     $this->confirmUninstall = $this->l('Are you sure you want to uninstall this module?');
     $this->limited_countries = ['ID'];
@@ -245,14 +245,14 @@ class Indodana extends PaymentModule
         $isValid[] = false;
       }
 
-      $isValid[] = $this->checkRequiredConfigValue('INDODANA_TITLE');
-      $isValid[] = $this->checkRequiredConfigValue('INDODANA_DESCRIPTION');
-      $isValid[] = $this->checkRequiredConfigValue('INDODANA_STORE_NAME');
-      $isValid[] = $this->checkRequiredConfigValue('INDODANA_STORE_CITY');
-      $isValid[] = $this->checkRequiredConfigValue('INDODANA_STORE_ADDRESS');
-      $isValid[] = $this->checkRequiredConfigValue('INDODANA_DEFAULT_ORDER_PENDING_STATUS');
-      $isValid[] = $this->checkRequiredConfigValue('INDODANA_DEFAULT_ORDER_SUCCESS_STATUS');
-      $isValid[] = $this->checkRequiredConfigValue('INDODANA_DEFAULT_ORDER_FAILED_STATUS');
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_TITLE', $output);
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_DESCRIPTION', $output);
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_STORE_NAME', $output);
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_STORE_CITY', $output);
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_STORE_ADDRESS', $output);
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_DEFAULT_ORDER_PENDING_STATUS', $output);
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_DEFAULT_ORDER_SUCCESS_STATUS', $output);
+      $isValid[] = $this->checkRequiredConfigValue('INDODANA_DEFAULT_ORDER_FAILED_STATUS', $output);
 
       $this->postProcess();
 
@@ -264,7 +264,7 @@ class Indodana extends PaymentModule
     return $output . $this->renderForm();
   }
 
-  private function checkRequiredConfigValue($configName)
+  private function checkRequiredConfigValue($configName, &$output)
   {
     $isValid = true;
     if ((empty(Tools::getValue($configName)))) {
@@ -602,6 +602,7 @@ class Indodana extends PaymentModule
     $formAction = $this->context->link->getModuleLink($this->name, 'validation', [], true);
     $this->smarty->assign([
       'action' => $formAction,
+      'description' => Configuration::get('INDODANA_DESCRIPTION'),
       'installmentOptions' => $installmentOptions,
       'displayName' => $this->displayName,
       'totalAmount' => $totalAmount
@@ -624,6 +625,11 @@ class Indodana extends PaymentModule
   {
     foreach ($this->moduleConfigs as $key => $value) {
       $env = Configuration::get('INDODANA_ENVIRONMENT');
+
+      // skip title check
+      if ($key == 'INDODANA_TITLE') {
+        continue;
+      }
 
       // skip api key/secret check when environment is different
       if ($env == 'SANDBOX' && ($key == 'INDODANA_API_KEY_PRODUCTION' || $key == 'INDODANA_API_SECRET_PRODUCTION')) {
