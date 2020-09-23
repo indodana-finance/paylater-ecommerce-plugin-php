@@ -48,7 +48,6 @@ class Transaction extends AbstractHelper implements IndodanaInterface
           if (!is_dir(INDODANA_LOG_DIR)) {
             mkdir(INDODANA_LOG_DIR, 0777, true);
           }
-
   }
 
   public function getIndodanaCommon()

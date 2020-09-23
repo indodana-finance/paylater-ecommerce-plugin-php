@@ -59,12 +59,22 @@ class Data extends AbstractHelper
 
   public function getApiKey()
   {
-    return $this->_scopeConfig->getValue('payment/indodanapayment/api_key', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    if($this->getEnvironment()=='SANDBOX'){
+      return $this->_scopeConfig->getValue('payment/indodanapayment/api_key_sandbox', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);      
+    }else{
+      return $this->_scopeConfig->getValue('payment/indodanapayment/api_key', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    }
+    
   }
 
   public function getApiSecret()
   {
-    return $this->_scopeConfig->getValue('payment/indodanapayment/api_secret', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    if($this->getEnvironment()=='SANDBOX'){
+      return $this->_scopeConfig->getValue('payment/indodanapayment/api_secret_sandbox', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    }else{
+      return $this->_scopeConfig->getValue('payment/indodanapayment/api_secret', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    }
+    
   }
 
   public function getEnvironment()
