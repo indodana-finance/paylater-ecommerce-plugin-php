@@ -26,4 +26,13 @@
                 |-Model
                 |-Observer
                 |-view
+    for detail guidelines can check at https://devdocs.magento.com/guides/v2.4/extension-dev-guide/build/module-file-structure.html
+
+
+
+# Plugin workflow 
+    ![alt Plugin workflow](docs/flow.png)
+    more Information check at https://devdocs.magento.com/guides/v2.3/payments-integrations/payment-gateway/payment-gateway-intro.html
+    and https://devdocs.magento.com/guides/v2.4/payments-integrations/payment-gateway/payment-gateway-structure.html
+
                 
