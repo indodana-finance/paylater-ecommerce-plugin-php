@@ -9,8 +9,6 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
 {
   public $indodanaCommon;
 
-  public $additionalFee = 0;
-
   public function getIndodanaCommon()
   {
     if (!isset($this->indodanaCommon)) {
@@ -35,14 +33,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
 
   public function getTotalAmount($order)
   {
-    $total = $order->getOrderTotal(true, Cart::BOTH);
-    $totalRoundUp = ceil($total);
-
-    // difference between totalRoundUp and total is additional fee
-    $difference = $totalRoundUp - $total;
-    $this->additionalFee = $this->convertPrecisionNumber($difference);
-
-    return $totalRoundUp;
+    return ceil($order->getOrderTotal(true, Cart::BOTH));
   }
 
   public function getTotalDiscountAmount($order)
@@ -113,7 +104,11 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
    */
   public function getAdditionalFeeAmount($order)
   {
-    return $this->additionalFee;
+    $orderTotal = $this->getTotalAmount($order);
+    $manualTotal = $this->getManualOrderTotal($order);
+    $additionalFee = $orderTotal - $manualTotal;
+
+    return $this->convertPrecisionNumber($additionalFee);
   }
 
   /**
@@ -201,5 +196,32 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
   private function getPhoneNumber($details)
   {
     return $details->phone != '' ? $details->phone : $details->phone_mobile;
+  }
+
+  /**
+   * calcaulate order total manually
+   */
+  private function getManualOrderTotal($order)
+  {
+    $discountTotal = $this->getTotalDiscountAmount($order);
+    $shippingTotal = $this->getTotalShippingAmount($order);
+    $taxTotal = $this->getTotalTaxAmount($order);
+    $adminFee = $this->getAdminFeeAmount($order);
+    // $additionalFee = $this->getAdditionalFeeAmount($order);
+    $insuranceFee = $this->getInsuranceFeeAmount($order);
+    $productTotal = 0;
+
+    $products = $order->getProducts();
+    foreach ($products as $product) {
+      $price = $this->convertPrecisionNumber($this->getPriceWithoutReductionWithoutTax($product));
+      $qty = $product['quantity'];
+
+      $productTotal += $price * $qty;
+    }
+    $productTotal = $this->convertPrecisionNumber($productTotal);
+
+    $manualTotal = $shippingTotal + $taxTotal + $productTotal + $adminFee + $insuranceFee - $discountTotal;
+
+    return $this->convertPrecisionNumber($manualTotal);
   }
 }
