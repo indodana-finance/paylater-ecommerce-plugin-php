@@ -100,7 +100,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
   }
 
   /**
-   * Prestashop doesn't have additional fee feature
+   * difference between total round up and total manually is additional fee
    */
   public function getAdditionalFeeAmount($order)
   {
@@ -207,7 +207,6 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
     $shippingTotal = $this->getTotalShippingAmount($order);
     $taxTotal = $this->getTotalTaxAmount($order);
     $adminFee = $this->getAdminFeeAmount($order);
-    // $additionalFee = $this->getAdditionalFeeAmount($order);
     $insuranceFee = $this->getInsuranceFeeAmount($order);
     $productTotal = 0;
 
