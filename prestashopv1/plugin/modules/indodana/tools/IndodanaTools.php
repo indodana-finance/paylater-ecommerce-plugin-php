@@ -9,6 +9,8 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
 {
   public $indodanaCommon;
 
+  public $additionalFee = 0;
+
   public function getIndodanaCommon()
   {
     if (!isset($this->indodanaCommon)) {
@@ -33,7 +35,14 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
 
   public function getTotalAmount($order)
   {
-    return $order->getOrderTotal(true, Cart::BOTH);
+    $total = $order->getOrderTotal(true, Cart::BOTH);
+    $totalRoundUp = ceil($total);
+
+    // difference between totalRoundUp and total is additional fee
+    $difference = $totalRoundUp - $total;
+    $this->additionalFee = $this->convertPrecisionNumber($difference);
+
+    return $totalRoundUp;
   }
 
   public function getTotalDiscountAmount($order)
@@ -104,7 +113,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
    */
   public function getAdditionalFeeAmount($order)
   {
-    return 0;
+    return $this->additionalFee;
   }
 
   /**
