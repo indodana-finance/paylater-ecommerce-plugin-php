@@ -91,6 +91,16 @@ define(
                             window.checkoutConfig.payment.indodanapayment.installment.forEach(function (d){
                                 d.monthlyInstallment=data.CurCode +' '+  d.monthlyInstallment.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
                             });
+                            $('#dvmsgIndodana').hide();
+                            if(window.checkoutConfig.payment.indodanapayment.PassMinAmount==false){
+                                $('#dvmsgIndodana').show();
+                                $("#indodanapayment").prop('disabled', true);
+                            }
+                            if(window.checkoutConfig.payment.indodanapayment.PassMaxItemPrice==false){
+                                $('#dvmsgIndodana').show();
+                                $("#indodanapayment").prop('disabled', true);
+                            }                
+            
                         },
                         //dataType: dataType
                     });
@@ -99,22 +109,26 @@ define(
             },
             beforeselectPaymentMethod : function(){
                 if(window.checkoutConfig.payment.indodanapayment.PassMinAmount==false){
-                    alert('Nilai traksaksi Anda tidak sesuai dengan ketentuan penggunaan Indodana PayLater');
+                    $('#dvmsgIndodana').show();
+                    $("#indodanapayment").prop('disabled', true);
                     return false;
                 }
                 if(window.checkoutConfig.payment.indodanapayment.PassMaxItemPrice==false){
-                    alert('Nilai traksaksi Anda tidak sesuai dengan ketentuan penggunaan Indodana PayLater');
+                    $('#dvmsgIndodana').show();
+                    $("#indodanapayment").prop('disabled', true);
                     return false;
                 }                
                 return this.selectPaymentMethod();
             },
             beforePlaceOrder:function(data, event){
                 if(window.checkoutConfig.payment.indodanapayment.PassMinAmount==false){
-                    alert('Nilai traksaksi Anda tidak sesuai dengan ketentuan penggunaan Indodana PayLater');
+                    $('#dvmsgIndodana').show();
+                    $("#indodanapayment").prop('disabled', true);
                     return false;
                 }
                 if(window.checkoutConfig.payment.indodanapayment.PassMaxItemPrice==false){
-                    alert('Nilai traksaksi Anda tidak sesuai dengan ketentuan penggunaan Indodana PayLater');
+                    $('#dvmsgIndodana').show();
+                    $("#indodanapayment").prop('disabled', true);
                     return false;
                 }                
 

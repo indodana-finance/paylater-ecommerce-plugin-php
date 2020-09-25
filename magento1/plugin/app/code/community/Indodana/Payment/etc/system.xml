@@ -1,0 +1,200 @@
+<config>
+    <sections>
+        <payment>
+            <groups>
+                <indodanapayment translate="label">
+                    <label>Indodana Payment</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>5</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <heading_account translate="label">
+                            <label>Indodana Settings</label>
+                            <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                        </heading_account>
+                        <active translate="label">
+                            <label>Enabled</label>
+                            <config_path>payment/indodanapayment/active</config_path>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </active>
+                        <title translate="label">
+                            <label>Title</label>
+                            <config_path>payment/indodanapayment/title</config_path>
+                            <frontend_type>text</frontend_type>
+                            <validate>required-entry</validate>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </title>                        
+                        <store_name translate="label">
+                            <label>Store Name</label>
+                            <config_path>payment/indodanapayment/store_name</config_path>
+                            <frontend_type>text</frontend_type>
+                            <validate>required-entry</validate>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </store_name>                        
+                        <store_url translate="label">
+                            <label>Store URL</label>
+                            <config_path>payment/indodanapayment/store_url</config_path>
+                            <frontend_type>text</frontend_type>
+                            <validate>required-entry validate-clean-url</validate>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </store_url>                        
+                        <store_email translate="label">
+                            <label>Store Email</label>
+                            <config_path>payment/indodanapayment/store_email</config_path>
+                            <frontend_type>text</frontend_type>
+                            <validate>required-entry validate-email</validate>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </store_email>                        
+                        <store_phone translate="label">
+                            <label>Store Phone</label>
+                            <config_path>payment/indodanapayment/store_phone</config_path>
+                            <frontend_type>text</frontend_type>
+                            <validate>required-entry</validate>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </store_phone>                        
+                        <store_country_code translate="label">
+                            <label>Store Country Code</label>
+                            <config_path>payment/indodanapayment/store_country_code</config_path>
+                            <frontend_type>select</frontend_type>
+                            <source_model>Indodana_Payment_Model_System_Config_Source_CountryCode</source_model>
+                            <validate>required-entry</validate>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </store_country_code>                        
+                        <store_city translate="label">
+                            <label>Store City</label>
+                            <config_path>payment/indodanapayment/store_city</config_path>
+                            <frontend_type>text</frontend_type>
+                            <validate>required-entry</validate>
+                            <sort_order>9</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </store_city>                        
+                        <store_address translate="label">
+                            <label>Store Address</label>
+                            <config_path>payment/indodanapayment/store_address</config_path>
+                            <frontend_type>textarea</frontend_type>
+                            <validate>required-entry</validate>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </store_address>                        
+                        <store_postal_code translate="label">
+                            <label>Store Postal Code</label>
+                            <config_path>payment/indodanapayment/store_postal_code</config_path>
+                            <frontend_type>text</frontend_type>
+                            <validate>required-entry validate-length minimum-length-5 maximum-length-5</validate>
+                            <sort_order>11</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </store_postal_code>                        
+                        <api_key translate="label">
+                            <label>API Key</label>
+                            <config_path>payment/indodanapayment/api_key</config_path>
+                            <frontend_type>text</frontend_type>
+                            <validate>required-entry</validate>
+                            <sort_order>12</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </api_key>
+                        <api_secret translate="label">
+                            <label>API Secret</label>
+                            <config_path>payment/indodanapayment/api_secret</config_path>
+                            <frontend_type>text</frontend_type>
+                            <validate>required-entry</validate>
+                            <sort_order>13</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </api_secret>
+                        <environment translate="label">
+                            <label>Environment</label>
+                            <config_path>payment/indodanapayment/environment</config_path>
+                            <frontend_type>select</frontend_type>
+                            <source_model>Indodana_Payment_Model_System_Config_Source_Environment</source_model>
+                            <validate>required-entry</validate>
+                            <sort_order>14</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </environment>
+                        <default_order_pending_status translate="label">
+                            <label>Default Order Pending Status</label>
+                            <config_path>payment/indodanapayment/default_order_pending_status</config_path>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_order_status</source_model>
+                            <validate>required-entry</validate>
+                            <sort_order>15</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </default_order_pending_status>
+                        <default_order_success_status translate="label">
+                            <label>Default Order Success Status</label>
+                            <config_path>payment/indodanapayment/default_order_success_status</config_path>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_order_status</source_model>
+                            <validate>required-entry</validate>
+                            <sort_order>16</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </default_order_success_status>
+                        <default_order_failed_status translate="label">
+                            <label>Default Order Failed Status</label>
+                            <config_path>payment/indodanapayment/default_order_failed_status</config_path>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_order_status</source_model>
+                            <validate>required-entry</validate>
+                            <sort_order>17</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </default_order_failed_status>
+                        <sort_order translate="label">
+                            <label>Sort Order</label>
+                            <config_path>payment/indodanapayment/sort_order</config_path>
+                            <frontend_type>text</frontend_type>
+                            <validate>required-entry validate-digits</validate>
+                            <sort_order>18</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>            
+                        </sort_order>
+                    </fields>
+                </indodanapayment>
+            </groups>
+        </payment>
+    </sections>
+</config>

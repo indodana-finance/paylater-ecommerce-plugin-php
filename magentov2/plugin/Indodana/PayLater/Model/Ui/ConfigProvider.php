@@ -38,7 +38,7 @@ final class ConfigProvider implements ConfigProviderInterface
                     ],
                     'installment'=>'',
                     'paytype'=>'',
-                    'logo' =>$this->_assetRepo->getUrl("Indodana_PayLater::images/logo-indodana.PNG")
+                    'logo' =>$this->_assetRepo->getUrl("Indodana_PayLater::images/Indodana-color.png")
 
                 ]
             ]

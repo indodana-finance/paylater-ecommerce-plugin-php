@@ -1,0 +1,165 @@
+
+<div id='content'>
+  <img src='<?php echo $this->getSkinUrl('images/indodana-small.png') ?>' class='indodana-header-image'/>
+  <input type='hidden' value='<?=$orderData; ?>' id='orderData'/>
+  <input type='hidden' value='<?=$authorization; ?>' id='authorization'/>
+  <input type='hidden' value='<?=$merchantConfirmPaymentUrl; ?>' id='merchantConfirmPaymentUrl' />
+  <input type='hidden' value='<?=$indodanaBaseUrl; ?>' id='indodanaBaseUrl' />
+  <div class='checkout-product'>
+    <?php foreach($paymentOptions as $paymentOption) { ?>
+      <label class='payment-option'>
+        <input type='radio' name='paymentSelection' class='checkbox-default' value='<?=$paymentOption['id'] ?>'>
+        <span class="checkbox checkbox-styled"></span>
+        <p><?=$paymentOption['paymentType']; ?></p>
+        <div class="filler"></div>
+        <p><?= Mage::helper('core')->currency($paymentOption['monthlyInstallment'], true, false) . '/bulan'; ?></p>
+      </label>
+    <?php } ?>
+    <div class='right'>
+      <input type='button' class="confirm-button" style='float: right;' value='Konfirmasi' id='confirmButton' onclick='submit();'/>
+    </div>
+  </div>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+  function getCheckedRadioValue(name) {
+      var elements = document.getElementsByName(name);
+      for (var i=0, len=elements.length; i<len; ++i) {
+        if (elements[i].checked) return elements[i].value;
+      }
+  }  
+
+  function confirmPayment(orderId, success) {
+    var confirmPaymentUrl = document.getElementById('merchantConfirmPaymentUrl').value;
+    var data = {
+      orderId: orderId
+    }
+    return axios.post(confirmPaymentUrl, data, {
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json'
+      },    
+    });
+  }
+
+  function getAuthorizationHeader() {
+    var authorization = document.getElementById('authorization').value;
+    return authorization;
+  }
+
+  function getCheckoutUrl(paymentOptionId, paymentData) {
+    var data = paymentData;
+    var baseUrl = document.getElementById('indodanaBaseUrl').value;
+    data.paymentType = paymentOptionId;
+    
+    return axios.post(`${baseUrl}/v1/checkout_url`, data, {
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': getAuthorizationHeader()
+      },
+    })
+      .then(response => response.data);
+  }
+
+  function submit() {
+    var jsonData = document.getElementById('orderData').value;
+    var data = JSON.parse(jsonData);
+    var paymentOptionId = getCheckedRadioValue('paymentSelection');
+    confirmPayment(data.transactionDetails.merchantOrderId)
+      .then(response => getCheckoutUrl(paymentOptionId, data))
+      .then(data => {
+        window.location = data.redirectUrl;
+      });
+  }
+  </script>
+
+  <style>
+    .checkbox-default {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+    
+    .checkbox-default:checked ~ .checkbox {
+      background-color: #3db3b3;
+    }
+
+    .checkbox-default:checked ~ .checkbox::after {
+      content: '';
+      display: block;
+      margin-left: 4px;
+      margin-top: 2px;
+      width: 4px;
+      height: 8px;
+      border: solid #ffffff;
+      border-width: 0 2px 2px 0;
+      -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+      transform: rotate(45deg);
+    }
+
+    .payment-option > p {
+      font-size: 14px;
+      font-weight: 300;
+    }
+
+    .checkbox-default:checked ~ p {
+      font-weight: bold;
+    }
+
+    .checkbox-styled {
+      height: 15px;
+      width: 15px;
+      min-width: 15px;
+      border-radius: 50%;
+      margin-right: 5px;
+      background-color: #ffffff;
+      border: 1px solid #3db3b3;
+    }
+
+    .filler {
+      flex-grow: 1;
+    }
+
+    .payment-option > * {
+      display: inline-block;
+    }
+
+    .payment-option {
+      width: 100%;
+      display: flex;
+      padding: 0.5em 0 0.5em 0;
+    }
+
+    .confirm-button {
+      background: #FFae31;
+      color: #573a10;
+      border: none;
+      font-size: 15px;
+      line-height: 18px;
+      border-radius: 22.5px;
+      padding: 8px 24px;
+      min-height: 40px;
+      height: auto;
+      cursor: pointer;
+      -webkit-transition: opacity .375s ease;
+      transition: opacity .375s ease;
+      text-transform: uppercase;
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+
+    .indodana-header-image {
+      max-width: 40%;
+    }
+
+    .checkout-product {
+      padding: 1em 0.5em 1em 0.5em;
+      overflow: hidden;
+    }
+  </style>
+</div>
