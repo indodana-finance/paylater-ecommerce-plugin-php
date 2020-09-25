@@ -16,7 +16,7 @@
                 <default_order_pending_status>pending_payment</default_order_pending_status>
                 <payment_action>authorize</payment_action>
                 <title>Indodana PayLater</title>
-                <description>Indodana PayLater</description>
+                <description>Pay with installment via our PayLater Product</description>
                 <currency>IDR</currency>
                 <environment>SANDBOX</environment>
                 <can_authorize>1</can_authorize>
@@ -29,7 +29,7 @@
                 <paymentInfoKeys>FRAUD_MSG_LIST</paymentInfoKeys>
                 <privateInfoKeys>FRAUD_MSG_LIST</privateInfoKeys>
                 <store_id>5e96ac2c-e123-11ea-9c01-00163e014000</store_id>
-                <store_name>nama toko</store_name>
+                <store_name>store name</store_name>
                 <store_phone>0811111</store_phone>
                 <store_url>www.google.com</store_url>
                 <store_city>SUB</store_city>
