@@ -1,0 +1,35 @@
+{
+  "name": "indodana/indodana-paylater-magento2",
+  "description": "Indodana PayLater plugin for Magento V2",
+  "type":"magento2-module",
+  "authors": [
+    {
+      "name": "Indodana",
+      "email": "dev@indodana.com"
+    },
+    {
+      "name": "Dian Febrianto",
+      "email": "dian.febrianto@gmail.com"
+    }
+    ],
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../../../../packages/common",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
+  "require": {
+    "indodana/indodana-paylater-ecommerce-common": "@dev"
+  },
+  "autoload": {
+    "files": [
+      "plugin/Indodana/PayLater/registrations.php"
+    ],
+    "psr-4": {
+      "Indodana\\PayLater\\":"plugin/"
+    }
+  }
+}

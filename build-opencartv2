@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -e
-
-. ./build
-
-build_plugin "opencartv2" "system/library/indodana"
