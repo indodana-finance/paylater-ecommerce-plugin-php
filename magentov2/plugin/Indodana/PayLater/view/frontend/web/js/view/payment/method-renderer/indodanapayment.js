@@ -71,9 +71,6 @@ define(
                 
                 return true;
             },            
-            
-    
-
             getPaymentOptions:function(){
                 if (window.checkoutConfig.payment.indodanapayment.installment==''){                
                     $.ajax({
@@ -86,21 +83,30 @@ define(
                             window.checkoutConfig.payment.indodanapayment.installment=data.Installment;
                             window.checkoutConfig.payment.indodanapayment.OrderID=data.OrderID;
                             window.checkoutConfig.payment.indodanapayment.PassMinAmount=data.PassMinAmount;
-                            window.checkoutConfig.payment.indodanapayment.PassMaxItemPrice=data.PassMaxItemPrice;                            
-
-                            window.checkoutConfig.payment.indodanapayment.installment.forEach(function (d){
-                                d.monthlyInstallment=data.CurCode +' '+  d.monthlyInstallment.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
-                            });
+                            window.checkoutConfig.payment.indodanapayment.PassMaxItemPrice=data.PassMaxItemPrice;  
+                            window.checkoutConfig.payment.indodanapayment.ErrMsg=data.ErrMsg;
                             $('#dvmsgIndodana').hide();
-                            if(window.checkoutConfig.payment.indodanapayment.PassMinAmount==false){
+                            if (data.IsError == true){
                                 $('#dvmsgIndodana').show();
                                 $("#indodanapayment").prop('disabled', true);
+                                $("#lblErrMsgIndodana").html(data.ErrMsg);
+                            } else{
+                                window.checkoutConfig.payment.indodanapayment.installment.forEach(function (d){
+                                    d.monthlyInstallment=data.CurCode +' '+  d.monthlyInstallment.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+                                });    
+                                
+                                if(window.checkoutConfig.payment.indodanapayment.PassMinAmount==false){
+                                    $('#dvmsgIndodana').show();
+                                    $("#indodanapayment").prop('disabled', true);
+                                    $("#lblErrMsgIndodana").html(data.ErrMsg);
+                                }
+                                if(window.checkoutConfig.payment.indodanapayment.PassMaxItemPrice==false){
+                                    $('#dvmsgIndodana').show();
+                                    $("#indodanapayment").prop('disabled', true);
+                                    $("#lblErrMsgIndodana").html(data.ErrMsg);
+                                }                
+    
                             }
-                            if(window.checkoutConfig.payment.indodanapayment.PassMaxItemPrice==false){
-                                $('#dvmsgIndodana').show();
-                                $("#indodanapayment").prop('disabled', true);
-                            }                
-            
                         },
                         //dataType: dataType
                     });
@@ -111,11 +117,13 @@ define(
                 if(window.checkoutConfig.payment.indodanapayment.PassMinAmount==false){
                     $('#dvmsgIndodana').show();
                     $("#indodanapayment").prop('disabled', true);
+                    $("#lblErrMsgIndodana").html(window.checkoutConfig.payment.indodanapayment.ErrMsg);
                     return false;
                 }
                 if(window.checkoutConfig.payment.indodanapayment.PassMaxItemPrice==false){
                     $('#dvmsgIndodana').show();
                     $("#indodanapayment").prop('disabled', true);
+                    $("#lblErrMsgIndodana").html(window.checkoutConfig.payment.indodanapayment.ErrMsg);
                     return false;
                 }                
                 return this.selectPaymentMethod();

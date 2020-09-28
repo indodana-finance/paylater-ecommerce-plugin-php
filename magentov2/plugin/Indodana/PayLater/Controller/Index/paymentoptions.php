@@ -1,6 +1,7 @@
 <?php
 
 namespace Indodana\PayLater\Controller\Index;
+use Exception;
 use Indodana\PayLater\Helper\Transaction;
 
 class paymentoptions extends \Magento\Framework\App\Action\Action
@@ -28,7 +29,16 @@ class paymentoptions extends \Magento\Framework\App\Action\Action
         $result = $this->_resultFactory->create();
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
         $cart = $objectManager->get('\Magento\Checkout\Model\Cart');         
-        $Installment=$this->_transaction->getInstallmentOptions($cart->getQuote());
+        $errMsg='Nilai transaksi Anda tidak sesuai dengan ketentuan penggunaan Indodana Paylater';
+        $isError = false;
+        $Installment=[];
+        try{
+            $Installment=$this->_transaction->getInstallmentOptions($cart->getQuote());
+        }catch (Exception $e) {
+            $isError=true;
+            $errMsg= 'Caught exception: '.  $e->getMessage() . "\n";
+        }
+        
         $passMinAmount = $this->_transaction->getMinimumTotalAmount() < $this->_transaction->getTotalAmount($cart->getQuote());
         $products = $this->_transaction->getProducts($cart->getQuote());
         $passMaxPrice =true;
@@ -43,7 +53,9 @@ class paymentoptions extends \Magento\Framework\App\Action\Action
                 'OrderID' => $cart->getQuote()->getId(),
                 'CurCode' => $this->_transaction->getOrderCurrencyCode($cart->getQuote()),
                 'PassMinAmount' => $passMinAmount ,
-                'PassMaxItemPrice' => $passMaxPrice
+                'PassMaxItemPrice' => $passMaxPrice ,
+                'IsError' => $isError,
+                'ErrMsg' => $errMsg
             ]
             );    
     }
