@@ -39,14 +39,11 @@ class paymentoptions extends \Magento\Framework\App\Action\Action
             $errMsg= 'Caught exception: '.  $e->getMessage() . "\n";
         }
         
-        $passMinAmount = $this->_transaction->getMinimumTotalAmount() < $this->_transaction->getTotalAmount($cart->getQuote());
+        $totalOrder = $this->_transaction->getTotalAmount($cart->getQuote());
+        $passMinAmount = $this->_transaction->getMinimumTotalAmount() < $totalOrder;
         $products = $this->_transaction->getProducts($cart->getQuote());
-        $passMaxPrice =true;
-        foreach($products as $product) {
-            if($product['price'] > 25000000){
-                $passMaxPrice=false;                    
-            }
-        }
+        $passMaxPrice = $totalOrder <= 25000000;
+
         return $result->setData(
             [
                 'Installment' => $Installment,
