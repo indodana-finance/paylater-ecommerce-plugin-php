@@ -250,13 +250,13 @@ class Transaction extends AbstractHelper implements IndodanaInterface
     $backToStoreUrl = str_replace('localhost','192.168.1.10',$backToStoreUrl);
     /// -->
 
-    $roundAmount = round($this->getTotalAmount($order)) - $this->getTotalAmount($order);
+    $roundAmount = ceil($this->getTotalAmount($order)) - $this->getTotalAmount($order);
     $roundAmount = round($roundAmount,2);
 
     return $this->getIndodanaCommon()->checkout(
        [      
        'merchantOrderId'         => Transaction::PREVIX_ORDERID . $order->getId(),
-       'totalAmount'             => round($this->getTotalAmount($order)),
+       'totalAmount'             => ceil($this->getTotalAmount($order)),
        'discountAmount'          => $this->getTotalDiscountAmount($order),
        'shippingAmount'          => $this->getTotalShippingAmount($order),
        'taxAmount'               => $this->getTotalTaxAmount($order),
