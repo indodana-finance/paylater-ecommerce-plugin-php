@@ -79,12 +79,20 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
     $items = [];
     $products = $order->getProducts();
     foreach ($products as $product) {
+      $image = Image::getCover($product['id_product']);
+      $link = new Link();
+      $productLink = $link->getProductLink($product);
+      $imageLink = $link->getImageLink($product['link_rewrite'], $image['id_image']);
+
       $items[] = [
         'id' => $product['reference'],
         'name' => $product['name'],
         'price' => $this->convertPrecisionNumber($this->getPriceWithoutReductionWithoutTax($product)),
         'quantity' => $product['quantity'],
         'category'  => IndodanaCommon\IndodanaConstant::DEFAULT_ITEM_CATEGORY,
+        'url' => $productLink,
+        'imageUrl' => $imageLink,
+        'type' => '',
       ];
     }
 
@@ -199,7 +207,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
   }
 
   /**
-   * calcaulate order total manually
+   * calculate order total manually
    */
   private function getManualOrderTotal($order)
   {
