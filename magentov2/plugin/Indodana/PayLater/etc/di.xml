@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2016 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <preference for="Indodana\PayLater\Api\NotifyInterface" type="Indodana\PayLater\Model\Api\Notify"/>
+
+    <!-- Payment Method Facade configuration -->
+    <virtualType name="PayLaterFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">\Indodana\PayLater\Model\Ui\ConfigProvider::CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Indodana\PayLater\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">PayLaterValueHandlerPool</argument>
+            <argument name="commandPool" xsi:type="object">PayLaterCommandPool</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Configuration reader -->
+    <virtualType name="PayLaterConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">\Indodana\PayLater\Model\Ui\ConfigProvider::CODE</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Logger, initialized with PayLaterConfig -->
+    <virtualType name="PayLaterLogger" type="Magento\Payment\Model\Method\Logger">
+        <arguments>
+            <argument name="config" xsi:type="object">PayLaterConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Indodana\PayLater\Gateway\Http\Client\ClientMock">
+        <arguments>
+            <argument name="logger" xsi:type="object">PayLaterLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Commands infrastructure -->
+    <virtualType name="PayLaterCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="authorize" xsi:type="string">PayLaterAuthorizeCommand</item>
+                <item name="capture" xsi:type="string">PayLaterCaptureCommand</item>
+                <item name="void" xsi:type="string">PayLaterVoidCommand</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Authorize command -->
+    <virtualType name="PayLaterAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">PayLaterAuthorizationRequest</argument>
+            <argument name="handler" xsi:type="object">PayLaterResponseHandlerComposite</argument>
+            <argument name="transferFactory" xsi:type="object">Indodana\PayLater\Gateway\Http\TransferFactory</argument>
+            <argument name="client" xsi:type="object">Indodana\PayLater\Gateway\Http\Client\ClientMock</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Authorization Request -->
+    <virtualType name="PayLaterAuthorizationRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="transaction" xsi:type="string">Indodana\PayLater\Gateway\Request\AuthorizationRequest</item>
+                <item name="mockData" xsi:type="string">Indodana\PayLater\Gateway\Request\MockDataRequest</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Indodana\PayLater\Gateway\Request\AuthorizationRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">PayLaterConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Capture command -->
+    <virtualType name="PayLaterCaptureCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">Indodana\PayLater\Gateway\Request\CaptureRequest</argument>
+            <argument name="handler" xsi:type="object">Indodana\PayLater\Gateway\Response\TxnIdHandler</argument>
+            <argument name="transferFactory" xsi:type="object">Indodana\PayLater\Gateway\Http\TransferFactory</argument>
+            <argument name="validator" xsi:type="object">Indodana\PayLater\Gateway\Validator\ResponseCodeValidator</argument>
+            <argument name="client" xsi:type="object">Indodana\PayLater\Gateway\Http\Client\ClientMock</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Capture Request -->
+    <type name="Indodana\PayLater\Gateway\Request\CaptureRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">PayLaterConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Void command -->
+    <virtualType name="PayLaterVoidCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">Indodana\PayLater\Gateway\Request\VoidRequest</argument>
+            <argument name="handler" xsi:type="object">Indodana\PayLater\Gateway\Response\TxnIdHandler</argument>
+            <argument name="transferFactory" xsi:type="object">Indodana\PayLater\Gateway\Http\TransferFactory</argument>
+            <argument name="validator" xsi:type="object">Indodana\PayLater\Gateway\Validator\ResponseCodeValidator</argument>
+            <argument name="client" xsi:type="object">Indodana\PayLater\Gateway\Http\Client\ClientMock</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Void Request -->
+    <type name="Indodana\PayLater\Gateway\Request\VoidRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">PayLaterConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Response handlers -->
+    <virtualType name="PayLaterResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="txnid" xsi:type="string">Indodana\PayLater\Gateway\Response\TxnIdHandler</item>
+                <item name="fraud" xsi:type="string">Indodana\PayLater\Gateway\Response\FraudHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Value handlers infrastructure -->
+    <virtualType name="PayLaterValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">PayLaterConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="PayLaterConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">PayLaterConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Indodana\PayLater\Block\Info">
+        <arguments>
+            <argument name="config" xsi:type="object">PayLaterConfig</argument>
+        </arguments>
+    </type>
+
+    <preference for="Indodana\PayLater\Api\HelloInterface"
+                type="Indodana\PayLater\Model\Api\Hello" />
+
+    <preference for="Indodana\PayLater\Api\CustomOrderInterface"
+                type="Indodana\PayLater\Model\Api\CustomOrder" />
+
+</config>
