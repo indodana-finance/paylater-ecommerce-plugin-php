@@ -240,6 +240,21 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     return (float) $cart->get_total_tax();
   }
 
+  public function getTotalAdminFeeAmount($cart)
+  {
+    return (float) 0;
+  }
+
+  public function getTotalAdditionalFeeAmount($cart)
+  {
+    return (float) $cart->get_fee_total();
+  }
+
+  public function getTotalInsuranceFeeAmount($cart)
+  {
+    return (float) 0;
+  }
+
   public function getProducts($cart)
   {
     $cart_items = $cart->get_cart();
@@ -336,11 +351,14 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     $cart = WC()->cart;
 
     $payment_options = $this->get_indodana_common()->getInstallmentOptions([
-      'totalAmount'    => $this->getTotalAmount($cart),
-      'discountAmount' => $this->getTotalDiscountAmount($cart),
-      'shippingAmount' => $this->getTotalShippingAmount($cart),
-      'taxAmount'      => $this->getTotalTaxAmount($cart),
-      'products'       => $this->getProducts($cart)
+      'totalAmount'         => $this->getTotalAmount($cart),
+      'shippingAmount'      => $this->getTotalShippingAmount($cart),
+      'taxAmount'           => $this->getTotalTaxAmount($cart),
+      'discountAmount'      => $this->getTotalDiscountAmount($cart),
+      'adminFeeAmount'      => $this->getTotalAdminFeeAmount($cart),
+      'additionalFeeAmount' => $this->getTotalAdditionalFeeAmount($cart),
+      'insuranceFeeAmount'  => $this->getTotalInsuranceFeeAmount($cart),
+      'products'            => $this->getProducts($cart)
     ]);
 
     $data = [];
@@ -406,9 +424,12 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     $checkout_url = $this->get_indodana_common()->checkout([
       'merchantOrderId'         => $order_id,
       'totalAmount'             => $this->getTotalAmount($cart),
-      'discountAmount'          => $this->getTotalDiscountAmount($cart),
       'shippingAmount'          => $this->getTotalShippingAmount($cart),
       'taxAmount'               => $this->getTotalTaxAmount($cart),
+      'discountAmount'          => $this->getTotalDiscountAmount($cart),
+      'adminFeeAmount'          => $this->getTotalAdminFeeAmount($cart),
+      'additionalFeeAmount'     => $this->getTotalAdditionalFeeAmount($cart),
+      'insuranceFeeAmount'      => $this->getTotalInsuranceFeeAmount($cart),
       'products'                => $this->getProducts($cart),
       'customerDetails'         => $this->getCustomerDetails($order),
       'billingAddress'          => $this->getBillingAddress($order),
