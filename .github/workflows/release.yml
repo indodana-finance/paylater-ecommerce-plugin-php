@@ -9,6 +9,7 @@ on:
       - 'WoocommerceV3-*'
       - 'WoocommerceV4-*'
       - 'MagentoV1-*'
+      - 'MagentoV2-*'
 
 jobs:
 
@@ -32,7 +33,7 @@ jobs:
         id: packageVersion
         uses: olegtarasov/get-tag@v2
         with:
-          tagRegex: "^(OpencartV1|OpencartV2|WoocommerceV3|WoocommerceV4|MagentoV1)-(.*)"
+          tagRegex: "^(OpencartV1|OpencartV2|WoocommerceV3|WoocommerceV4|MagentoV1|MagentoV2)-(.*)"
           tagRegexGroup: 2
 
       # We differentiate plugin release based on prefix
@@ -96,6 +97,18 @@ jobs:
           echo '::set-env name=source-directory::magento1'
           echo '::set-env name=target-directory::.build/magento1'
           echo '::set-env name=build-command::make magento1-build'
+
+      - name: Prepare release for MagentoV2
+        if: startsWith(github.ref, 'refs/tags/MagentoV2-')
+        run: |
+          PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
+          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
+          echo "::set-env name=release-name::magento_v1-${PACKAGE_VERSION//\./_}"
+          echo '::set-env name=php-versions::7.3'
+          echo '::set-env name=key::cache-magentov2-v2'
+          echo '::set-env name=source-directory::magento2'
+          echo '::set-env name=target-directory::.build/magento2'
+          echo '::set-env name=build-command::make magento2-build'
 
       # Install & cache environments
       # https://github.com/marketplace/actions/setup-php-action#cache-extensions

@@ -94,10 +94,6 @@ class Redirectto extends \Magento\Framework\App\Action\Action
               )
               ->save();
         }
-        //$objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 
-        //$cartObject = $objectManager->create('Magento\Checkout\Model\Cart')->truncate(); 
-        //$cartObject->saveQuote();
-        //$this->_checkoutSession->clearQuote();
          
         $result = $this->_resultFactory->create();
         return $result->setData(

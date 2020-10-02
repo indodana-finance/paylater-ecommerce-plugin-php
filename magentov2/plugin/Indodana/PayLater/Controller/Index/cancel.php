@@ -67,7 +67,6 @@ class Cancel extends \Magento\Framework\App\Action\Action
                 ->save();
             }
         } catch (Exception $e) {
-            //echo 'Caught exception: ',  $e->getMessage(), "\n";
             IndodanaLogger::error(
             sprintf(
                 '%s Error Msg : %s',

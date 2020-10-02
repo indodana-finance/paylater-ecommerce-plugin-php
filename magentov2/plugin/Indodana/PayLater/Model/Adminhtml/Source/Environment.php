@@ -26,8 +26,6 @@ class Environment implements \Magento\Framework\Option\ArrayInterface
                 'value' => __('PRODUCTION'),
                 'label' => __('PRODUCTION')
             ]
-
-
         ];
     }
 }
