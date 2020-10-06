@@ -14,7 +14,7 @@ class IndodanaTools extends Tools implements IndodanaCommon\IndodanaInterface
     if (!isset($this->indodanaCommon)) {
       if (Configuration::get('INDODANA_ENVIRONMENT') == 'PRODUCTION') {
         $apiKey = Configuration::get('INDODANA_API_KEY_PRODUCTION');
-        $apiSecret = Configuration::get('INDODANA_API_KEY_PRODUCTION');
+        $apiSecret = Configuration::get('INDODANA_API_SECRET_PRODUCTION');
       } else {
         $apiKey = Configuration::get('INDODANA_API_KEY');
         $apiSecret = Configuration::get('INDODANA_API_SECRET');
