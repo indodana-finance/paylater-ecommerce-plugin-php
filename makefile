@@ -103,6 +103,29 @@ magento1-log-tail:
 
 
 
+# Magento V2
+# ----------------------------------
+magento2_build_dir=.build/magentov2/upload
+magento2_dir = ./magentov2
+
+magentov2-install-dependencies:
+	cd ./magentov2/ && composer install
+
+magentov2-build:
+	./build-magentov2
+
+magentov2-test:
+	$(magentov2_dir)/vendor/bin/
+
+magentov2-serve: magentov2-build
+	php7.3 -S localhost:6301 -t $(magentov2_build_dir)
+
+magentov2-log-tail:
+	tail -f ./$(magentov2_build_dir)/var/log/Indodana/info.log
+
+
+
+
 # Prestashop V1
 # ----------------------------------
 prestashopv1_build_dir = .build/prestashopv1/upload
