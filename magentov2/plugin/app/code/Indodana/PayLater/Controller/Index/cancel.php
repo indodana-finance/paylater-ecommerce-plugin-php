@@ -1,6 +1,7 @@
 <?php
 
 namespace Indodana\PayLater\Controller\Index;
+require_once( dirname(dirname(dirname(__FILE__))) . '/vendor/autoload.php');
 use Indodana\PayLater\Helper\Transaction;
 
 class Cancel extends \Magento\Framework\App\Action\Action
