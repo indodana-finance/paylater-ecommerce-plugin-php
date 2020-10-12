@@ -26,10 +26,10 @@
   },
   "autoload": {
     "files": [
-      "plugin/Indodana/PayLater/registrations.php"
+      "plugin/app/code/Indodana/PayLater/registrations.php"
     ],
     "psr-4": {
-      "Indodana\\PayLater\\":"plugin/Indodana/PayLater/"
+      "Indodana\\PayLater\\":"plugin/app/code/Indodana/PayLater/"
     }
   }
 }
