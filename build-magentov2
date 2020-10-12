@@ -3,4 +3,6 @@ set -e
 
 . ./build
 
-build_plugin "magentov2" "Indodana/PayLater"
+build_plugin "magentov2" "app/code/Indodana/PayLater"
+
+
