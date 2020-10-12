@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2016 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment">
+            <group id="indodanapayment" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <attribute type="displayIn">recommended_solutions</attribute>
+                
+                <label>Indodana Paylater</label>
+                <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="title" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Title</label>
+                </field>
+                <field id="description" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Description</label>
+                </field>
+                <field id="store_name" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Store Name</label>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="store_id" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Store ID</label>
+                    <validate>required-entry</validate>
+                </field>
+
+                <field id="store_phone" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Store Phone</label>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="store_email" translate="label" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Store Email</label>
+                    <validate>required-entry</validate>
+                </field>
+
+                <field id="store_url" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Store URL</label>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="store_country_code" translate="label" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Store Country</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="store_city" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Store City</label>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="store_address" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Store Address</label>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="store_postal_code" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Store Postal Code</label>
+                    <validate>required-entry</validate>
+                </field>
+
+                <field id="environment" translate="label" type="select" sortOrder="139" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Environment</label>
+                    <source_model>Indodana\PayLater\Model\Adminhtml\Source\Environment</source_model>
+                </field>
+
+                <field id="api_key" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Key</label>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="*/*/environment">PRODUCTION</field>
+                    </depends>
+
+                </field>
+                <field id="api_secret" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Secret</label>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="*/*/environment">PRODUCTION</field>
+                    </depends>
+                </field>
+
+                <field id="api_key_sandbox" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Key SANDBOX</label>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="*/*/environment">SANDBOX</field>
+                    </depends>
+
+                </field>
+                <field id="api_secret_sandbox" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Secret SANDBOX</label>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="*/*/environment">SANDBOX</field>
+                    </depends>
+                </field>
+
+                <field id="default_order_pending_status" translate="label" type="select" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Order Pending Status</label> 
+                    <source_model>Magento\Sales\Model\ResourceModel\Order\Status\Collection</source_model>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="default_order_success_status" translate="label" type="select" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Order Success Status</label>
+                    <source_model>Magento\Sales\Model\ResourceModel\Order\Status\Collection</source_model>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="default_order_failed_status" translate="label" type="select" sortOrder="180" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Order Failed Status</label>
+                    <source_model>Magento\Sales\Model\ResourceModel\Order\Status\Collection</source_model>
+                    <validate>required-entry</validate>
+                </field>
+
+
+                <field id="debug" translate="label" type="select" sortOrder="190" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Debug</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="payment_action" translate="label" type="select" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment Action</label>
+                    <source_model>Indodana\PayLater\Model\Adminhtml\Source\PaymentAction</source_model>
+                </field>
+
+            </group>
+        </section>
+    </system>
+</config>

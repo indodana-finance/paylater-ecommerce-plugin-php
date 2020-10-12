@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2016 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <indodanapayment>
+                <debug>1</debug>
+                <active>0</active>
+                <model>PayLaterFacade</model>
+                <merchant_gateway_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
+                <default_order_pending_status>pending_payment</default_order_pending_status>
+                <payment_action>authorize</payment_action>
+                <title>Indodana PayLater</title>
+                <description>Pay with installment via our PayLater Product</description>
+                <currency>IDR</currency>
+                <environment>SANDBOX</environment>
+                <can_authorize>1</can_authorize>
+                <can_capture>1</can_capture>
+                <can_void>1</can_void>
+                <can_use_checkout>1</can_use_checkout>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <debugReplaceKeys>MERCHANT_KEY</debugReplaceKeys>
+                <paymentInfoKeys>FRAUD_MSG_LIST</paymentInfoKeys>
+                <privateInfoKeys>FRAUD_MSG_LIST</privateInfoKeys>
+                <store_id>5e96ac2c-e123-11ea-9c01-00163e014000</store_id>
+                <store_name>store name</store_name>
+                <store_phone>0811111</store_phone>
+                <store_url>www.google.com</store_url>
+                <store_city>SUB</store_city>
+                <store_address>Jalan X</store_address>
+                <store_postal_code>11530</store_postal_code>
+            </indodanapayment>
+        </payment>
+    </default>
+</config>
