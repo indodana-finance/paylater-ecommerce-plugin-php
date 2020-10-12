@@ -105,8 +105,8 @@ magento1-log-tail:
 
 # Magento V2
 # ----------------------------------
-magento2_build_dir=.build/magentov2/upload
-magento2_dir = ./magentov2
+magentov2_build_dir=.build/magentov2/upload
+magentov2_dir = ./magentov2
 
 magentov2-install-dependencies:
 	cd ./magentov2/ && composer install

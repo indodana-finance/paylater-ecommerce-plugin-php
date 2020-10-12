@@ -15,7 +15,7 @@
   "repositories": [
     {
       "type": "path",
-      "url": "../../../../packages/common",
+      "url": "../packages/common",
       "options": {
         "symlink": true
       }
@@ -29,7 +29,7 @@
       "plugin/Indodana/PayLater/registrations.php"
     ],
     "psr-4": {
-      "Indodana\\PayLater\\":""
+      "Indodana\\PayLater\\":"plugin/Indodana/PayLater/"
     }
   }
 }
