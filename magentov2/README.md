@@ -35,8 +35,8 @@
     8. Jika mode developer skip bagian ini ( coba skip dulu ) 
             Run <magento_root>$sudo bin/magento setup:di:compile
     9. Run <magento_root>$sudo bin/magento setup:static-content:deploy –f
-    10. Pastikan apache/ngix punya hak write
-        Atau jalankan 
+    10. make sure apache/ngix has write access
+        or you can run below command  
         sudo chown -R ubuntu:www-data <magento_root>
     11. Set Currency = IDR
    
@@ -64,17 +64,17 @@ for detail guidelines can see [magento-module-file-structure](https://devdocs.ma
 
 
     |-Controller\Index
-        |-paymentoptions.php    => digunakan untuk proses mengambil data installment
-        |-redirectto.php        => digunakan untuk proses checkout ke indodana payment
-        |-cancel.php            => digunakan untk proses cancel cart
+        |-paymentoptions.php    => to handle get installment options
+        |-redirectto.php        => to handle checkout process to indodana payment
+        |-cancel.php            => to handle cancel process of cart
 
     |-Api
-        |-NotifyInterface.php   => Interface api untuk handle notification dari indodana
+        |-NotifyInterface.php   => Api Interface to handle notification result from indodana
     |-Model
         |-Api
-            |-Notify.php        => Implementasi dari Notify Interface untuk handle notification dari indodana
+            |-Notify.php        => Implemtation of Notify Interface to handle notification result from indodana
     |-view\frontend\web\template\payment
-        |-form.html             => html untuk view installment
+        |-form.html             => html view of installment options
 
 
 
