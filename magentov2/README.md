@@ -10,7 +10,7 @@
     3. Set permission 
     3. Install magento, step by step installation can follow https://devdocs.magento.com/guides/v2.4/install-gde/install-quick-ref.html
 
-# Application Instalation
+
 # Magento Structure
     Magento Root -
                  |-app
@@ -63,18 +63,18 @@ for detail guidelines can see [magento-module-file-structure](https://devdocs.ma
 ![alt Plugin workflow](docs/flow.PNG)
 
 
-|-Controller\Index
-    |-paymentoptions.php    => digunakan untuk proses mengambil data installment
-    |-redirectto.php        => digunakan untuk proses checkout ke indodana payment
-    |-cancel.php            => digunakan untk proses cancel cart
+    |-Controller\Index
+        |-paymentoptions.php    => digunakan untuk proses mengambil data installment
+        |-redirectto.php        => digunakan untuk proses checkout ke indodana payment
+        |-cancel.php            => digunakan untk proses cancel cart
 
-|-Api
-    |-NotifyInterface.php   => Interface api untuk handle notification dari indodana
-|-Model
     |-Api
-        |-Notify.php        => Implementasi dari Notify Interface untuk handle notification dari indodana
-|-view\frontend\web\template\payment
-    |-form.html             => html untuk view installment
+        |-NotifyInterface.php   => Interface api untuk handle notification dari indodana
+    |-Model
+        |-Api
+            |-Notify.php        => Implementasi dari Notify Interface untuk handle notification dari indodana
+    |-view\frontend\web\template\payment
+        |-form.html             => html untuk view installment
 
 
 
