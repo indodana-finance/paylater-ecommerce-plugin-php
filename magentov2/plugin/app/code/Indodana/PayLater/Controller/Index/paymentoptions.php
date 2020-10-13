@@ -1,7 +1,9 @@
 <?php
 
 namespace Indodana\PayLater\Controller\Index;
+
 require_once( dirname(dirname(dirname(__FILE__))) . '/vendor/autoload.php');
+
 use Exception;
 use Indodana\PayLater\Helper\Transaction;
 
