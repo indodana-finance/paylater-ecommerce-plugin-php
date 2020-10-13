@@ -1,4 +1,4 @@
-# indodana paylater payment method module for magento 2.4.0 >= 2.3.x 
+# indodana paylater payment method module for magento 2.4.0 or magento 2.3.x 
 # Application Instalation
     1. Setup Database, create user and database for magento 
         ```sql
