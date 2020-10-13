@@ -63,7 +63,7 @@ for detail guidelines can see [magento-module-file-structure](https://devdocs.ma
 ![alt Plugin workflow](docs/flow.PNG)
 
 
-|-Controller/Index
+|-Controller\Index
     |-paymentoptions.php    => digunakan untuk proses mengambil data installment
     |-redirectto.php        => digunakan untuk proses checkout ke indodana payment
     |-cancel.php            => digunakan untk proses cancel cart
@@ -73,6 +73,10 @@ for detail guidelines can see [magento-module-file-structure](https://devdocs.ma
 |-Model
     |-Api
         |-Notify.php        => Implementasi dari Notify Interface untuk handle notification dari indodana
+|-view\frontend\web\template\payment
+    |-form.html             => html untuk view installment
+
+
 
 more Information check [payment-gateway-intro](https://devdocs.magento.com/guides/v2.3/payments-integrations/payment-gateway/payment-gateway-intro.html) 
 and [payment-gateway-structure](https://devdocs.magento.com/guides/v2.4/payments-integrations/payment-gateway/payment-gateway-structure.html)
