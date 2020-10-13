@@ -32,7 +32,7 @@
     5. Run <magento_root>$sudo bin/magento setup:upgrade
     6. Run <magento_root>$sudo bin/magento module:enable Indodana_PayLater
     7. Run <magento_root>$sudo bin/magento setup:upgrade
-    8. Jika mode developer skip bagian ini ( coba skip dulu ) 
+    8. if magento mode is developer you can skip below command ( we suggest to skip this)
             Run <magento_root>$sudo bin/magento setup:di:compile
     9. Run <magento_root>$sudo bin/magento setup:static-content:deploy –f
     10. make sure apache/ngix has write access
