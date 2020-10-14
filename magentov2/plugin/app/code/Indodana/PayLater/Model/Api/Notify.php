@@ -19,10 +19,12 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
     protected $_helper;
     protected $_dir;
     protected $_coretransaction;
+    protected $_ordermodel;
 
     public function __construct
     (
       \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
+      \Magento\Sales\Model\Order $order,
       \Indodana\PayLater\Helper\Transaction $transaction,
       \Indodana\PayLater\Helper\Data $helper,
       \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
@@ -34,6 +36,7 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
       $this->_helper = $helper;
       $this->_dir = $directoryList;
       $this->_coretransaction=$coretransaction;
+      $this->_ordermodel = $order;
       /// use by indodana logger
       //define('INDODANA_LOG_DIR',$this->_dir->getPath('log'). DIRECTORY_SEPARATOR . 'Indodana' . DIRECTORY_SEPARATOR );
 
@@ -144,7 +147,7 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
     
         $transactionStatus = $requestBody['transactionStatus'];
         $orderId = str_replace(Transaction::PREVIX_ORDERID,'',$requestBody['merchantOrderId']);      
-        $order= $this->_order->get($orderId);  
+        $order = $this->_ordermodel->loadByIncrementId($orderId);
 
         IndodanaLogger::info(
           sprintf(
