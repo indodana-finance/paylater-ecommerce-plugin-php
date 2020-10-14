@@ -23,13 +23,5 @@
   ],
   "require": {
     "indodana/indodana-paylater-ecommerce-common": "@dev"
-  },
-  "autoload": {
-    "files": [
-      "plugin/app/code/Indodana/PayLater/registrations.php"
-    ],
-    "psr-4": {
-      "Indodana\\PayLater\\":"plugin/app/code/Indodana/PayLater/"
-    }
   }
 }
