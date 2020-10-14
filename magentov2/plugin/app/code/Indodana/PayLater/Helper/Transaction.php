@@ -22,7 +22,8 @@ class Transaction extends AbstractHelper implements IndodanaInterface
 
   /// to make uniq order id between magento 2.3.5 and 2.4.0
   /// due to the same configuration (store id, apikey & secret key)
-  public const PREVIX_ORDERID='M235';
+  /// remove for production 
+  public const PREVIX_ORDERID='';
 
   public function __construct(
     Data $helper,
