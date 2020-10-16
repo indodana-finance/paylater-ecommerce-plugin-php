@@ -251,7 +251,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
 
     return $this->getIndodanaCommon()->checkout(
        [      
-       'merchantOrderId'         => Transaction::PREVIX_ORDERID . $order->getId(),
+       'merchantOrderId'         => Transaction::PREVIX_ORDERID . $order->getRealOrderId(),
        'totalAmount'             => ceil($this->getTotalAmount($order)),
        'discountAmount'          => round($this->getTotalDiscountAmount($order),2),
        'shippingAmount'          => round($this->getTotalShippingAmount($order),2),
