@@ -238,16 +238,40 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
     return (float) $cart->get_total_tax();
   }
 
+  /**
+   * Total admin fee amount for Indodana Transaction.
+   *
+   * Because we didn't have the value for this variable (at least to our understanding, no),
+   * We intentionally hardcode it to 0 so that we're aware of existance and usage of this variable.
+   *
+   * @param Cart $cart the cart
+   * @return float
+   */
   public function getTotalAdminFeeAmount($cart)
   {
     return (float) 0;
   }
 
+  /**
+   * Total additional fee amount for Indodana Transaction.
+   *
+   * @param Cart $cart the cart
+   * @return float
+   */
   public function getTotalAdditionalFeeAmount($cart)
   {
     return (float) $cart->get_fee_total();
   }
 
+  /**
+   * Total insurance fee amount for Indodana Transaction.
+   *
+   * Because we didn't have the value for this variable (at least to our understanding, no),
+   * We intentionally hardcode it to 0 so that we're aware of existance and usage of this variable.
+   *
+   * @param Cart $cart the cart
+   * @return float
+   */
   public function getTotalInsuranceFeeAmount($cart)
   {
     return (float) 0;
