@@ -1,7 +1,5 @@
 <?php
 
-require_once DIR_SYSTEM . 'library/indodana/autoload.php';
-
 use IndodanaCommon\IndodanaCommon;
 use IndodanaCommon\IndodanaConstant;
 
