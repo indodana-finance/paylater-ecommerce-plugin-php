@@ -246,11 +246,17 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     $this->data['indodanaBaseUrl'] = $this->getIndodanaCommon()->getBaseUrl();
     $this->data['merchantConfirmPaymentUrl'] = $this->url->link('payment/indodana_checkout/confirmOrder');
 
-    if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/indodana_checkout_payment.tpl')) {
-      return $this->load->view($this->config->get('config_template') . '/template/payment/indodana_checkout_payment.tpl', $this->data);
-    } else {
-      return $this->load->view('default/template/payment/indodana_checkout_payment.tpl', $this->data);
+    if (version_compare(VERSION, '2.2.0.0', '<')) {
+      return $this->load->view(
+        $this->config->get('config_template') . '/template/payment/indodana_checkout_payment.tpl',
+        $this->data
+      );
     }
+
+    return $this->load->view(
+      'payment/indodana_checkout_payment.tpl',
+      $this->data
+    );
   }
 
   private function loadLanguage()
@@ -286,17 +292,18 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
   }
 
   private function formatPaymentOptionsToDefaultCurrency(&$payment_options) {
-    $currency = $this->config->get('config_currency');
+    $config_currency = $this->config->get('config_currency');
+    $session_currency = $this->session->data['currency'];
 
     foreach ($payment_options as &$payment_option) {
       $monthly_installment = $payment_option['monthlyInstallment'];
       $installment_amount = $payment_option['installmentAmount'];
 
-      $monthly_installment = $this->currency->convert($monthly_installment, 'IDR', $currency);
-      $installment_amount = $this->currency->convert($installment_amount, 'IDR', $currency);
+      $monthly_installment = $this->currency->convert($monthly_installment, $session_currency, $config_currency);
+      $installment_amount = $this->currency->convert($installment_amount, $session_currency, $config_currency);
 
-      $payment_option['monthlyInstallment'] = $this->currency->format($monthly_installment, $this->currency->getCode());
-      $payment_option['installmentAmount'] = $this->currency->format($installment_amount, $this->currency->getCode());
+      $payment_option['monthlyInstallment'] = $this->currency->format($monthly_installment, 'IDR');
+      $payment_option['installmentAmount'] = $this->currency->format($installment_amount, 'IDR');
     }
   }
 
