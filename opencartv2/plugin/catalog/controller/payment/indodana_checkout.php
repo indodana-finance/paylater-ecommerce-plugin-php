@@ -246,6 +246,8 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     $this->data['indodanaBaseUrl'] = $this->getIndodanaCommon()->getBaseUrl();
     $this->data['merchantConfirmPaymentUrl'] = $this->url->link('payment/indodana_checkout/confirmOrder');
 
+    // Starts from Opencart 2.2.0.0, it loads .tpl differently
+    // Reference: https://stackoverflow.com/questions/40755573/specific-template-for-category-and-product-page-in-opencart-2-2-0-0
     if (version_compare(VERSION, '2.2.0.0', '<')) {
       return $this->load->view(
         $this->config->get('config_template') . '/template/payment/indodana_checkout_payment.tpl',
