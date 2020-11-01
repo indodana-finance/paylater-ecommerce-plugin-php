@@ -169,7 +169,7 @@ class ControllerPaymentIndodanaCheckout extends Controller {
 
   private function redirectToExtensionPage() 
   {
-    $this->response->redirect($this->url->link('extension/payment', 'token=' . $this->session->data['token']));
+    $this->response->redirect($this->url->link('extension/payment', 'token=' . $this->session->data['token'], true));
   }
 
   private function initializeLanguage() 
@@ -229,8 +229,8 @@ class ControllerPaymentIndodanaCheckout extends Controller {
     $this->data['text_status_enabled'] = $this->status_mapping[IndodanaConstant::ENABLED];
 
     // Action
-    $this->data['form_action'] = $this->url->link('payment/indodana_checkout', 'token=' . $this->session->data['token']);
-    $this->data['form_cancel'] = $this->url->link('payment', 'token=' . $this->session->data['token']);
+    $this->data['form_action'] = $this->url->link('payment/indodana_checkout', 'token=' . $this->session->data['token'], true);
+    $this->data['form_cancel'] = $this->url->link('payment', 'token=' . $this->session->data['token'], true);
   }
 
   private function initializeErrors() 

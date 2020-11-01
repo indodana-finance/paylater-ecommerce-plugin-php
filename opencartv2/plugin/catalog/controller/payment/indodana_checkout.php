@@ -101,7 +101,8 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
       // Get URL
       $url = $this->url->link(
         'product/product',
-        'product_id=' . $product_id
+        'product_id=' . $product_id,
+        true
       );
 
       // Get Image URL
@@ -216,9 +217,9 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
 
     $this->formatPaymentOptionsToDefaultCurrency($payment_options);
 
-    $approved_notification_url = $this->url->link('payment/indodana_checkout/notify');
-    $cancellation_redirect_url = $this->url->link('payment/indodana_checkout/cancel');
-    $back_to_store_url = $this->url->link('checkout/success');
+    $approved_notification_url = $this->url->link('payment/indodana_checkout/notify', '', true);
+    $cancellation_redirect_url = $this->url->link('payment/indodana_checkout/cancel', '', true);
+    $back_to_store_url = $this->url->link('checkout/success', '', true);
 
     // DEV MODE
     // $approved_notification_url = 'https://example.com/index.php?route=payment/indodana_checkout/notify';
@@ -244,7 +245,7 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
     $this->data['paymentOptions'] = $payment_options;
     $this->data['authorization'] = $this->getIndodanaCommon()->getAuthToken();
     $this->data['indodanaBaseUrl'] = $this->getIndodanaCommon()->getBaseUrl();
-    $this->data['merchantConfirmPaymentUrl'] = $this->url->link('payment/indodana_checkout/confirmOrder');
+    $this->data['merchantConfirmPaymentUrl'] = $this->url->link('payment/indodana_checkout/confirmOrder', '', true);
 
     // Starts from Opencart 2.2.0.0, it loads .tpl differently
     // Reference: https://stackoverflow.com/questions/40755573/specific-template-for-category-and-product-page-in-opencart-2-2-0-0
@@ -348,7 +349,7 @@ class ControllerPaymentIndodanaCheckout extends Controller implements IndodanaIn
       $this->config->get('indodana_checkout_default_order_failed_status_id')
     );
 
-    $this->response->redirect($this->url->link('checkout/cart'));
+    $this->response->redirect($this->url->link('checkout/cart', '', true));
   }
 
   public function notify()
