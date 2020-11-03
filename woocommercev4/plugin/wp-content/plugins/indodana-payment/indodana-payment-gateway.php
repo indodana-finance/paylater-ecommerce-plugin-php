@@ -466,7 +466,8 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
 
     $order->update_status($this->get_option('default_order_pending_status'));
 
-    WC()->cart->empty_cart();
+    // Don't empty persistent cart
+    $cart->empty_cart(false);
 
     return [
       'result' => 'success',
