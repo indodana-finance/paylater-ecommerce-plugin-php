@@ -409,6 +409,24 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       )
     );
 
+    $existing_checkout_url = get_post_meta($order_id, 'indodana_checkout_url', true);
+
+    // If the current order already made to Indodana and not completed yet, just redirect it to the current order's existing checkout url instead of creating new order
+    if ($existing_checkout_url) {
+      IndodanaLogger::info(
+        sprintf(
+          '%s Redirect to existing checkout url: %s',
+          $namespace,
+          $existing_checkout_url
+        )
+      );
+
+      return [
+        'result' => 'success',
+        'redirect' => $existing_checkout_url
+      ];
+    }
+
     $cart = WC()->cart;
     $order = wc_get_order($order_id);
 
@@ -464,10 +482,18 @@ class WC_Indodana_Gateway extends WC_Payment_Gateway implements IndodanaInterfac
       'backToStoreUrl'          => $back_to_store_url
     ]);
 
+    // Save checkout url so it can be accessed again later
+    update_post_meta($order_id, 'indodana_checkout_url', esc_attr($checkout_url));
+
     $order->update_status($this->get_option('default_order_pending_status'));
 
-    // Don't empty persistent cart
-    $cart->empty_cart(false);
+    IndodanaLogger::info(
+      sprintf(
+        '%s Redirect to new checkout url: %s',
+        $namespace,
+        $checkout_url
+      )
+    );
 
     return [
       'result' => 'success',
