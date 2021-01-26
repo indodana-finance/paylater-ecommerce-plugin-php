@@ -1,0 +1,27 @@
+{
+  "name": "indodana/indodana-paylater-opencartv2.3",
+  "description": "Indodana Paylater plugin for Opencart v2.3.x.x",
+  "authors": [
+    {
+      "name": "Indodana",
+      "email": "dev@indodana.com"
+    },
+    {
+      "name": "Steven Yang",
+      "email": "stv.yang10@gmail.com"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../packages/common",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
+  "require": {
+    "indodana/indodana-paylater-ecommerce-common": "@dev"
+  }
+}
+
