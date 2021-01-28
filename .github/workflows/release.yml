@@ -4,14 +4,10 @@ on:
   push:
     # Sequence of patterns matched against refs/tags
     tags:
-      - 'OpencartV1-*'
-      - 'OpencartV2-*'
-      - 'OpencartV2.3-*'
-      - 'WoocommerceV3-*'
-      - 'WoocommerceV4-*'
-      - 'MagentoV1-*'
-      - 'MagentoV2-*'
-      - 'PrestashopV1-*'
+      - 'Opencart*'
+      - 'Woocommerce*'
+      - 'Magento*'
+      - 'Prestashop*'
 
 jobs:
 
