@@ -129,7 +129,7 @@ class ControllerExtensionPaymentIndodanaCheckout extends Controller {
 
   private function loadModel() 
   {
-		$this->load->language('extension/payment/indodana_checkout');
+    $this->load->language('extension/payment/indodana_checkout');
 
     $this->load->model('setting/setting');
     $this->load->model('localisation/order_status');
@@ -197,12 +197,12 @@ class ControllerExtensionPaymentIndodanaCheckout extends Controller {
 
   private function initializeView() 
   {
-		$this->data['column_left'] = $this->load->controller('common/column_left');
-		$this->data['column_right'] = $this->load->controller('common/column_right');
-		$this->data['content_top'] = $this->load->controller('common/content_top');
-		$this->data['content_bottom'] = $this->load->controller('common/content_bottom');
-		$this->data['footer'] = $this->load->controller('common/footer');
-		$this->data['header'] = $this->load->controller('common/header');
+    $this->data['column_left'] = $this->load->controller('common/column_left');
+    $this->data['column_right'] = $this->load->controller('common/column_right');
+    $this->data['content_top'] = $this->load->controller('common/content_top');
+    $this->data['content_bottom'] = $this->load->controller('common/content_bottom');
+    $this->data['footer'] = $this->load->controller('common/footer');
+    $this->data['header'] = $this->load->controller('common/header');
   }
 
   private function initializeFormUI()
