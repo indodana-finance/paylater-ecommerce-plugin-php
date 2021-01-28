@@ -6,6 +6,7 @@ on:
     tags:
       - 'OpencartV1-*'
       - 'OpencartV2-*'
+      - 'OpencartV2.3-*'
       - 'WoocommerceV3-*'
       - 'WoocommerceV4-*'
       - 'MagentoV1-*'
@@ -34,7 +35,7 @@ jobs:
         id: packageVersion
         uses: olegtarasov/get-tag@v2
         with:
-          tagRegex: "^(OpencartV1|OpencartV2|WoocommerceV3|WoocommerceV4|MagentoV1|PrestashopV1|MagentoV2)-(.*)"
+          tagRegex: "^(OpencartV1|OpencartV2|OpencartV2.3|WoocommerceV3|WoocommerceV4|MagentoV1|PrestashopV1|MagentoV2)-(.*)"
           tagRegexGroup: 2
 
       # We differentiate plugin release based on prefix
@@ -62,6 +63,18 @@ jobs:
           echo '::set-env name=source-directory::opencartv2'
           echo '::set-env name=target-directory::.build/opencartv2'
           echo '::set-env name=build-command::make opencartv2-build'
+
+      - name: Prepare release for OpencartV2.3
+        if: startsWith(github.ref, 'refs/tags/OpencartV2.3-')
+        run: |
+          PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
+          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
+          echo "::set-env name=release-name::opencart_v2.3-${PACKAGE_VERSION//\./_}"
+          echo '::set-env name=php-versions::7.2'
+          echo '::set-env name=key::cache-opencartv2.3-v1'
+          echo '::set-env name=source-directory::opencartv2.3'
+          echo '::set-env name=target-directory::.build/opencartv2.3'
+          echo '::set-env name=build-command::make opencartv2.3-build'
 
       - name: Prepare release for WoocommerceV3
         if: startsWith(github.ref, 'refs/tags/WoocommerceV3-')

@@ -43,6 +43,35 @@ opencartv2-log-tail:
 
 
 
+# Opencart v2.3
+# ----------------------------------
+
+opencartv2.3_build_dir=.build/opencartv2.3/upload
+opencartv2.3_dir = ./opencartv2.3
+
+opencartv2.3-install-dependencies:
+	cd ./opencartv2.3/ && composer install
+
+opencartv2.3-build:
+	./build-opencartv2.3
+
+opencartv2.3-test:
+	$(opencartv2.3_dir)/vendor/bin/
+
+opencartv2.3-serve: opencartv2.3-build
+	php7.2 -S localhost:6123 -t $(opencartv2.3_build_dir)
+
+opencartv2.3-tail-info-log:
+	tail -f ./$(opencartv2.3_build_dir)/system/library/indodana/log/info.log
+
+opencartv2.3-tail-warning-log:
+	tail -f ./$(opencartv2.3_build_dir)/system/library/indodana/log/warning.log
+
+opencartv2.3-tail-error-log:
+	tail -f ./$(opencartv2.3_build_dir)/system/library/indodana/log/error.log
+
+
+
 # Woocommerce
 # ----------------------------------
 woocommerce_build_dir=.build/woocommerce/upload
