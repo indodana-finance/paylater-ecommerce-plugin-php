@@ -216,13 +216,13 @@ class ControllerExtensionPaymentIndodanaCheckout extends Controller implements I
 
     $this->formatPaymentOptionsToDefaultCurrency($payment_options);
 
-    $approved_notification_url = $this->url->link('payment/indodana_checkout/notify');
-    $cancellation_redirect_url = $this->url->link('payment/indodana_checkout/cancel');
+    $approved_notification_url = $this->url->link('extension/payment/indodana_checkout/notify');
+    $cancellation_redirect_url = $this->url->link('extension/payment/indodana_checkout/cancel');
     $back_to_store_url = $this->url->link('checkout/success');
 
     // DEV MODE
-    // $approved_notification_url = 'https://example.com/index.php?route=payment/indodana_checkout/notify';
-    // $cancellation_redirect_url = 'https://example.com/index.php?route=payment/indodana_checkout/cancel';
+    // $approved_notification_url = 'https://example.com/index.php?route=extension/payment/indodana_checkout/notify';
+    // $cancellation_redirect_url = 'https://example.com/index.php?route=extension/payment/indodana_checkout/cancel';
     // $back_to_store_url = 'https://example.com/index.php?route=checkout/success';
 
     $order_data = $this->getIndodanaCommon()->getCheckoutPayload([
