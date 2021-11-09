@@ -1,6 +1,6 @@
 # Indodana Paylater Ecommerce Plugin for PHP
 
-This repository contains plugins for most used ecommerce framework based on PHP. See [here](https://indodana.gitbook.io/indodana-paylater/integrations/e-commerce-plugins) for supported e-commerce frameworks, versions, system requirements, etc.
+This repository contains plugins for most used ecommerce framework based on PHP. See [here](https://dev.indodana.id/indodana-paylater/integration/e-commerce-plugins) for supported e-commerce frameworks, versions, system requirements, etc.
 
 ## Product Specs
 
