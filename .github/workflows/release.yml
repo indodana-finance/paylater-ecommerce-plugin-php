@@ -157,6 +157,10 @@ jobs:
         working-directory: ${{ env.source-directory }}
         run: composer install --prefer-dist --no-progress
 
+      - name: Check PHP version
+        working-directory: ${{ env.source-directory }}
+        run: php -v
+
       - name: Check plugin dependencies on specific platform
         working-directory: ${{ env.source-directory }}
         run: composer check-platform-reqs
