@@ -29,7 +29,7 @@ jobs:
       # Use semantic versioning. Example output: 1.0.0
       - name: Get package version
         id: packageVersion
-        uses: olegtarasov/get-tag@v2
+        uses: olegtarasov/get-tag@v2.1
         with:
           tagRegex: "^(OpencartV1|OpencartV2|OpencartV2.3|WoocommerceV3|WoocommerceV4|MagentoV1|PrestashopV1|MagentoV2)-(.*)"
           tagRegexGroup: 2
