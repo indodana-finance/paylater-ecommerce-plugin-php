@@ -163,10 +163,6 @@ jobs:
         working-directory: ${{ env.source-directory }}
         run: composer install --prefer-dist --no-progress
 
-      - name: Check PHP version
-        working-directory: ${{ env.source-directory }}
-        run: php -v
-
       - name: Build the plugin
         run: ${{ env.build-command }}
 
