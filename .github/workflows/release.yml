@@ -155,7 +155,7 @@ jobs:
 
       - name: Install plugin dependencies
         working-directory: ${{ env.source-directory }}
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress --ignore-platform-reqs
 
       - name: Build the plugin
         run: ${{ env.build-command }}
