@@ -11,6 +11,11 @@
       "email": "stv.yang10@gmail.com"
     }
   ],
+  "config": {
+    "platform":{
+        "php": "7.2"
+    }
+  },
   "repositories": [
     {
       "type": "path",
