@@ -110,6 +110,22 @@ woocommercev4-serve: woocommercev4-build
 
 
 
+# Woocommerce V5
+# ----------------------------------
+woocommercev5_build_dir=.build/woocommercev5/upload
+woocommercev5_dir = ./woocommercev5
+
+woocommercev5-install-dependencies:
+	cd ./woocommercev5/ && composer install
+
+woocommercev5-build:
+	./build-woocommercev5
+
+woocommercev5-serve: woocommercev5-build
+	php7.2 -S localhost:6207 -t $(woocommercev5_build_dir)
+
+
+
 # Magento 1
 # ----------------------------------
 magento1_build_dir=.build/magento1/upload

@@ -35,6 +35,7 @@ vendor/
 /prestashop/upload/
 /woocommerce/upload/
 /woocommercev4/upload/
+/woocommercev5/upload/
 
 # INDODANA COMMON
 /packages/common/.coverage/
