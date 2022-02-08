@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a73760d560e0853a9cad610c6d2aa5c1",
+    "content-hash": "f587dff01cca0d524c392156e77c9c8a",
     "packages": [
         {
             "name": "indodana/indodana-paylater-ecommerce-common",
@@ -247,5 +247,8 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
+    "platform-overrides": {
+        "php": "7.2"
+    },
     "plugin-api-version": "1.1.0"
 }
