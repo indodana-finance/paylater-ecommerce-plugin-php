@@ -149,6 +149,12 @@ jobs:
           key: ${{ steps.cache-env.outputs.key }}
           restore-keys: ${{ steps.cache-env.outputs.key }}
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: ${{ env.extensions }}
+
       - name: Validate plugin composer.json and composer.lock
         working-directory: ${{ env.source-directory }}
         run: composer validate
@@ -160,10 +166,6 @@ jobs:
       - name: Check PHP version
         working-directory: ${{ env.source-directory }}
         run: php -v
-
-      - name: Check plugin dependencies on specific platform
-        working-directory: ${{ env.source-directory }}
-        run: composer check-platform-reqs
 
       - name: Build the plugin
         run: ${{ env.build-command }}
