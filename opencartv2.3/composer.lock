@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "94ffe8e58574407ca98d05103d64bf38",
+    "content-hash": "a73760d560e0853a9cad610c6d2aa5c1",
     "packages": [
         {
             "name": "indodana/indodana-paylater-ecommerce-common",
@@ -91,10 +91,6 @@
                 }
             ],
             "description": "Indodana Paylater SDK for PHP that provides merchant integration functionalities",
-            "support": {
-                "issues": "https://github.com/indodana/indodana-paylater-sdk-php/issues",
-                "source": "https://github.com/indodana/indodana-paylater-sdk-php/tree/master"
-            },
             "time": "2020-08-25T12:57:34+00:00"
         },
         {
@@ -158,10 +154,6 @@
                 "validation",
                 "validator"
             ],
-            "support": {
-                "issues": "https://github.com/Respect/Validation/issues",
-                "source": "https://github.com/Respect/Validation/tree/1.1.31"
-            },
             "time": "2019-05-28T06:10:06+00:00"
         },
         {
@@ -225,9 +217,6 @@
                 "portable",
                 "shim"
             ],
-            "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.22.0"
-            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -255,5 +244,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "1.1.0"
 }
