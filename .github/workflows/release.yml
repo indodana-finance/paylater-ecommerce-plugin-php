@@ -157,6 +157,10 @@ jobs:
         working-directory: ${{ env.source-directory }}
         run: composer install --prefer-dist --no-progress
 
+      - name: Check plugin dependencies on specific platform
+        working-directory: ${{ env.source-directory }}
+        run: composer check-platform-reqs
+
       - name: Build the plugin
         run: ${{ env.build-command }}
 
