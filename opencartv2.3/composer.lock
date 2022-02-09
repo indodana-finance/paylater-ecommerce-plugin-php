@@ -8,7 +8,7 @@
     "packages": [
         {
             "name": "indodana/indodana-paylater-ecommerce-common",
-            "version": "dev-add_support_opencartv2_3_x_x",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "../packages/common",

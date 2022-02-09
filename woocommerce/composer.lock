@@ -442,7 +442,7 @@
         },
         {
             "name": "indodana/indodana-paylater-ecommerce-common",
-            "version": "dev-fix_github_actions_release",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "../packages/common",
