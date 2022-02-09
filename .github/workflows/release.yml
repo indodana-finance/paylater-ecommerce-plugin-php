@@ -101,9 +101,9 @@ jobs:
         run: |
           PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
           echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
-          echo "release-name=woocommerce_v4-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo "release-name=woocommerce_v5-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
           echo 'php-versions=7.2' >> $GITHUB_ENV
-          echo 'key=cache-woocommercev5-v2' >> $GITHUB_ENV
+          echo 'key=cache-woocommercev5-v1' >> $GITHUB_ENV
           echo 'source-directory=woocommercev5' >> $GITHUB_ENV
           echo 'target-directory=.build/woocommercev5' >> $GITHUB_ENV
           echo 'build-command=make woocommercev5-build' >> $GITHUB_ENV
