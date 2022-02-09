@@ -31,7 +31,7 @@ jobs:
         id: packageVersion
         uses: olegtarasov/get-tag@v2.1
         with:
-          tagRegex: "^(OpencartV1|OpencartV2|OpencartV2.3|WoocommerceV3|WoocommerceV4|MagentoV1|PrestashopV1|MagentoV2)-(.*)"
+          tagRegex: "^(OpencartV1|OpencartV2|OpencartV2.3|WoocommerceV3|WoocommerceV4|WoocommerceV5|MagentoV1|PrestashopV1|MagentoV2)-(.*)"
           tagRegexGroup: 2
 
       # We differentiate plugin release based on prefix
@@ -95,6 +95,18 @@ jobs:
           echo 'source-directory=woocommercev4' >> $GITHUB_ENV
           echo 'target-directory=.build/woocommercev4' >> $GITHUB_ENV
           echo 'build-command=make woocommercev4-build' >> $GITHUB_ENV
+
+      - name: Prepare release for WoocommerceV5
+        if: startsWith(github.ref, 'refs/tags/WoocommerceV5-')
+        run: |
+          PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
+          echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
+          echo "release-name=woocommerce_v5-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo 'php-versions=7.2' >> $GITHUB_ENV
+          echo 'key=cache-woocommercev5-v1' >> $GITHUB_ENV
+          echo 'source-directory=woocommercev5' >> $GITHUB_ENV
+          echo 'target-directory=.build/woocommercev5' >> $GITHUB_ENV
+          echo 'build-command=make woocommercev5-build' >> $GITHUB_ENV
 
       - name: Prepare release for MagentoV1
         if: startsWith(github.ref, 'refs/tags/MagentoV1-')
