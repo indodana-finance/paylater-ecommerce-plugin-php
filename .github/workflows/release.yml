@@ -29,7 +29,7 @@ jobs:
       # Use semantic versioning. Example output: 1.0.0
       - name: Get package version
         id: packageVersion
-        uses: olegtarasov/get-tag@v2
+        uses: olegtarasov/get-tag@v2.1
         with:
           tagRegex: "^(OpencartV1|OpencartV2|OpencartV2.3|WoocommerceV3|WoocommerceV4|MagentoV1|PrestashopV1|MagentoV2)-(.*)"
           tagRegexGroup: 2
@@ -40,97 +40,97 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/OpencartV1-')
         run: |
           PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
-          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
-          echo "::set-env name=release-name::opencart_v1-${PACKAGE_VERSION//\./_}"
-          echo '::set-env name=php-versions::5.6'
-          echo '::set-env name=key::cache-opencartv1-v2'
-          echo '::set-env name=source-directory::opencartv1'
-          echo '::set-env name=target-directory::.build/opencartv1'
-          echo '::set-env name=build-command::make opencartv1-build'
+          echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
+          echo "release-name=opencart_v1-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo 'php-versions=5.6' >> $GITHUB_ENV
+          echo 'key=cache-opencartv1-v2' >> $GITHUB_ENV
+          echo 'source-directory=opencartv1' >> $GITHUB_ENV
+          echo 'target-directory=.build/opencartv1' >> $GITHUB_ENV
+          echo 'build-command=make opencartv1-build' >> $GITHUB_ENV
 
       - name: Prepare release for OpencartV2
         if: startsWith(github.ref, 'refs/tags/OpencartV2-')
         run: |
           PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
-          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
-          echo "::set-env name=release-name::opencart_v2-${PACKAGE_VERSION//\./_}"
-          echo '::set-env name=php-versions::5.6'
-          echo '::set-env name=key::cache-opencartv2-v2'
-          echo '::set-env name=source-directory::opencartv2'
-          echo '::set-env name=target-directory::.build/opencartv2'
-          echo '::set-env name=build-command::make opencartv2-build'
+          echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
+          echo "release-name=opencart_v2-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo 'php-versions=5.6' >> $GITHUB_ENV
+          echo 'key=cache-opencartv2-v2' >> $GITHUB_ENV
+          echo 'source-directory=opencartv2' >> $GITHUB_ENV
+          echo 'target-directory=.build/opencartv2' >> $GITHUB_ENV
+          echo 'build-command=make opencartv2-build' >> $GITHUB_ENV
 
       - name: Prepare release for OpencartV2.3
         if: startsWith(github.ref, 'refs/tags/OpencartV2.3-')
         run: |
           PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
-          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
-          echo "::set-env name=release-name::opencart_v2.3-${PACKAGE_VERSION//\./_}"
-          echo '::set-env name=php-versions::7.2'
-          echo '::set-env name=key::cache-opencartv2.3-v1'
-          echo '::set-env name=source-directory::opencartv2.3'
-          echo '::set-env name=target-directory::.build/opencartv2.3'
-          echo '::set-env name=build-command::make opencartv2.3-build'
+          echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
+          echo "release-name=opencart_v2.3-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo 'php-versions=7.2' >> $GITHUB_ENV
+          echo 'key=cache-opencartv2.3-v1' >> $GITHUB_ENV
+          echo 'source-directory=opencartv2.3' >> $GITHUB_ENV
+          echo 'target-directory=.build/opencartv2.3' >> $GITHUB_ENV
+          echo 'build-command=make opencartv2.3-build' >> $GITHUB_ENV
 
       - name: Prepare release for WoocommerceV3
         if: startsWith(github.ref, 'refs/tags/WoocommerceV3-')
         run: |
           PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
-          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
-          echo "::set-env name=release-name::woocommerce_v3-${PACKAGE_VERSION//\./_}"
-          echo '::set-env name=php-versions::7.2'
-          echo '::set-env name=key::cache-woocommercev3-v2'
-          echo '::set-env name=source-directory::woocommerce'
-          echo '::set-env name=target-directory::.build/woocommerce'
-          echo '::set-env name=build-command::make woocommerce-build'
+          echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
+          echo "release-name=woocommerce_v3-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo 'php-versions=7.2' >> $GITHUB_ENV
+          echo 'key=cache-woocommercev3-v2' >> $GITHUB_ENV
+          echo 'source-directory=woocommerce' >> $GITHUB_ENV
+          echo 'target-directory=.build/woocommerce' >> $GITHUB_ENV
+          echo 'build-command=make woocommerce-build' >> $GITHUB_ENV
 
       - name: Prepare release for WoocommerceV4
         if: startsWith(github.ref, 'refs/tags/WoocommerceV4-')
         run: |
           PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
-          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
-          echo "::set-env name=release-name::woocommerce_v4-${PACKAGE_VERSION//\./_}"
-          echo '::set-env name=php-versions::7.2'
-          echo '::set-env name=key::cache-woocommercev4-v2'
-          echo '::set-env name=source-directory::woocommercev4'
-          echo '::set-env name=target-directory::.build/woocommercev4'
-          echo '::set-env name=build-command::make woocommercev4-build'
+          echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
+          echo "release-name=woocommerce_v4-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo 'php-versions=7.2' >> $GITHUB_ENV
+          echo 'key=cache-woocommercev4-v2' >> $GITHUB_ENV
+          echo 'source-directory=woocommercev4' >> $GITHUB_ENV
+          echo 'target-directory=.build/woocommercev4' >> $GITHUB_ENV
+          echo 'build-command=make woocommercev4-build' >> $GITHUB_ENV
 
       - name: Prepare release for MagentoV1
         if: startsWith(github.ref, 'refs/tags/MagentoV1-')
         run: |
           PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
-          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
-          echo "::set-env name=release-name::magento_v1-${PACKAGE_VERSION//\./_}"
-          echo '::set-env name=php-versions::5.6'
-          echo '::set-env name=key::cache-magentov1-v2'
-          echo '::set-env name=source-directory::magento1'
-          echo '::set-env name=target-directory::.build/magento1'
-          echo '::set-env name=build-command::make magento1-build'
+          echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
+          echo "release-name=magento_v1-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo 'php-versions=5.6' >> $GITHUB_ENV
+          echo 'key=cache-magentov1-v2' >> $GITHUB_ENV
+          echo 'source-directory=magento1' >> $GITHUB_ENV
+          echo 'target-directory=.build/magento1' >> $GITHUB_ENV
+          echo 'build-command=make magento1-build' >> $GITHUB_ENV
 
       - name: Prepare release for MagentoV2
         if: startsWith(github.ref, 'refs/tags/MagentoV2-')
         run: |
           PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
-          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
-          echo "::set-env name=release-name::magento_v2-${PACKAGE_VERSION//\./_}"
-          echo '::set-env name=php-versions::7.3'
-          echo '::set-env name=key::cache-magentov2-v2'
-          echo '::set-env name=source-directory::magentov2'
-          echo '::set-env name=target-directory::.build/magentov2'
-          echo '::set-env name=build-command::make magentov2-build'
+          echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
+          echo "release-name=magento_v2-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo 'php-versions=7.3' >> $GITHUB_ENV
+          echo 'key=cache-magentov2-v2' >> $GITHUB_ENV
+          echo 'source-directory=magentov2' >> $GITHUB_ENV
+          echo 'target-directory=.build/magentov2' >> $GITHUB_ENV
+          echo 'build-command=make magentov2-build' >> $GITHUB_ENV
           
       - name: Prepare release for PrestashopV1
         if: startsWith(github.ref, 'refs/tags/PrestashopV1-')
         run: |
           PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
-          echo '::set-env name=extensions::curl, json, mbstring, xdebug'
-          echo "::set-env name=release-name::prestashop_v1-${PACKAGE_VERSION//\./_}"
-          echo '::set-env name=php-versions::7.2'
-          echo '::set-env name=key::cache-prestashopv1-v2'
-          echo '::set-env name=source-directory::prestashopv1'
-          echo '::set-env name=target-directory::.build/prestashopv1'
-          echo '::set-env name=build-command::make prestashopv1-build'
+          echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
+          echo "release-name=prestashop_v1-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo 'php-versions=7.2' >> $GITHUB_ENV
+          echo 'key=cache-prestashopv1-v2' >> $GITHUB_ENV
+          echo 'source-directory=prestashopv1' >> $GITHUB_ENV
+          echo 'target-directory=.build/prestashopv1' >> $GITHUB_ENV
+          echo 'build-command=make prestashopv1-build' >> $GITHUB_ENV
 
       # Install & cache environments
       # https://github.com/marketplace/actions/setup-php-action#cache-extensions
@@ -149,13 +149,19 @@ jobs:
           key: ${{ steps.cache-env.outputs.key }}
           restore-keys: ${{ steps.cache-env.outputs.key }}
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.php-versions }}
+          extensions: ${{ env.extensions }}
+
       - name: Validate plugin composer.json and composer.lock
         working-directory: ${{ env.source-directory }}
         run: composer validate
 
       - name: Install plugin dependencies
         working-directory: ${{ env.source-directory }}
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress
 
       - name: Build the plugin
         run: ${{ env.build-command }}
