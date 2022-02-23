@@ -31,14 +31,5 @@ build_plugin() {
   # Note: CMS upload dir might not exist during CI build
   if [ -d $TARGET_DIR/upload ]; then
     cp -Lr $TARGET_DIR/plugin/* $TARGET_DIR/upload
-
-    # Release(WooCommerce): move contents of indodana-payment
-    # directly under plugin dir before zipped
-    if [ -z "${PLUGIN_NAME##woocommerce*}" ]; then
-      mkdir $TARGET_DIR/temp
-      cp -Lr $TARGET_DIR/plugin/wp-content/plugins/indodana-payment/* $TARGET_DIR/temp
-      rm -rf $TARGET_DIR/plugin
-      mv $TARGET_DIR/temp $TARGET_DIR/plugin
-    fi
   fi
 }

@@ -5,3 +5,11 @@ set -e
 . ./build
 
 build_plugin "woocommerce" "wp-content/plugins/indodana-payment/library/Indodana/Payment"
+
+# Release(WooCommerce): move contents of indodana-payment
+# directly under plugin dir before zipped
+TARGET_DIR=".build/woocommerce"
+mkdir $TARGET_DIR/temp
+cp -Lr $TARGET_DIR/plugin/wp-content/plugins/indodana-payment/* $TARGET_DIR/temp
+rm -rf $TARGET_DIR/plugin
+mv $TARGET_DIR/temp $TARGET_DIR/plugin
