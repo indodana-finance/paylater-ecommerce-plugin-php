@@ -29,7 +29,7 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
       \Magento\Framework\DB\Transaction $coretransaction
     )
     {
-      $this->_order=$order;
+      $this->_order = $order;
       $this->_transaction = $transaction;
       $this->_helper = $helper;
       $this->_dir = $directoryList;
@@ -94,7 +94,7 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
         // Check whether request authorization is valid
         // -----
         $authToken = IndodanaHelper::getAuthToken($requestHeaders, $namespace);  
-        $isValidAuthorization = $this->_transaction //Mage::helper('indodanapayment/transaction')
+        $isValidAuthorization = $this->_transaction
           ->getIndodanaCommon()
           ->isValidAuthToken($authToken);  
 
