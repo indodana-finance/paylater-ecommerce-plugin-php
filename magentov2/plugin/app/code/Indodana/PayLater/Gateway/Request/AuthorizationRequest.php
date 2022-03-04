@@ -5,7 +5,7 @@
  */
 namespace Indodana\Paylater\Gateway\Request;
 
-use Magento\Payment\Gateway\ConfigInterface;
+use Magento\Payment\Gateway\Config\Config as ConfigInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 
