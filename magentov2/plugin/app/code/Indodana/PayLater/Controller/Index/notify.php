@@ -119,13 +119,11 @@ class Notify extends \Magento\Framework\App\Action\Action
     }
 
     if (!in_array($transactionStatus, IndodanaConstant::getSuccessTransactionStatuses())) {
-      MerchantResponse::printInvalidTransactionStatusResponse(
+      return MerchantResponse::printInvalidTransactionStatusResponse(
         $transactionStatus,
         $orderId,
         $namespace
       );  
-      
-      return;
     }
 
     // Handle success order

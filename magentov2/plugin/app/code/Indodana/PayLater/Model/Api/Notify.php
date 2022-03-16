@@ -19,63 +19,44 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
     protected $_helper;
     protected $_dir;
     protected $_coretransaction;
-    protected $_ordermodel;
 
     public function __construct
     (
-      \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
-      \Magento\Sales\Model\Order $order,
+      \Magento\Sales\Api\Data\OrderInterface $order,
       \Indodana\PayLater\Helper\Transaction $transaction,
       \Indodana\PayLater\Helper\Data $helper,
       \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
       \Magento\Framework\DB\Transaction $coretransaction
     )
     {
-      $this->_order=$orderRepository;
+      $this->_order = $order;
       $this->_transaction = $transaction;
       $this->_helper = $helper;
       $this->_dir = $directoryList;
       $this->_coretransaction=$coretransaction;
-      $this->_ordermodel = $order;
       /// use by indodana logger
       //define('INDODANA_LOG_DIR',$this->_dir->getPath('log'). DIRECTORY_SEPARATOR . 'Indodana' . DIRECTORY_SEPARATOR );
 
       if (!is_dir(INDODANA_LOG_DIR)) {
         mkdir(INDODANA_LOG_DIR, 0777, true);
       }
-
     }
 
-
-    public function OKReturn()
+    public function printResponse($response, $namespace)
     {
-      $namespace = '[MagentoV2-Indodana\PayLater\Model\Api\Notify\OKReturn]';
-      IndodanaLogger::info(
-        sprintf(
-          '%s OK Return ',
-          $namespace
-        )
-      );  
+      $json_encoded_response = json_encode($response);
 
-      return [
-            'status' => 'OK',
-            'message' => 'Message from merchant if any'
-        ];
-    }
-    public function RejectReturn($msg){
-      $namespace = '[MagentoV2-Indodana\PayLater\Model\Api\Notify\RejectReturn]';
-      IndodanaLogger::info(
-        sprintf(
-          '%s Reject Return : %s',
-          $namespace,$msg
-        )
-      );  
+      IndodanaLogger::info(sprintf(
+        '%s Response: %s',
+        $namespace,
+        $json_encoded_response
+      ));
 
-        return [
-            'status' => 'REJECT',
-            'message' => 'Message from merchant if any' . $msg
-        ];
+      header('Content-type: application/json');
 
+      print_r($json_encoded_response, false);
+
+      die;
     }
 
     /**
@@ -94,16 +75,11 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
           );  
     
         $this->notifyAction();
-        
     }
 
     public function notifyAction(){
         $namespace = '[MagentoV2-Indodana\PayLater\Model\Api\Notify\notifyAction]';
-        //Disallow any action for invalid request
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    
-          $this->RejectReturn('must be post method');
-        }  
+
         // Log request headers
         // -----    
         $requestHeaders = IndodanaHelper::getRequestHeaders();  
@@ -114,16 +90,22 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
             json_encode($requestHeaders)
           )
         );  
+
         // Check whether request authorization is valid
         // -----
         $authToken = IndodanaHelper::getAuthToken($requestHeaders, $namespace);  
-        $isValidAuthorization = $this->_transaction//Mage::helper('indodanapayment/transaction')
+        $isValidAuthorization = $this->_transaction
           ->getIndodanaCommon()
           ->isValidAuthToken($authToken);  
+
         if (!$isValidAuthorization) {
-          MerchantResponse::printInvalidRequestAuthResponse($namespace);  
-          
-          $this->RejectReturn( 'Invalid  authorization');
+          return $this->printResponse(
+            [
+              'status'  => 'REJECTED',
+              'message' => 'Invalid request authorization'
+            ],
+            $namespace
+          );
         }
     
         // Log request body
@@ -140,14 +122,18 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
         // Check whether request body is valid
         // -----
         if (!isset($requestBody['transactionStatus']) || !isset($requestBody['merchantOrderId'])) {
-          MerchantResponse::printInvalidRequestBodyResponse($namespace);  
-          
-          $this->RejectReturn('Invalid body');
+          return $this->printResponse(
+            [
+              'status'  => 'REJECTED',
+              'message' => 'Invalid request body'
+            ],
+            $namespace
+          );
         }  
     
         $transactionStatus = $requestBody['transactionStatus'];
-        $orderId = str_replace(Transaction::PREVIX_ORDERID,'',$requestBody['merchantOrderId']);      
-        $order = $this->_ordermodel->loadByIncrementId($orderId);
+        $incrementId = str_replace(Transaction::PREVIX_ORDERID,'',$requestBody['merchantOrderId']);      
+        $order= $this->_order->loadByIncrementid($incrementId);  
 
         IndodanaLogger::info(
           sprintf(
@@ -158,39 +144,45 @@ class Notify implements \Indodana\PayLater\Api\NotifyInterface
         );  
 
         IndodanaLogger::info(
-            sprintf(
-              '%s Order: %s',
-              $namespace,
-              json_encode($order)
-            )
-          );  
+          sprintf(
+            '%s Order: %s',
+            $namespace,
+            json_encode($order)
+          )
+        );  
   
         
         if (!$order) {
-          MerchantResponse::printNotFoundOrderResponse(
-            $orderId,
+          return $this->printResponse(
+            [
+              'status'  => 'REJECTED',
+              'message' => "Order not found for merchant order id: ${orderId}"
+            ],
             $namespace
           );
-          
-          $this->RejectReturn('Order not found ');
         }
     
         if (!in_array($transactionStatus, IndodanaConstant::getSuccessTransactionStatuses())) {
-          MerchantResponse::printInvalidTransactionStatusResponse(
-            $transactionStatus,
-            $orderId,
+          return $this->printResponse(
+            [
+              'status'  => 'REJECTED',
+              'message' => "Invalid transaction status: ${transactionStatus} for merchant order id: ${orderId}"
+            ],
             $namespace
-          );  
-          
-          $this->RejectReturn(' transaction invalid ');
+          );
         }
     
         // Handle success order
         // -----
         $this->handleSuccessOrder($order);  
-        MerchantResponse::printSuccessResponse($namespace);  
-        
-        $this->OKReturn();;
+
+        return $this->printResponse(
+          [
+            'status'  => 'OK',
+            'message' => 'OK'
+          ],
+          $namespace
+        );
       }
     
       private function handleSuccessOrder($order) {

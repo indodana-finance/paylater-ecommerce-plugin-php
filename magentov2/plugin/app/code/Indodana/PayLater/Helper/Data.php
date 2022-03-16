@@ -2,7 +2,7 @@
 
 namespace Indodana\PayLater\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
-use Magento\Payment\Gateway\ConfigInterface;
+use Magento\Payment\Gateway\Config as ConfigInterface;
 
 class Data extends AbstractHelper
 {
@@ -10,8 +10,9 @@ class Data extends AbstractHelper
 
   public function __construct(\Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig)
   {
-          $this->_scopeConfig = $scopeConfig;
+    $this->_scopeConfig = $scopeConfig;
   }
+
   public function getStoreID()
   {
     return $this->_scopeConfig->getValue('payment/indodanapayment/store_id', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
@@ -59,22 +60,20 @@ class Data extends AbstractHelper
 
   public function getApiKey()
   {
-    if($this->getEnvironment()=='SANDBOX'){
-      return $this->_scopeConfig->getValue('payment/indodanapayment/api_key_sandbox', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);      
-    }else{
+    if ($this->getEnvironment()=='SANDBOX') {
+      return $this->_scopeConfig->getValue('payment/indodanapayment/api_key_sandbox', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    } else {
       return $this->_scopeConfig->getValue('payment/indodanapayment/api_key', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
-    
   }
 
   public function getApiSecret()
   {
-    if($this->getEnvironment()=='SANDBOX'){
+    if ($this->getEnvironment()=='SANDBOX') {
       return $this->_scopeConfig->getValue('payment/indodanapayment/api_secret_sandbox', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-    }else{
+    } else {
       return $this->_scopeConfig->getValue('payment/indodanapayment/api_secret', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
-    
   }
 
   public function getEnvironment()
