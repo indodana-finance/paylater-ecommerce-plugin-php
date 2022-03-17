@@ -97,9 +97,14 @@ class Transaction extends AbstractHelper implements IndodanaInterface
 
   public function getTotalShippingAmount($order)
   {
+    $shippingAddress = $order->getShippingAddress();
+    if (is_null($shippingAddress)) {
+      return;
+    }
+
     // I'm not really sure whether to use getShippingInclTax() or getShippingAmount()
     // For get installment options
-    $totalShippingAmount = (float) $order->getShippingAddress()->getShippingInclTax();
+    $totalShippingAmount = (float) $shippingAddress->getShippingInclTax();
     // For checkout
     if (!$totalShippingAmount) {
       $totalShippingAmount = (float) $order->getShippingInclTax();
@@ -198,6 +203,9 @@ class Transaction extends AbstractHelper implements IndodanaInterface
   {
     // Shipping address always exist even though the user ship to billing address
     $shippingAddress  = $order->getShippingAddress();
+    if (is_null($shippingAddress)) {
+      return;
+    }
 
     return [
       'firstName'     => $shippingAddress->getFirstname(),
