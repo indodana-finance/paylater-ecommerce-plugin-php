@@ -80,16 +80,14 @@ class Redirectto extends \Magento\Framework\App\Action\Action
             )
           );            
 
-        $checkout =  $this->_transaction->checkOut($order,$paytype);         
-        
-        if ($order) {        
+        if ($order) {
             IndodanaLogger::info(
                 sprintf(
                   '%s DefaultOrderPendingStatus: %s',
                   $namespace,
                   $this->_helper->getDefaultOrderPendingStatus()
                 )
-              );            
+              );
             $order
               ->addStatusToHistory(
                 $this->_helper->getDefaultOrderPendingStatus(),
@@ -97,13 +95,15 @@ class Redirectto extends \Magento\Framework\App\Action\Action
               )
               ->save();
         }
-         
+
+        $checkout =  $this->_transaction->checkOut($order,$paytype);
+
         $result = $this->_resultFactory->create();
         return $result->setData(
             [
                 'success' => true,
-                'Order' =>$checkout
+                'Order' => $checkout
             ]
-        );    
+        );
     }
 }
