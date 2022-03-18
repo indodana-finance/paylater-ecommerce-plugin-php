@@ -98,6 +98,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
   public function getTotalShippingAmount($order)
   {
     $shippingAddress = $order->getShippingAddress();
+
     if (is_null($shippingAddress)) {
       return;
     }
@@ -203,6 +204,7 @@ class Transaction extends AbstractHelper implements IndodanaInterface
   {
     // Shipping address always exist even though the user ship to billing address
     $shippingAddress  = $order->getShippingAddress();
+
     if (is_null($shippingAddress)) {
       return;
     }
