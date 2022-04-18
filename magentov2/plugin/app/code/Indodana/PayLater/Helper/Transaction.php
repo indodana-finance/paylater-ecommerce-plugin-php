@@ -105,10 +105,10 @@ class Transaction extends AbstractHelper implements IndodanaInterface
 
     // I'm not really sure whether to use getShippingInclTax() or getShippingAmount()
     // For get installment options
-    $totalShippingAmount = (float) $shippingAddress->getShippingInclTax();
+    $totalShippingAmount = (float) $shippingAddress->getShippingInclTax() - $shippingAddress->getShippingDiscountAmount();
     // For checkout
     if (!$totalShippingAmount) {
-      $totalShippingAmount = (float) $order->getShippingInclTax();
+      $totalShippingAmount = (float) $order->getShippingInclTax() - $order->getShippingDiscountAmount();
     }
 
     return $totalShippingAmount;
