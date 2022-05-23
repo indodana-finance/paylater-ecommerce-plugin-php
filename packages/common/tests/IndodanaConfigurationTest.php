@@ -63,7 +63,7 @@ class IndodanaConfigurationTest extends TestCase
 
     $indodanaConfiguration = new IndodanaConfiguration([
       'storeName'                 => 'Store Name',
-      'storeUrl'                  => 'www.storename.com',
+      'storeUrl'                  => 'http://storename.com',
       'storeEmail'                => 'admin@storename.com',
       'storePhone'                => 'Store Phone', 
       'storeCountryCode'          => $countryCodeSample,
