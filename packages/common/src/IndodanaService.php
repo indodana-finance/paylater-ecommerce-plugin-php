@@ -2,12 +2,8 @@
 
 namespace IndodanaCommon;
 
-use Respect\Validation\Validator;
 use Indodana\Indodana;
-use Indodana\RespectValidation\RespectValidationHelper;
 use IndodanaCommon\ApiResources;
-use IndodanaCommon\Exceptions\IndodanaCommonException;
-use IndodanaCommon\IndodanaHelper;
 use IndodanaCommon\Utils;
 use IndodanaCommon\Seller;
 

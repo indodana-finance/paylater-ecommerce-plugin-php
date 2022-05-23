@@ -2,8 +2,7 @@
 
 namespace IndodanaCommon;
 
-use Respect\Validation\Validator;
-use Respect\Validation\Exceptions\NestedValidationException;
+use Indodana\Utils\Validator\Validator;
 use IndodanaCommon\IndodanaConstant;
 
 class IndodanaConfiguration
@@ -12,77 +11,54 @@ class IndodanaConfiguration
 
   public function __construct(array $config = [])
   {
-    $validator = Validator::create()
-      ->key('storeName', Validator::stringType()->notEmpty())
-      ->key('storeUrl', Validator::domain()->notEmpty())
-      ->key('storeEmail', Validator::email()->notEmpty())
-      ->key('storePhone', Validator::stringType()->notEmpty()) // Respect doesn't have validation for Indonesia phone
-      ->key('storeCountryCode', Validator::in(IndodanaConstant::getCountryCodes()))
-      ->key('storeCity', Validator::stringType()->notEmpty())
-      ->key('storeAddress', Validator::stringType()->notEmpty())
-      ->key('storePostalCode', Validator::postalCode('ID')->notEmpty()) // We only validate Indonesia postal code atm (5 digits)
-      ->key('apiKey', Validator::stringType()->notEmpty())
-      ->key('apiSecret', Validator::stringType()->notEmpty())
-      ->key('environment', Validator::in(IndodanaConstant::getEnvironments()))
-      ->key('defaultOrderPendingStatus', Validator::stringType()->notEmpty())
-      ->key('defaultOrderSuccessStatus', Validator::stringType()->notEmpty())
-      ->key('defaultOrderFailedStatus', Validator::stringType()->notEmpty());
+    $validationResult = Validator::create($config)
+      ->key('storeName', Validator::required())
+      ->key('storeUrl', Validator::required(), Validator::domain())
+      ->key('storeEmail', Validator::required(), Validator::email())
+      ->key('storePhone', Validator::required()) // Respect doesn't have validation for Indonesia phone
+      ->key('storeCountryCode', Validator::required(), Validator::in(IndodanaConstant::getCountryCodes()))
+      ->key('storeCity', Validator::required())
+      ->key('storeAddress', Validator::required())
+      ->key('storePostalCode', Validator::required(), Validator::indonesianPostalCode()) // We only validate Indonesia postal code atm (5 digits)
+      ->key('apiKey', Validator::required())
+      ->key('apiSecret', Validator::required())
+      ->key('environment', Validator::required(), Validator::in(IndodanaConstant::getEnvironments()))
+      ->key('defaultOrderPendingStatus', Validator::required())
+      ->key('defaultOrderSuccessStatus', Validator::required())
+      ->key('defaultOrderFailedStatus', Validator::required());
 
-    $this->setErrors($validator, $config);
+    $this->setErrors($validationResult->getErrorMessages());
   }
 
-  private function setErrors($validator, $config)
+  private function setErrors($errors = [])
   {
-    try {
-      $validator->assert($config);
+    if (count($errors) === 0) {
+      $this->errors = $errors;
+      return;
+    }
 
-      $this->errors = [];
-    } catch (NestedValidationException $exception) {
-      $stringValidationMessage = '{{name}} must not be empty and contain text';
+    $frontendValidationMessages = [];
 
-      // These custom error message are not perfect.
-      // TODO: On next iteration, consider remove `findMessages` because on newest Respect, it's not included anymore.
-      // It seems that the newest Respect force developer to validate each key on a map separately -> Need more research
-      $exceptionValidationMessages = $exception->findMessages([
-        'storeName'                 => $stringValidationMessage,
-        'storeUrl'                  => '{{name}} must not be empty and valid URL',
-        'storeEmail'                => '{{name}} must not be empty and valid email',
-        'storePhone'                => $stringValidationMessage,
-        'storeCountryCode'          ,
-        'storeCity'                 => $stringValidationMessage,
-        'storeAddress'              => $stringValidationMessage,
-        'storePostalCode'           => '{{name}} must not be empty and valid Indonesia postal code',
-        'apiKey'                    => $stringValidationMessage,
-        'apiSecret'                 => $stringValidationMessage,
-        'environment'               ,
-        'defaultOrderPendingStatus' => $stringValidationMessage,
-        'defaultOrderSuccessStatus' => $stringValidationMessage,
-        'defaultOrderFailedStatus'  => $stringValidationMessage,
-      ]);
+    $frontendConfigMapping = IndodanaConstant::getFrontendConfigMapping();
 
-      $frontendValidationMessages = [];
-
-      $frontendConfigMapping = IndodanaConstant::getFrontendConfigMapping();
-
-      foreach ($exceptionValidationMessages as $configKey => $exceptionValidationMessage) {
-        if (empty($exceptionValidationMessage)) {
-          continue;
-        }
-
-        // We haven't handled if the value of configKey is empty
-        $frontendConfigValue = $frontendConfigMapping[$configKey];
-
-        $frontendValidationMessage = str_replace(
-          $configKey,
-          $frontendConfigValue,
-          $exceptionValidationMessage
-        );
-
-        $frontendValidationMessages[$configKey] = $frontendValidationMessage;
+    foreach ($errors as $configKey => $exceptionValidationMessage) {
+      if (empty($exceptionValidationMessage)) {
+        continue;
       }
 
-      $this->errors = $frontendValidationMessages;
+      // We haven't handled if the value of configKey is empty
+      $frontendConfigValue = $frontendConfigMapping[$configKey];
+
+      $frontendValidationMessage = str_replace(
+        $configKey,
+        $frontendConfigValue,
+        $exceptionValidationMessage
+      );
+
+      $frontendValidationMessages[$configKey] = $frontendValidationMessage;
     }
+
+    $this->errors = $frontendValidationMessages;
   }
 
   public function getValidationResult()
