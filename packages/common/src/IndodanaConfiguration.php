@@ -15,7 +15,7 @@ class IndodanaConfiguration
       ->key('storeName', Validator::required())
       ->key('storeUrl', Validator::required(), Validator::domain())
       ->key('storeEmail', Validator::required(), Validator::email())
-      ->key('storePhone', Validator::required()) // Respect doesn't have validation for Indonesia phone
+      ->key('storePhone', Validator::required())
       ->key('storeCountryCode', Validator::required(), Validator::in(IndodanaConstant::getCountryCodes()))
       ->key('storeCity', Validator::required())
       ->key('storeAddress', Validator::required())
