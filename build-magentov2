@@ -4,3 +4,9 @@ set -e
 . ./build
 
 build_plugin "magentov2" "app/code/Indodana/PayLater"
+
+# Release(Magento 2.x): remove unit test because it is not excluded
+# during setup:di:compile
+# TODO: remove indodana-paylater-sdk from this command
+rm -rf .build/magentov2/plugin/app/code/Indodana/PayLater/vendor/indodana/indodana-paylater-ecommerce-common/tests/
+rm -rf .build/magentov2/plugin/app/code/Indodana/PayLater/vendor/indodana/indodana-paylater-sdk/tests/ # for development purpose, use local sdk
