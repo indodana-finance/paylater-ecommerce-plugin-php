@@ -1,0 +1,519 @@
+##
+# Magento Plugin Tester — multi-version environment
+#
+# Usage:
+#   docker compose --profile m244 up -d --build   # Magento 2.4.4-p18
+#   docker compose --profile m245 up -d --build   # Magento 2.4.5-p17
+#   docker compose --profile m246 up -d --build   # Magento 2.4.6-p15
+#   docker compose --profile m247 up -d --build   # Magento 2.4.7-p10
+#   docker compose --profile m248 up -d --build   # Magento 2.4.8-p5
+#   docker compose --profile all  up -d --build   # All versions
+#
+# After containers up, install Magento:
+#   docker compose exec php-m244 install-magento.sh
+#
+
+# ─── Shared services ────────────────────────────────────────────
+services:
+  redis:
+    image: redis:7.2-alpine
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: [m244, m245, m246, m247, m248, all]
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-magento}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-magento}
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: [m244, m245, m246, m247, m248, all]
+    restart: unless-stopped
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "8025:8025"
+    profiles: [m244, m245, m246, m247, m248, all]
+    restart: unless-stopped
+
+  # ─── Magento 2.4.4-p18 — PHP 8.1 + Elasticsearch 7.17 ──────
+  db-m244:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-magento_root}
+      MYSQL_DATABASE: magento
+      MYSQL_USER: ${MYSQL_USER:-magento}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-magento}
+    volumes:
+      - dbdata-m244:/var/lib/mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --innodb-buffer-pool-size=512M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-magento_root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: [m244, all]
+    restart: unless-stopped
+
+  elasticsearch-m244:
+    image: elasticsearch:7.17.24
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    volumes:
+      - esdata-m244:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: [m244, all]
+    restart: unless-stopped
+
+  php-m244:
+    build:
+      context: ./php
+      args:
+        PHP_VERSION: "8.1"
+    volumes:
+      - magento-m244:/var/www/html
+      - ./php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+      - ./plugins:/var/www/plugins:ro
+    environment:
+      MAGENTO_VERSION: "2.4.4-p13"
+      SEARCH_ENGINE: elasticsearch7
+      SEARCH_HOST: elasticsearch-m244
+      SEARCH_PORT: "9200"
+      DB_HOST: db-m244
+      MYSQL_DATABASE: magento
+      MYSQL_USER: ${MYSQL_USER:-magento}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-magento}
+      RABBITMQ_USER: ${RABBITMQ_USER:-magento}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-magento}
+      BASE_URL: "http://localhost:8244"
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin123!}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      COMPOSER_AUTH: ${COMPOSER_AUTH}
+    depends_on:
+      db-m244:
+        condition: service_healthy
+      elasticsearch-m244:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    profiles: [m244, all]
+    restart: unless-stopped
+
+  nginx-m244:
+    image: nginx:1.24-alpine
+    ports:
+      - "8244:80"
+    volumes:
+      - magento-m244:/var/www/html
+      - ./nginx/magento.conf.template:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      PHP_FPM_HOST: php-m244
+    depends_on:
+      - php-m244
+    profiles: [m244, all]
+    restart: unless-stopped
+
+  # ─── Magento 2.4.5-p17 — PHP 8.1 + Elasticsearch 7.17 ──────
+  db-m245:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-magento_root}
+      MYSQL_DATABASE: magento
+      MYSQL_USER: ${MYSQL_USER:-magento}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-magento}
+    volumes:
+      - dbdata-m245:/var/lib/mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --innodb-buffer-pool-size=512M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-magento_root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: [m245, all]
+    restart: unless-stopped
+
+  elasticsearch-m245:
+    image: elasticsearch:7.17.24
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    volumes:
+      - esdata-m245:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: [m245, all]
+    restart: unless-stopped
+
+  php-m245:
+    build:
+      context: ./php
+      args:
+        PHP_VERSION: "8.1"
+    volumes:
+      - magento-m245:/var/www/html
+      - ./php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+      - ./plugins:/var/www/plugins:ro
+    environment:
+      MAGENTO_VERSION: "2.4.5-p14"
+      SEARCH_ENGINE: elasticsearch7
+      SEARCH_HOST: elasticsearch-m245
+      SEARCH_PORT: "9200"
+      DB_HOST: db-m245
+      MYSQL_DATABASE: magento
+      MYSQL_USER: ${MYSQL_USER:-magento}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-magento}
+      RABBITMQ_USER: ${RABBITMQ_USER:-magento}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-magento}
+      BASE_URL: "http://localhost:8245"
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin123!}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      COMPOSER_AUTH: ${COMPOSER_AUTH}
+    depends_on:
+      db-m245:
+        condition: service_healthy
+      elasticsearch-m245:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    profiles: [m245, all]
+    restart: unless-stopped
+
+  nginx-m245:
+    image: nginx:1.24-alpine
+    ports:
+      - "8245:80"
+    volumes:
+      - magento-m245:/var/www/html
+      - ./nginx/magento.conf.template:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      PHP_FPM_HOST: php-m245
+    depends_on:
+      - php-m245
+    profiles: [m245, all]
+    restart: unless-stopped
+
+  # ─── Magento 2.4.6-p15 — PHP 8.2 + OpenSearch 2.5 ──────────
+  db-m246:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-magento_root}
+      MYSQL_DATABASE: magento
+      MYSQL_USER: ${MYSQL_USER:-magento}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-magento}
+    volumes:
+      - dbdata-m246:/var/lib/mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --innodb-buffer-pool-size=512M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-magento_root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: [m246, all]
+    restart: unless-stopped
+
+  opensearch-m246:
+    image: opensearchproject/opensearch:2.5.0
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - OPENSEARCH_JAVA_OPTS=-Xms256m -Xmx256m
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+    volumes:
+      - osdata-m246:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: [m246, all]
+    restart: unless-stopped
+
+  php-m246:
+    build:
+      context: ./php
+      args:
+        PHP_VERSION: "8.2"
+    volumes:
+      - magento-m246:/var/www/html
+      - ./php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+      - ./plugins:/var/www/plugins:ro
+    environment:
+      MAGENTO_VERSION: "2.4.6-p15"
+      SEARCH_ENGINE: opensearch
+      SEARCH_HOST: opensearch-m246
+      SEARCH_PORT: "9200"
+      DB_HOST: db-m246
+      MYSQL_DATABASE: magento
+      MYSQL_USER: ${MYSQL_USER:-magento}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-magento}
+      RABBITMQ_USER: ${RABBITMQ_USER:-magento}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-magento}
+      BASE_URL: "http://localhost:8246"
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin123!}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      COMPOSER_AUTH: ${COMPOSER_AUTH}
+    depends_on:
+      db-m246:
+        condition: service_healthy
+      opensearch-m246:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    profiles: [m246, all]
+    restart: unless-stopped
+
+  nginx-m246:
+    image: nginx:1.24-alpine
+    ports:
+      - "8246:80"
+    volumes:
+      - magento-m246:/var/www/html
+      - ./nginx/magento.conf.template:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      PHP_FPM_HOST: php-m246
+    depends_on:
+      - php-m246
+    profiles: [m246, all]
+    restart: unless-stopped
+
+  # ─── Magento 2.4.7-p10 — PHP 8.3 + OpenSearch 2.12 ─────────
+  db-m247:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-magento_root}
+      MYSQL_DATABASE: magento
+      MYSQL_USER: ${MYSQL_USER:-magento}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-magento}
+    volumes:
+      - dbdata-m247:/var/lib/mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --innodb-buffer-pool-size=512M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-magento_root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: [m247, all]
+    restart: unless-stopped
+
+  opensearch-m247:
+    image: opensearchproject/opensearch:2.12.0
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - OPENSEARCH_JAVA_OPTS=-Xms256m -Xmx256m
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+    volumes:
+      - osdata-m247:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: [m247, all]
+    restart: unless-stopped
+
+  php-m247:
+    build:
+      context: ./php
+      args:
+        PHP_VERSION: "8.3"
+    volumes:
+      - magento-m247:/var/www/html
+      - ./php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+      - ./plugins:/var/www/plugins:ro
+    environment:
+      MAGENTO_VERSION: "2.4.7-p10"
+      SEARCH_ENGINE: opensearch
+      SEARCH_HOST: opensearch-m247
+      SEARCH_PORT: "9200"
+      DB_HOST: db-m247
+      MYSQL_DATABASE: magento
+      MYSQL_USER: ${MYSQL_USER:-magento}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-magento}
+      RABBITMQ_USER: ${RABBITMQ_USER:-magento}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-magento}
+      BASE_URL: "http://localhost:8247"
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin123!}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      COMPOSER_AUTH: ${COMPOSER_AUTH}
+    depends_on:
+      db-m247:
+        condition: service_healthy
+      opensearch-m247:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    profiles: [m247, all]
+    restart: unless-stopped
+
+  nginx-m247:
+    image: nginx:1.24-alpine
+    ports:
+      - "8247:80"
+    volumes:
+      - magento-m247:/var/www/html
+      - ./nginx/magento.conf.template:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      PHP_FPM_HOST: php-m247
+    depends_on:
+      - php-m247
+    profiles: [m247, all]
+    restart: unless-stopped
+
+  # ─── Magento 2.4.8-p5 — PHP 8.3 + OpenSearch 2.19 + MySQL 8.4 ─
+  db-m248:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-magento_root}
+      MYSQL_DATABASE: magento
+      MYSQL_USER: ${MYSQL_USER:-magento}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-magento}
+    volumes:
+      - dbdata-m248:/var/lib/mysql
+    command: >
+      --innodb-buffer-pool-size=512M
+      --log-bin-trust-function-creators=1
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-magento_root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: [m248, all]
+    restart: unless-stopped
+
+  opensearch-m248:
+    image: opensearchproject/opensearch:2.19.0
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - OPENSEARCH_JAVA_OPTS=-Xms256m -Xmx256m
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+    volumes:
+      - osdata-m248:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: [m248, all]
+    restart: unless-stopped
+
+  php-m248:
+    build:
+      context: ./php
+      args:
+        PHP_VERSION: "8.3"
+    volumes:
+      - magento-m248:/var/www/html
+      - ./php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+      - ./plugins:/var/www/plugins:ro
+    environment:
+      MAGENTO_VERSION: "2.4.8-p5"
+      SEARCH_ENGINE: opensearch
+      SEARCH_HOST: opensearch-m248
+      SEARCH_PORT: "9200"
+      DB_HOST: db-m248
+      MYSQL_DATABASE: magento
+      MYSQL_USER: ${MYSQL_USER:-magento}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-magento}
+      RABBITMQ_USER: ${RABBITMQ_USER:-magento}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-magento}
+      BASE_URL: "http://localhost:8248"
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin123!}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      COMPOSER_AUTH: ${COMPOSER_AUTH}
+    depends_on:
+      db-m248:
+        condition: service_healthy
+      opensearch-m248:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    profiles: [m248, all]
+    restart: unless-stopped
+
+  nginx-m248:
+    image: nginx:1.26-alpine
+    ports:
+      - "8248:80"
+    volumes:
+      - magento-m248:/var/www/html
+      - ./nginx/magento.conf.template:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      PHP_FPM_HOST: php-m248
+    depends_on:
+      - php-m248
+    profiles: [m248, all]
+    restart: unless-stopped
+
+volumes:
+  redisdata:
+  rabbitmqdata:
+  # 2.4.4
+  dbdata-m244:
+  esdata-m244:
+  magento-m244:
+  # 2.4.5
+  dbdata-m245:
+  esdata-m245:
+  magento-m245:
+  # 2.4.6
+  dbdata-m246:
+  osdata-m246:
+  magento-m246:
+  # 2.4.7
+  dbdata-m247:
+  osdata-m247:
+  magento-m247:
+  # 2.4.8
+  dbdata-m248:
+  osdata-m248:
+  magento-m248:

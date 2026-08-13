@@ -31,7 +31,7 @@ jobs:
         id: packageVersion
         uses: olegtarasov/get-tag@v2.1
         with:
-          tagRegex: "^(OpencartV1|OpencartV2|OpencartV2.3|WoocommerceV3|WoocommerceV4|WoocommerceV5|MagentoV1|PrestashopV1|MagentoV2)-(.*)"
+          tagRegex: "^(OpencartV1|OpencartV2|OpencartV2.3|WoocommerceV3|WoocommerceV4|WoocommerceV5|MagentoV1|PrestashopV1|MagentoV2.4.0|MagentoV2.4.4|MagentoV2)-(.*)"
           tagRegexGroup: 2
 
       # We differentiate plugin release based on prefix
@@ -120,18 +120,71 @@ jobs:
           echo 'target-directory=.build/magento1' >> $GITHUB_ENV
           echo 'build-command=make magento1-build' >> $GITHUB_ENV
 
-      - name: Prepare release for MagentoV2
-        if: startsWith(github.ref, 'refs/tags/MagentoV2-')
+      - name: Prepare release for MagentoV2 (2.4.0-2.4.3)
+        if: startsWith(github.ref, 'refs/tags/MagentoV2.4.0-')
         run: |
           PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
           echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
-          echo "release-name=magento_v2-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo "release-name=magento_v2.4.0-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
           echo 'php-versions=7.3' >> $GITHUB_ENV
-          echo 'key=cache-magentov2-v2' >> $GITHUB_ENV
-          echo 'source-directory=magentov2' >> $GITHUB_ENV
-          echo 'target-directory=.build/magentov2' >> $GITHUB_ENV
-          echo 'build-command=make magentov2-build' >> $GITHUB_ENV
-          
+          echo 'key=cache-magentov2.4.0-v2' >> $GITHUB_ENV
+          echo 'source-directory=magentov2.4.0' >> $GITHUB_ENV
+          echo 'target-directory=.build/magentov2.4.0' >> $GITHUB_ENV
+          echo 'build-command=make magentov2.4.0-build' >> $GITHUB_ENV
+          echo "release-title=Magento 2.4.0 - 2.4.3 (PHP 7.3 / 7.4) | plugin ${PACKAGE_VERSION}" >> $GITHUB_ENV
+          {
+            echo 'release-notes<<RELEASE_NOTES_EOF'
+            echo '### Compatibility'
+            echo ''
+            echo '| | |'
+            echo '|---|---|'
+            echo '| **Magento** | 2.4.0 - 2.4.3 (also works on 2.3.x) |'
+            echo '| **PHP** | 7.3 / 7.4 |'
+            echo ''
+            echo 'On Magento **2.4.4 or newer**? Magento dropped PHP 7 support at 2.4.4, so use the'
+            echo '`magento_v2.4.4-*.zip` asset from the latest `MagentoV2.4.4-*` release instead.'
+            echo ''
+            echo 'Installation steps: see `magentov2.4.0/README.md`.'
+            echo 'RELEASE_NOTES_EOF'
+          } >> $GITHUB_ENV
+
+      - name: Prepare release for MagentoV2 (2.4.4-2.4.8)
+        if: startsWith(github.ref, 'refs/tags/MagentoV2.4.4-')
+        run: |
+          PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
+          echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
+          echo "release-name=magento_v2.4.4-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo 'php-versions=8.1' >> $GITHUB_ENV
+          echo 'key=cache-magentov2.4.4-v2' >> $GITHUB_ENV
+          echo 'source-directory=magentov2.4.4' >> $GITHUB_ENV
+          echo 'target-directory=.build/magentov2.4.4' >> $GITHUB_ENV
+          echo 'build-command=make magentov2.4.4-build' >> $GITHUB_ENV
+          # indodana/indodana-paylater-sdk 2.0.0 declares "php": "^5.6|^7.0", so
+          # composer refuses to install it on the PHP 8.1 this plugin targets.
+          # The SDK code itself is PHP 8 compatible (see the ^8.0 constraint on
+          # SDK 2.1.0-BETA); drop this once the pin in packages/common is raised.
+          echo 'composer-flags=--ignore-platform-req=php' >> $GITHUB_ENV
+          echo "release-title=Magento 2.4.4 - 2.4.8 (PHP 8.1+) | plugin ${PACKAGE_VERSION}" >> $GITHUB_ENV
+          {
+            echo 'release-notes<<RELEASE_NOTES_EOF'
+            echo '### Compatibility'
+            echo ''
+            echo '| | |'
+            echo '|---|---|'
+            echo '| **Magento** | 2.4.4 - 2.4.8 |'
+            echo '| **PHP** | 8.1 / 8.2 / 8.3 |'
+            echo ''
+            echo '> **PHP 7 is not supported.** Magento 2.4.4 dropped PHP 7, so this plugin'
+            echo '> requires PHP 8.1 or newer.'
+            echo ''
+            echo 'Still on Magento **2.4.0 - 2.4.3** with PHP 7.3 / 7.4? Use the'
+            echo '`magento_v2.4.0-*.zip` asset from the latest `MagentoV2.4.0-*` release instead.'
+            echo ''
+            echo 'Verified against Magento 2.4.4, 2.4.5, 2.4.6, 2.4.7 and 2.4.8.'
+            echo 'Installation steps: see `magentov2.4.4/README.md`.'
+            echo 'RELEASE_NOTES_EOF'
+          } >> $GITHUB_ENV
+
       - name: Prepare release for PrestashopV1
         if: startsWith(github.ref, 'refs/tags/PrestashopV1-')
         run: |
@@ -171,9 +224,10 @@ jobs:
         working-directory: ${{ env.source-directory }}
         run: composer validate
 
+      # composer-flags is empty for every plugin that does not set it
       - name: Install plugin dependencies
         working-directory: ${{ env.source-directory }}
-        run: composer install --prefer-dist --no-progress
+        run: composer install --prefer-dist --no-progress ${{ env.composer-flags }}
 
       - name: Build the plugin
         run: ${{ env.build-command }}
@@ -183,9 +237,13 @@ jobs:
           cd ${{ env.target-directory }}
           zip -r ${{ env.release-name }}.zip plugin
 
+      # release-title and release-notes are empty for every plugin that does not
+      # set them, in which case GitHub falls back to the tag name and no body
       - name: Create the release
         uses: softprops/action-gh-release@v2
         with:
+          name: ${{ env.release-title || github.ref_name }}
+          body: ${{ env.release-notes }}
           files: ${{ env.target-directory }}/${{ env.release-name }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
