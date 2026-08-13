@@ -23,3 +23,59 @@ This repository contains plugins for most used ecommerce framework based on PHP.
 
 - [Test Cases](https://github.com/indodana/paylater-ecommerce-plugin-php/wiki/%5BTech%5D-Test-Cases)
 - [List of Tested Ecommerce Plugin Versions](https://github.com/indodana/paylater-ecommerce-plugin-php/wiki/%5BTech%5D-List-of-Tested-Ecommerce-Plugin-Versions)
+
+## Plugin Testing
+
+Docker-based test environments for verifying plugin compatibility across multiple platform versions. Each test environment builds the plugin from source before installing.
+
+Currently supported:
+- **Magento v2.4.4** — `magentov2.4.4` plugin tested against Magento 2.4.4 through 2.4.8
+
+Planned:
+- WooCommerce (woocommerce, woocommercev4, woocommercev5)
+- OpenCart (opencartv1, opencartv2, opencartv2.3)
+- PrestaShop (prestashopv1)
+
+### Magento v2.4.4 Test Environment
+
+| Profile | Magento     | PHP | Search Engine      | Port |
+|---------|-------------|-----|--------------------|------|
+| `m244`  | 2.4.4-p13   | 8.1 | Elasticsearch 7.17 | 8244 |
+| `m245`  | 2.4.5-p14   | 8.1 | Elasticsearch 7.17 | 8245 |
+| `m246`  | 2.4.6-p15   | 8.2 | OpenSearch 2.5      | 8246 |
+| `m247`  | 2.4.7-p10   | 8.3 | OpenSearch 2.12     | 8247 |
+| `m248`  | 2.4.8-p5    | 8.3 | OpenSearch 2.19     | 8248 |
+
+### Quick Start
+
+```bash
+# 1. Configure auth
+cp .env.example .env
+# Edit .env — set COMPOSER_AUTH with your Adobe marketplace keys
+
+# 2. Test plugin on a specific version (builds from magentov2.4.4 source)
+./test-plugin.sh test m247
+
+# 3. Test on all versions
+./test-plugin.sh test
+```
+
+### Commands
+
+```bash
+./test-plugin.sh build               # Build plugin from source
+./test-plugin.sh up [version]        # Start stack
+./test-plugin.sh down [version]      # Stop stack
+./test-plugin.sh install [version]   # Install Magento
+./test-plugin.sh plugin [version]    # Build plugin + install into Magento
+./test-plugin.sh test [version]      # Full run: build + up + install + plugin
+./test-plugin.sh status              # Show running containers
+./test-plugin.sh logs [version]      # Tail logs
+./test-plugin.sh shell <version>     # Open bash in PHP container
+./test-plugin.sh nuke [version]      # Stop and destroy volumes
+```
+
+### Services
+
+- **RabbitMQ Management**: http://localhost:15672 (magento/magento)
+- **MailHog** (dev email): http://localhost:8025

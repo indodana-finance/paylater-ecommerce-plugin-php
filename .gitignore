@@ -2,6 +2,7 @@
 /.build
 /.svctl_docker_mount
 /.env.db
+/.env
 
 /cli/svctl
 /cli/sv
@@ -28,6 +29,8 @@ vendor/
 
 # MERCHANT PLUGIN
 /magento1/upload/
+/magentov2.4.0/upload/
+/magentov2.4.4/upload/
 /opencartv1/upload/
 /opencartv2/upload/
 /opencartv2.3/upload/

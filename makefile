@@ -148,25 +148,47 @@ magento1-log-tail:
 
 
 
-# Magento V2
+# Magento V2 (2.4.0 - 2.4.3)
 # ----------------------------------
-magentov2_build_dir=.build/magentov2/upload
-magentov2_dir = ./magentov2
+magentov2.4.0_build_dir=.build/magentov2.4.0/upload
+magentov2.4.0_dir = ./magentov2.4.0
 
-magentov2-install-dependencies:
-	cd ./magentov2/ && composer install
+magentov2.4.0-install-dependencies:
+	cd ./magentov2.4.0/ && composer install
 
-magentov2-build:
-	./build-magentov2
+magentov2.4.0-build:
+	./build-magentov2.4.0
 
-magentov2-test:
-	$(magentov2_dir)/vendor/bin/
+magentov2.4.0-test:
+	$(magentov2.4.0_dir)/vendor/bin/
 
-magentov2-serve: magentov2-build
-	php7.3 -S localhost:6301 -t $(magentov2_build_dir)
+magentov2.4.0-serve: magentov2.4.0-build
+	php7.3 -S localhost:6301 -t $(magentov2.4.0_build_dir)
 
-magentov2-log-tail:
-	tail -f ./$(magentov2_build_dir)/var/log/Indodana/info.log
+magentov2.4.0-log-tail:
+	tail -f ./$(magentov2.4.0_build_dir)/var/log/Indodana/info.log
+
+
+
+# Magento V2 (2.4.4 - 2.4.8)
+# ----------------------------------
+magentov2.4.4_build_dir=.build/magentov2.4.4/upload
+magentov2.4.4_dir = ./magentov2.4.4
+
+magentov2.4.4-install-dependencies:
+	cd ./magentov2.4.4/ && composer install
+
+magentov2.4.4-build:
+	./build-magentov2.4.4
+
+magentov2.4.4-test:
+	$(magentov2.4.4_dir)/vendor/bin/
+
+magentov2.4.4-serve: magentov2.4.4-build
+	php8.1 -S localhost:6302 -t $(magentov2.4.4_build_dir)
+
+magentov2.4.4-log-tail:
+	tail -f ./$(magentov2.4.4_build_dir)/var/log/Indodana/info.log
 
 
 

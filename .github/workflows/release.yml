@@ -31,7 +31,7 @@ jobs:
         id: packageVersion
         uses: olegtarasov/get-tag@v2.1
         with:
-          tagRegex: "^(OpencartV1|OpencartV2|OpencartV2.3|WoocommerceV3|WoocommerceV4|WoocommerceV5|MagentoV1|PrestashopV1|MagentoV2)-(.*)"
+          tagRegex: "^(OpencartV1|OpencartV2|OpencartV2.3|WoocommerceV3|WoocommerceV4|WoocommerceV5|MagentoV1|PrestashopV1|MagentoV2.4.0|MagentoV2.4.4|MagentoV2)-(.*)"
           tagRegexGroup: 2
 
       # We differentiate plugin release based on prefix
@@ -120,17 +120,29 @@ jobs:
           echo 'target-directory=.build/magento1' >> $GITHUB_ENV
           echo 'build-command=make magento1-build' >> $GITHUB_ENV
 
-      - name: Prepare release for MagentoV2
-        if: startsWith(github.ref, 'refs/tags/MagentoV2-')
+      - name: Prepare release for MagentoV2 (2.4.0-2.4.3)
+        if: startsWith(github.ref, 'refs/tags/MagentoV2.4.0-')
         run: |
           PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
           echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
-          echo "release-name=magento_v2-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo "release-name=magento_v2.4.0-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
           echo 'php-versions=7.3' >> $GITHUB_ENV
-          echo 'key=cache-magentov2-v2' >> $GITHUB_ENV
-          echo 'source-directory=magentov2' >> $GITHUB_ENV
-          echo 'target-directory=.build/magentov2' >> $GITHUB_ENV
-          echo 'build-command=make magentov2-build' >> $GITHUB_ENV
+          echo 'key=cache-magentov2.4.0-v2' >> $GITHUB_ENV
+          echo 'source-directory=magentov2.4.0' >> $GITHUB_ENV
+          echo 'target-directory=.build/magentov2.4.0' >> $GITHUB_ENV
+          echo 'build-command=make magentov2.4.0-build' >> $GITHUB_ENV
+
+      - name: Prepare release for MagentoV2 (2.4.4-2.4.8)
+        if: startsWith(github.ref, 'refs/tags/MagentoV2.4.4-')
+        run: |
+          PACKAGE_VERSION=${{ steps.packageVersion.outputs.tag }}
+          echo 'extensions=curl, json, mbstring, xdebug' >> $GITHUB_ENV
+          echo "release-name=magento_v2.4.4-${PACKAGE_VERSION//\./_}" >> $GITHUB_ENV
+          echo 'php-versions=8.1' >> $GITHUB_ENV
+          echo 'key=cache-magentov2.4.4-v2' >> $GITHUB_ENV
+          echo 'source-directory=magentov2.4.4' >> $GITHUB_ENV
+          echo 'target-directory=.build/magentov2.4.4' >> $GITHUB_ENV
+          echo 'build-command=make magentov2.4.4-build' >> $GITHUB_ENV
           
       - name: Prepare release for PrestashopV1
         if: startsWith(github.ref, 'refs/tags/PrestashopV1-')
