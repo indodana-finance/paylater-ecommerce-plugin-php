@@ -2,6 +2,16 @@
 
 This repository contains plugins for most used ecommerce framework based on PHP. See [here](https://dev.indodana.id/indodana-paylater/integration/e-commerce-plugins) for supported e-commerce frameworks, versions, system requirements, etc.
 
+## Which Magento 2 plugin do I need?
+
+Magento 2.4.4 dropped PHP 7 support, and no PHP version runs both 2.4.3 and 2.4.4 — so
+the Magento 2 plugin ships as two separate modules. Pick by your Magento version:
+
+| Your Magento | Plugin directory | PHP | Release asset |
+|---|---|---|---|
+| 2.3.x, 2.4.0 - 2.4.3 | [`magentov2.4.0`](magentov2.4.0) | 7.3 / 7.4 | `magento_v2.4.0-*.zip` |
+| 2.4.4 - 2.4.8 | [`magentov2.4.4`](magentov2.4.4) | **8.1 / 8.2 / 8.3 — PHP 7 not supported** | `magento_v2.4.4-*.zip` |
+
 ## Product Specs
 
 - [Features](https://github.com/indodana/paylater-ecommerce-plugin-php/wiki/%5BProduct%5D-Features)

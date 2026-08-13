@@ -131,6 +131,22 @@ jobs:
           echo 'source-directory=magentov2.4.0' >> $GITHUB_ENV
           echo 'target-directory=.build/magentov2.4.0' >> $GITHUB_ENV
           echo 'build-command=make magentov2.4.0-build' >> $GITHUB_ENV
+          echo "release-title=Magento 2.4.0 - 2.4.3 (PHP 7.3 / 7.4) | plugin ${PACKAGE_VERSION}" >> $GITHUB_ENV
+          {
+            echo 'release-notes<<RELEASE_NOTES_EOF'
+            echo '### Compatibility'
+            echo ''
+            echo '| | |'
+            echo '|---|---|'
+            echo '| **Magento** | 2.4.0 - 2.4.3 (also works on 2.3.x) |'
+            echo '| **PHP** | 7.3 / 7.4 |'
+            echo ''
+            echo 'On Magento **2.4.4 or newer**? Magento dropped PHP 7 support at 2.4.4, so use the'
+            echo '`magento_v2.4.4-*.zip` asset from the latest `MagentoV2.4.4-*` release instead.'
+            echo ''
+            echo 'Installation steps: see `magentov2.4.0/README.md`.'
+            echo 'RELEASE_NOTES_EOF'
+          } >> $GITHUB_ENV
 
       - name: Prepare release for MagentoV2 (2.4.4-2.4.8)
         if: startsWith(github.ref, 'refs/tags/MagentoV2.4.4-')
@@ -148,6 +164,26 @@ jobs:
           # The SDK code itself is PHP 8 compatible (see the ^8.0 constraint on
           # SDK 2.1.0-BETA); drop this once the pin in packages/common is raised.
           echo 'composer-flags=--ignore-platform-req=php' >> $GITHUB_ENV
+          echo "release-title=Magento 2.4.4 - 2.4.8 (PHP 8.1+) | plugin ${PACKAGE_VERSION}" >> $GITHUB_ENV
+          {
+            echo 'release-notes<<RELEASE_NOTES_EOF'
+            echo '### Compatibility'
+            echo ''
+            echo '| | |'
+            echo '|---|---|'
+            echo '| **Magento** | 2.4.4 - 2.4.8 |'
+            echo '| **PHP** | 8.1 / 8.2 / 8.3 |'
+            echo ''
+            echo '> **PHP 7 is not supported.** Magento 2.4.4 dropped PHP 7, so this plugin'
+            echo '> requires PHP 8.1 or newer.'
+            echo ''
+            echo 'Still on Magento **2.4.0 - 2.4.3** with PHP 7.3 / 7.4? Use the'
+            echo '`magento_v2.4.0-*.zip` asset from the latest `MagentoV2.4.0-*` release instead.'
+            echo ''
+            echo 'Verified against Magento 2.4.4, 2.4.5, 2.4.6, 2.4.7 and 2.4.8.'
+            echo 'Installation steps: see `magentov2.4.4/README.md`.'
+            echo 'RELEASE_NOTES_EOF'
+          } >> $GITHUB_ENV
 
       - name: Prepare release for PrestashopV1
         if: startsWith(github.ref, 'refs/tags/PrestashopV1-')
@@ -201,9 +237,13 @@ jobs:
           cd ${{ env.target-directory }}
           zip -r ${{ env.release-name }}.zip plugin
 
+      # release-title and release-notes are empty for every plugin that does not
+      # set them, in which case GitHub falls back to the tag name and no body
       - name: Create the release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
+          name: ${{ env.release-title || github.ref_name }}
+          body: ${{ env.release-notes }}
           files: ${{ env.target-directory }}/${{ env.release-name }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

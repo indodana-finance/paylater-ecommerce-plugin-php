@@ -1,4 +1,29 @@
-# indodana paylater payment method module for magento 2.4.0 or magento 2.3.x 
+# Indodana PayLater payment method module for Magento 2.4.4 - 2.4.8
+
+## Compatibility
+
+| | |
+|---|---|
+| **Magento** | 2.4.4 - 2.4.8 |
+| **PHP** | 8.1 / 8.2 / 8.3 |
+
+> **PHP 7 is not supported.** Magento 2.4.4 dropped PHP 7, so this module requires
+> PHP 8.1 or newer. There is no PHP version that runs both 2.4.3 and 2.4.4, which is
+> why the plugin ships as two separate modules.
+
+**Running Magento 2.4.0 - 2.4.3 on PHP 7.3 / 7.4?** Use [`magentov2.4.0`](../magentov2.4.0)
+instead — download the `magento_v2.4.0-*.zip` asset from a `MagentoV2.4.0-*` release.
+
+Verified against the following combinations (see `testing/magento/docker-compose.yml`):
+
+| Magento | PHP | Search engine |
+|---------|-----|---------------|
+| 2.4.4   | 8.1 | Elasticsearch 7.17 |
+| 2.4.5   | 8.1 | Elasticsearch 7.17 |
+| 2.4.6   | 8.2 | OpenSearch 2.5 |
+| 2.4.7   | 8.3 | OpenSearch 2.12 |
+| 2.4.8   | 8.3 | OpenSearch 2.19 |
+
 # Application Instalation
     1. Setup Database, create user and database for magento 
         ```sql
