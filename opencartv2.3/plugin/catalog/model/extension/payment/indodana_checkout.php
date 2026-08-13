@@ -5,13 +5,11 @@ require_once DIR_SYSTEM . 'library/indodana/autoload.php';
 use IndodanaCommon\IndodanaConstant;
 
 class ModelExtensionPaymentIndodanaCheckout extends Model {
-  const MINIMIM_ORDER_AMOUNT = 10000;
-
   public function getMethod($address, $total) {
     $defaultCurrency = $this->config->get('config_currency');
     $totalInIDR = ceil($this->currency->convert($total, $defaultCurrency, 'IDR'));
 
-    if ($totalInIDR < self::MINIMIM_ORDER_AMOUNT) {
+    if ($totalInIDR < IndodanaConstant::MINIMUM_ORDER_AMOUNT) {
       return null;
     }
 

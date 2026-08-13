@@ -12,12 +12,15 @@ class IndodanaConstant
   const SANDBOX = Indodana::SANDBOX_ENVIRONMENT;
   const PRODUCTION = Indodana::PRODUCTION_ENVIRONMENT;
 
-  const LOGO_URL = 'https://indodana-web.imgix.net/assets/indodana-new-color.png?width=150&height=50';
+  const LOGO_URL = 'https://prod-tmf.imgix.net/tmf-assets/assets/indodana-paylater.png?auto=format%2Ccompress&width=150&height=50';
 
   const DISABLED = 'DISABLED';
   const ENABLED = 'ENABLED';
 
   const DEFAULT_ITEM_CATEGORY = 'others';
+
+  const MINIMUM_ORDER_AMOUNT = 10000;
+  const MAXIMUM_ORDER_AMOUNT = 50000000;
 
   const frontendConfigMapping = [
     'storeName'                 => 'Store Name',

@@ -64,9 +64,8 @@
   }
 </style>
 
-{if $totalAmount < 10000 || $totalAmount > 25000000}
+{if $totalAmount < $minOrderAmount || $totalAmount > $maxOrderAmount}
   <script>
-    // disable payment method when total amount less than 10000 or more than 25000000
     document.addEventListener("DOMContentLoaded", function() {
       var input = document.querySelector('[data-module-name="{$displayName}"]');
       var paymentOption = input.closest('.payment-option');
