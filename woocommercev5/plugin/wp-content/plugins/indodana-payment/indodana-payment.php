@@ -1,10 +1,10 @@
 <?php
 /*
  * Plugin Name: Indodana Payment
- * Plugin URI: https://indodana.com
+ * Plugin URI: https://indodana.id
  * Description: "Paylater" service registered on OJK.
  * Author: Indodana
- * Author URI: https://indodana.com
+ * Author URI: https://indodana.id
  * Version: 1.0.0
  */
 

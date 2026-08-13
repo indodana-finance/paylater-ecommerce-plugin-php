@@ -605,7 +605,9 @@ class Indodana extends PaymentModule
       'description' => Configuration::get('INDODANA_DESCRIPTION'),
       'installmentOptions' => $installmentOptions,
       'displayName' => $this->displayName,
-      'totalAmount' => $totalAmount
+      'totalAmount' => $totalAmount,
+      'minOrderAmount' => IndodanaCommon\IndodanaConstant::MINIMUM_ORDER_AMOUNT,
+      'maxOrderAmount' => IndodanaCommon\IndodanaConstant::MAXIMUM_ORDER_AMOUNT
     ]);
     $paymentForm = $this->fetch('module:indodana/views/templates/hook/payment_form.tpl');
 
@@ -699,7 +701,9 @@ class Indodana extends PaymentModule
       'moduleName' => $this->name,
       'displayName' => $this->displayName,
       'indodanaLogo' => IndodanaCommon\IndodanaConstant::LOGO_URL,
-      'totalAmount' => $totalAmount
+      'totalAmount' => $totalAmount,
+      'minOrderAmount' => IndodanaCommon\IndodanaConstant::MINIMUM_ORDER_AMOUNT,
+      'maxOrderAmount' => IndodanaCommon\IndodanaConstant::MAXIMUM_ORDER_AMOUNT
     ]);
 
     return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
