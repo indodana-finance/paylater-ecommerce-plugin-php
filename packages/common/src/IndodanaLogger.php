@@ -21,12 +21,12 @@ class IndodanaLogger
       $time = time();
     }
 
-    if (($requestUri = $_SERVER['REQUEST_URI']) === '') {
+    if (!array_key_exists('REQUEST_URI', $_SERVER)) {
       $requestUri = 'REQUEST_URI_UNKNOWN';
     }
 
     $date = date("Y-m-d H:i:s", $time);
-   
+
     return "[INDODANA][${date}][${requestUri}]${message}" . PHP_EOL;
   }
 

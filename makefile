@@ -154,7 +154,7 @@ magentov2_build_dir=.build/magentov2/upload
 magentov2_dir = ./magentov2
 
 magentov2-install-dependencies:
-	cd ./magentov2/ && composer install
+	cd ./magentov2/ && composer install --no-dev
 
 magentov2-build:
 	./build-magentov2
