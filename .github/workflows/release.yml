@@ -159,11 +159,6 @@ jobs:
           echo 'source-directory=magentov2.4.4' >> $GITHUB_ENV
           echo 'target-directory=.build/magentov2.4.4' >> $GITHUB_ENV
           echo 'build-command=make magentov2.4.4-build' >> $GITHUB_ENV
-          # indodana/indodana-paylater-sdk 2.0.0 declares "php": "^5.6|^7.0", so
-          # composer refuses to install it on the PHP 8.1 this plugin targets.
-          # The SDK code itself is PHP 8 compatible (see the ^8.0 constraint on
-          # SDK 2.1.0-BETA); drop this once the pin in packages/common is raised.
-          echo 'composer-flags=--ignore-platform-req=php' >> $GITHUB_ENV
           echo "release-title=Magento 2.4.4 - 2.4.8 (PHP 8.1+) | plugin ${PACKAGE_VERSION}" >> $GITHUB_ENV
           {
             echo 'release-notes<<RELEASE_NOTES_EOF'
@@ -224,10 +219,9 @@ jobs:
         working-directory: ${{ env.source-directory }}
         run: composer validate
 
-      # composer-flags is empty for every plugin that does not set it
       - name: Install plugin dependencies
         working-directory: ${{ env.source-directory }}
-        run: composer install --prefer-dist --no-progress ${{ env.composer-flags }}
+        run: composer install --prefer-dist --no-progress
 
       - name: Build the plugin
         run: ${{ env.build-command }}
