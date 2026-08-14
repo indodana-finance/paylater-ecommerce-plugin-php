@@ -8,14 +8,14 @@
     "packages": [
         {
             "name": "indodana/indodana-paylater-ecommerce-common",
-            "version": "dev-master",
+            "version": "dev-bump_sdk_2_1_0_deprecated_api_fix",
             "dist": {
                 "type": "path",
                 "url": "../packages/common",
-                "reference": "0e7294464d80e5e153860560014fc0873ef03090"
+                "reference": "a5e57c150a5bc04ccfd2b46fed5e1f516fdde528"
             },
             "require": {
-                "indodana/indodana-paylater-sdk": "2.0.0",
+                "indodana/indodana-paylater-sdk": "2.0.1",
                 "respect/validation": "^1.1"
             },
             "require-dev": {
@@ -52,16 +52,16 @@
         },
         {
             "name": "indodana/indodana-paylater-sdk",
-            "version": "2.0.0",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/indodana/indodana-paylater-sdk-php.git",
-                "reference": "f9c044406fa0b34ecec84cbcd2e070d566768ccb"
+                "url": "https://github.com/indodana-finance/indodana-paylater-sdk-php.git",
+                "reference": "055437ff32f78cc37dee4ae73156feaddb83880a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/indodana/indodana-paylater-sdk-php/zipball/f9c044406fa0b34ecec84cbcd2e070d566768ccb",
-                "reference": "f9c044406fa0b34ecec84cbcd2e070d566768ccb",
+                "url": "https://api.github.com/repos/indodana-finance/indodana-paylater-sdk-php/zipball/055437ff32f78cc37dee4ae73156feaddb83880a",
+                "reference": "055437ff32f78cc37dee4ae73156feaddb83880a",
                 "shasum": ""
             },
             "require": {
@@ -91,7 +91,11 @@
                 }
             ],
             "description": "Indodana Paylater SDK for PHP that provides merchant integration functionalities",
-            "time": "2020-08-25T12:57:34+00:00"
+            "support": {
+                "issues": "https://github.com/indodana-finance/indodana-paylater-sdk-php/issues",
+                "source": "https://github.com/indodana-finance/indodana-paylater-sdk-php/tree/2.0.1"
+            },
+            "time": "2026-08-14T06:53:39+00:00"
         },
         {
             "name": "respect/validation",
@@ -245,7 +249,7 @@
     },
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
-    "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "platform": {},
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
 }
