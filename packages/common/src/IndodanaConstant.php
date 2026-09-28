@@ -12,7 +12,7 @@ class IndodanaConstant
   const SANDBOX = Indodana::SANDBOX_ENVIRONMENT;
   const PRODUCTION = Indodana::PRODUCTION_ENVIRONMENT;
 
-  const LOGO_URL = 'https://indodana-web.imgix.net/assets/indodana-new-color.png?width=150&height=50';
+  const LOGO_URL = 'https://prod-tmf.imgix.net/common-assets/logo-color.png?width=150&height=50';
 
   const DISABLED = 'DISABLED';
   const ENABLED = 'ENABLED';
