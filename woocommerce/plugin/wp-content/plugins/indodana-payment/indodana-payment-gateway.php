@@ -2,7 +2,6 @@
 
 require_once INDODANA_PLUGIN_ROOT_DIR . 'autoload.php';
 
-use Respect\Validation\Validator;
 use IndodanaCommon\IndodanaConstant;
 use IndodanaCommon\IndodanaInterface;
 use IndodanaCommon\IndodanaHelper;

@@ -2,8 +2,7 @@
 
 namespace IndodanaCommon;
 
-use Respect\Validation\Validator;
-use Indodana\RespectValidation\RespectValidationHelper;
+use Indodana\Utils\Validator\Validator;
 use IndodanaCommon\Exceptions\IndodanaCommonException;
 
 class Seller
@@ -13,10 +12,8 @@ class Seller
 
   public function __construct($input = [])
   {
-    $validator = Validator::create()
-      ->key('url', Validator::stringType()->notEmpty());
-
-    $validationResult = RespectValidationHelper::validate($validator, $input);
+    $validationResult = Validator::create($input)
+      ->key('url', Validator::required());
 
     if (!$validationResult->isSuccess()) {
       throw new IndodanaCommonException($validationResult->printErrorMessages());

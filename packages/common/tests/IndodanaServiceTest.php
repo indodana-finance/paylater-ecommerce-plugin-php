@@ -16,7 +16,7 @@ class IndodanaServiceTest extends TestCase
   protected function setUp()
   {
     // IndodanaLogger will not be doing anything
-    $indodanaLoggerMock = Mockery::mock('alias:IndodanaCommon\IndodanaLogger');
+    $indodanaLoggerMock = Mockery::mock('alias:IndodanaCommon\IndodanaLoggerMock');
     $indodanaLoggerMock
       ->expects()
       ->info(Mockery::type('string'));

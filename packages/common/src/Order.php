@@ -2,13 +2,10 @@
 
 namespace IndodanaCommon;
 
-use Respect\Validation\Validator;
-use Indodana\RespectValidation\RespectValidationHelper;
+use Indodana\Utils\Validator\Validator;
 use IndodanaCommon\Exceptions\IndodanaCommonException;
 use IndodanaCommon\IndodanaConstant;
 use IndodanaCommon\Seller;
-
-Validator::with('IndodanaCommon\\Validation\\Rules');
 
 class Order
 {
@@ -25,17 +22,15 @@ class Order
 
   public function __construct(array $input = [], Seller $seller)
   {
-    $validator = Validator::create()
-      ->key('totalAmount', Validator::numberType()->notOptional())
-      ->key('products', Validator::arrayType()->notEmpty())
-      ->key('shippingAmount', Validator::numberType()->notOptional())
-      ->key('taxAmount', Validator::numberType()->notOptional())
-      ->key('discountAmount', Validator::numberType()->notOptional())
-      ->key('adminFeeAmount', Validator::numberType(), false)
-      ->key('additionalFeeAmount', Validator::numberType(), false)
-      ->key('insuranceFeeAmount', Validator::numberType(), false);
-
-    $validationResult = RespectValidationHelper::validate($validator, $input);
+    $validationResult = Validator::create($input)
+      ->key('totalAmount', Validator::required(), Validator::numeric())
+      ->key('products', Validator::required(), Validator::arrayType())
+      ->key('shippingAmount', Validator::required(), Validator::numeric())
+      ->key('taxAmount', Validator::required(), Validator::numeric())
+      ->key('discountAmount', Validator::required(), Validator::numeric())
+      ->key('adminFeeAmount', Validator::numeric())
+      ->key('additionalFeeAmount', Validator::numeric())
+      ->key('insuranceFeeAmount', Validator::numeric());
 
     if (!$validationResult->isSuccess()) {
       throw new IndodanaCommonException($validationResult->printErrorMessages());
