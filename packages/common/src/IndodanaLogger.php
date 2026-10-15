@@ -11,7 +11,7 @@ class IndodanaLogger
     $logDirConstant = 'INDODANA_LOG_DIR';
 
     if (!defined($logDirConstant)) {
-      throw new Exception("\"${logDirConstant}\" is not configured");
+      throw new Exception("\"{$logDirConstant}\" is not configured");
     }
   }
 
@@ -27,7 +27,7 @@ class IndodanaLogger
 
     $date = date("Y-m-d H:i:s", $time);
    
-    return "[INDODANA][${date}][${requestUri}]${message}" . PHP_EOL;
+    return "[INDODANA][{$date}][{$requestUri}]{$message}" . PHP_EOL;
   }
 
   private static function write($message, $filePath)

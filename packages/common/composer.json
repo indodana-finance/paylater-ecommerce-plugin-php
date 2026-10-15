@@ -20,7 +20,7 @@
     "test": "./vendor/bin/phpunit --configuration phpunit.xml.dist --testdox --verbose"
   },
   "require": {
-    "indodana/indodana-paylater-sdk": "2.0.0",
+    "indodana/indodana-paylater-sdk": "2.0.1",
     "respect/validation": "^1.1"
   },
   "require-dev": {

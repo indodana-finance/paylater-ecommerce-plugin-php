@@ -75,7 +75,7 @@ class MerchantResponse
     return self::printResponse(
       [
         'status'  => 'REJECTED',
-        'message' => "Order not found for merchant order id: ${order_id}"
+        'message' => "Order not found for merchant order id: {$order_id}"
       ],
       $namespace
     );
@@ -89,7 +89,7 @@ class MerchantResponse
     return self::printResponse(
       [
         'status'  => 'REJECTED',
-        'message' => "Order status is missing for merchant order id: ${order_id}"
+        'message' => "Order status is missing for merchant order id: {$order_id}"
       ],
       $namespace
     );
@@ -102,7 +102,7 @@ class MerchantResponse
     return self::printResponse(
       [
         'status'  => 'REJECTED',
-        'message' => "Invalid transaction status: ${transaction_status} for merchant order id: ${order_id}"
+        'message' => "Invalid transaction status: {$transaction_status} for merchant order id: {$order_id}"
       ],
       $namespace
     );

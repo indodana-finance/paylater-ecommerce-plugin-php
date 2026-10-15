@@ -126,6 +126,22 @@ woocommercev5-serve: woocommercev5-build
 
 
 
+# Woocommerce V11
+# ----------------------------------
+woocommercev11_build_dir=.build/woocommercev11/upload
+woocommercev11_dir = ./woocommercev11
+
+woocommercev11-install-dependencies:
+	cd ./woocommercev11/ && composer install
+
+woocommercev11-build:
+	./build-woocommercev11
+
+woocommercev11-serve: woocommercev11-build
+	php8.2 -S localhost:6211 -t $(woocommercev11_build_dir)
+
+
+
 # Magento 1
 # ----------------------------------
 magento1_build_dir=.build/magento1/upload
